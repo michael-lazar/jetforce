@@ -242,19 +242,36 @@ class GeminiServer:
         print(message, file=sys.stderr)
 
 
-if __name__ == "__main__":
-
-    parser = argparse.ArgumentParser(prog="jetforce")
-    parser.add_argument("--host", default="127.0.0.1")
-    parser.add_argument("--port", type=int, default=1965)
-    parser.add_argument("--ssl-certfile", metavar="FILE", default="localhost.crt")
-    parser.add_argument("--ssl-keyfile", metavar="FILE", default="localhost.key")
+def run_server():
+    parser = argparse.ArgumentParser(
+        prog="jetforce",
+        description="An Experimental Gemini Protocol Server",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+    parser.add_argument("--host", help="Server host", default="127.0.0.1")
+    parser.add_argument("--port", help="Server port", type=int, default=1965)
+    parser.add_argument(
+        "--tls-certfile",
+        help="TLS certificate file",
+        metavar="FILE",
+        default="localhost.crt",
+    )
+    parser.add_argument(
+        "--tls-keyfile",
+        help="TLS private key file",
+        metavar="FILE",
+        default="localhost.key",
+    )
     args = parser.parse_args()
 
     server = GeminiServer(
         host=args.host,
         port=args.port,
-        ssl_context=(args.ssl_certfile, args.ssl_keyfile),
+        ssl_context=(args.tls_certfile, args.tls_keyfile),
         app=EchoApp,
     )
     asyncio.run(server.run())
+
+
+if __name__ == "__main__":
+    run_server()
