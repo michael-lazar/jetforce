@@ -1,0 +1,5 @@
+*.crt
+*.key
+.idea/
+.mypy_cache/
+NOTES
