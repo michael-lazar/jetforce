@@ -19,7 +19,7 @@ setuptools.setup(
     long_description=long_description(),
     py_modules=["jetforce"],
     entry_points={"console_scripts": ["jetforce=jetforce:run_server"]},
-    python_requires=">=3.6",
+    python_requires=">=3.7",
     keywords="gemini server tcp gopher asyncio",
     classifiers=[
         "Environment :: Web Environment",

@@ -6,7 +6,7 @@ import mimetypes
 import os
 import ssl
 import sys
-from typing import Any, Callable, Dict, Iterator, Optional, Union
+import typing
 
 __version__ = "0.0.1"
 __title__ = "Jetforce Gemini Server"
@@ -43,11 +43,11 @@ class EchoApp:
     A simple application that echos back the requested path.
     """
 
-    def __init__(self, environ: dict, send_status: Callable) -> None:
+    def __init__(self, environ: dict, send_status: typing.Callable) -> None:
         self.environ = environ
         self.send_status = send_status
 
-    def __iter__(self) -> Iterator[bytes]:
+    def __iter__(self) -> typing.Iterator[bytes]:
         self.send_status(STATUS_SUCCESS, "text/plain")
         path = self.environ["PATH"]
         yield f"Received path: {path}".encode()
@@ -64,13 +64,13 @@ class StaticDirectoryApp:
 
     root: str = "/var/gemini"
 
-    def __init__(self, environ: dict, send_status: Callable) -> None:
+    def __init__(self, environ: dict, send_status: typing.Callable) -> None:
         self.environ = environ
         self.send_status = send_status
 
         self.mimetypes = mimetypes.MimeTypes()
 
-    def __iter__(self) -> Iterator[bytes]:
+    def __iter__(self) -> typing.Iterator[bytes]:
         filename = self.environ["PATH"]
         filename = filename.lstrip("/")
 
@@ -134,20 +134,20 @@ class GeminiRequestHandler:
     removed or slimmed-down.
     """
 
-    def __init__(self, server: "GeminiServer", app: Callable) -> None:
+    def __init__(self, server: "GeminiServer", app: typing.Callable) -> None:
         self.server = server
         self.app = app
 
-        self.reader: Optional[asyncio.StreamReader] = None
-        self.writer: Optional[asyncio.StreamWriter] = None
+        self.reader: typing.Optional[asyncio.StreamReader] = None
+        self.writer: typing.Optional[asyncio.StreamWriter] = None
 
-        self.received_timestamp: Optional[datetime.datetime] = None
-        self.client_ip: Optional[str] = None
-        self.client_port: Optional[int] = None
-        self.path: Optional[str] = None
-        self.status: Optional[int] = None
-        self.mimetype: Optional[str] = None
-        self.response_buffer: Optional[str] = None
+        self.received_timestamp: typing.Optional[datetime.datetime] = None
+        self.client_ip: typing.Optional[str] = None
+        self.client_port: typing.Optional[int] = None
+        self.path: typing.Optional[str] = None
+        self.status: typing.Optional[int] = None
+        self.mimetype: typing.Optional[str] = None
+        self.response_buffer: typing.Optional[str] = None
         self.response_size: int = 0
 
     async def handle(
@@ -186,7 +186,7 @@ class GeminiRequestHandler:
             self.log_request()
             await writer.drain()
 
-    def build_environ(self) -> Dict[str, Any]:
+    def build_environ(self) -> typing.Dict[str, typing.Any]:
         """
         Construct a dictionary that will be passed to the application handler.
         """
@@ -272,8 +272,8 @@ class GeminiServer:
         self,
         host: str,
         port: int,
-        ssl_context: Union[tuple, ssl.SSLContext],
-        app: Callable,
+        ssl_context: typing.Union[tuple, ssl.SSLContext],
+        app: typing.Callable,
     ) -> None:
 
         self.host = host

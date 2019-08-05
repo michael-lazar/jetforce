@@ -13,7 +13,7 @@
 
 ## Installation
 
-Requires Python 3.6+ and OpenSSL
+Requires Python 3.7+ and OpenSSL
 
 ### pip
 
