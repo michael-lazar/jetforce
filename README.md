@@ -1,8 +1,8 @@
-# Jetforce
-
-A python server framework for the new, under development Gemini Protocol.
-
-Learn more about Project Gemini from its author, ~solderpunk, [here](https://gopher.commons.host/gopher://zaibatsu.circumlunar.space/1/~solderpunk/gemini).
+<h1 align="center">Jetforce</h1>
+<p align="center">A python server framework for the new, under development Gemini Protocol.</p>
+<p align="center"><img alt="rocket launch" src="resources/rocket.jpg"/></p>
+<p align="center">Learn more about Project Gemini from its author, ~solderpunk,
+<a href="https://gopher.commons.host/gopher://zaibatsu.circumlunar.space/1/~solderpunk/gemini">here</a>.</p>
 
 ## Features
 
