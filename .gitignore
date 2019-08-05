@@ -4,3 +4,6 @@
 .mypy_cache/
 NOTES
 venv/
+*.egg-info/
+build/
+dist/
