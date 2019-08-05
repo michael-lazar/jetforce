@@ -8,7 +8,7 @@ import ssl
 import sys
 from typing import Any, Callable, Dict, Iterator, Optional, Union
 
-__version__ = "0.1.0"
+__version__ = "0.0.1"
 __title__ = "Jetforce Gemini Server"
 __author__ = "Michael Lazar"
 __license__ = "GNU General Public License v3.0"
