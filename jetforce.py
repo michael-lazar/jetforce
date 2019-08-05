@@ -325,11 +325,11 @@ def run_server():
         description="An Experimental Gemini Protocol Server",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
-    parser.add_argument("--host", help="Server host", default="127.0.0.1")
-    parser.add_argument("--port", help="Server port", type=int, default=1965)
+    parser.add_argument("--host", help="server host", default="127.0.0.1")
+    parser.add_argument("--port", help="server port", type=int, default=1965)
     parser.add_argument(
         "--dir",
-        help="Local directory to serve files from",
+        help="local directory to serve files from",
         type=str,
         default=StaticDirectoryApp.root,
     )
