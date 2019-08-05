@@ -2,6 +2,8 @@
 import argparse
 import asyncio
 import datetime
+import mimetypes
+import os
 import ssl
 import sys
 from typing import Any, Callable, Dict, Iterator, Optional, Union
@@ -14,14 +16,14 @@ __copyright__ = "(c) 2019 Michael Lazar"
 
 
 ABOUT = fr"""
-You are now running...
+You are now riding on...
 _________    _____________
 ______  /______  /___  __/_______________________
 ___ _  /_  _ \  __/_  /_ _  __ \_  ___/  ___/  _ \
 / /_/ / /  __/ /_ _  __/ / /_/ /  /   / /__ /  __/
 \____/  \___/\__/ /_/    \____//_/    \___/ \___/
 
-An Experimental Gemini Protocol Server, v{__version__}
+An Experimental Gemini Server, v{__version__}
 https://github.com/michael-lazar/jetforce
 """
 
@@ -38,7 +40,7 @@ STATUS_TOO_MANY_REQUESTS = 9
 
 class EchoApp:
     """
-    A demonstration of a simple echo server in Gemini.
+    A simple application that echos back the requested path.
     """
 
     def __init__(self, environ: dict, send_status: Callable) -> None:
@@ -49,6 +51,76 @@ class EchoApp:
         self.send_status(STATUS_SUCCESS, "text/plain")
         path = self.environ["PATH"]
         yield f"Received path: {path}".encode()
+
+
+class StaticDirectoryApp:
+    """
+    Serve a static directory over Gemini.
+
+    If a directory contains a hidden file with the name ".gemini", that file
+    will be returned when the directory path is requested. Otherwise, a
+    directory listing will be auto-generated.
+    """
+
+    root: str = "/var/gemini"
+
+    def __init__(self, environ: dict, send_status: Callable) -> None:
+        self.environ = environ
+        self.send_status = send_status
+
+        self.mimetypes = mimetypes.MimeTypes()
+
+    def __iter__(self) -> Iterator[bytes]:
+        filename = self.environ["PATH"]
+        filename = filename.lstrip("/")
+
+        abs_filename = os.path.abspath(os.path.join(self.root, filename))
+        if not abs_filename.startswith(self.root):
+            # Guard against breaking out of the directory
+            self.send_status(STATUS_NOT_FOUND, "Not Found")
+
+        elif os.path.isfile(abs_filename):
+            mimetype = self.guess_mimetype(abs_filename)
+            yield from self.load_file(abs_filename, mimetype)
+
+        elif os.path.isdir(abs_filename):
+            gemini_map_file = os.path.join(abs_filename, ".gemini")
+            if os.path.exists(gemini_map_file):
+                yield from self.load_file(gemini_map_file, "text/gemini")
+            else:
+                yield from self.list_directory(abs_filename)
+
+        else:
+            self.send_status(STATUS_NOT_FOUND, "Not Found")
+
+    def load_file(self, abs_filename: str, mimetype: str):
+        self.send_status(STATUS_SUCCESS, mimetype)
+        with open(abs_filename, "rb") as fp:
+            data = fp.read(1024)
+            while data:
+                yield data
+                data = fp.read(1024)
+
+    def list_directory(self, abs_folder: str):
+        self.send_status(STATUS_SUCCESS, "text/gemini")
+
+        for filename in os.listdir(abs_folder):
+            if filename == ".gemini" or filename.startswith("~"):
+                continue
+            abs_filename = os.path.join(abs_folder, filename)
+            if os.path.isdir(abs_filename):
+                # The directory end slash is necessary for relative paths to work
+                filename += "/"
+            yield f"=>{filename}\r\n".encode()
+
+    def guess_mimetype(self, filename: str):
+        mime, encoding = self.mimetypes.guess_type(filename)
+        if encoding:
+            return f"{mime}; charset={encoding}"
+        elif mime:
+            return mime
+        else:
+            return "text/plain"
 
 
 class GeminiRequestHandler:
@@ -103,14 +175,14 @@ class GeminiRequestHandler:
             environ = self.build_environ()
             app = self.app(environ, self.write_status)
             for data in app:
-                self.write_body(data)
+                await self.write_body(data)
 
         except Exception as e:
             self.write_status(STATUS_SERVER_ERROR, str(e))
             raise
 
         finally:
-            self.flush_status()
+            await self.flush_status()
             self.log_request()
             await writer.drain()
 
@@ -121,6 +193,8 @@ class GeminiRequestHandler:
         return {
             "SERVER_HOST": self.server.host,
             "SERVER_PORT": self.server.port,
+            "CLIENT_IP": self.client_ip,
+            "CLIENT_PORT": self.client_port,
             "PATH": self.path,
         }
 
@@ -153,15 +227,16 @@ class GeminiRequestHandler:
         self.mimetype = mimetype
         self.response_buffer = f"{status}\t{mimetype}\r\n"
 
-    def write_body(self, data: bytes) -> None:
+    async def write_body(self, data: bytes) -> None:
         """
         Write bytes to the gemini response body.
         """
-        self.flush_status()
+        await self.flush_status()
         self.response_size += len(data)
         self.writer.write(data)
+        await self.writer.drain()
 
-    def flush_status(self) -> None:
+    async def flush_status(self) -> None:
         """
         Flush the status line from the internal buffer to the socket stream.
         """
@@ -169,6 +244,7 @@ class GeminiRequestHandler:
             data = self.response_buffer.encode()
             self.response_size += len(data)
             self.writer.write(data)
+            await self.writer.drain()
         self.response_buffer = None
 
     def log_request(self) -> None:
@@ -199,6 +275,7 @@ class GeminiServer:
         ssl_context: Union[tuple, ssl.SSLContext],
         app: Callable,
     ) -> None:
+
         self.host = host
         self.port = port
         self.app = app
@@ -218,7 +295,7 @@ class GeminiServer:
         )
 
         socket_info = server.sockets[0].getsockname()
-        self.log_message(f"listening on {socket_info[0]}:{socket_info[1]}")
+        self.log_message(f"Listening on {socket_info[0]}:{socket_info[1]}")
 
         async with server:
             await server.serve_forever()
@@ -251,6 +328,12 @@ def run_server():
     parser.add_argument("--host", help="Server host", default="127.0.0.1")
     parser.add_argument("--port", help="Server port", type=int, default=1965)
     parser.add_argument(
+        "--dir",
+        help="Local directory to serve files from",
+        type=str,
+        default=StaticDirectoryApp.root,
+    )
+    parser.add_argument(
         "--tls-certfile",
         help="TLS certificate file",
         metavar="FILE",
@@ -264,11 +347,13 @@ def run_server():
     )
     args = parser.parse_args()
 
+    StaticDirectoryApp.root = args.dir
+
     server = GeminiServer(
         host=args.host,
         port=args.port,
         ssl_context=(args.tls_certfile, args.tls_keyfile),
-        app=EchoApp,
+        app=StaticDirectoryApp,
     )
     asyncio.run(server.run())
 
