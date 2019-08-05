@@ -5,7 +5,7 @@
 
 ## Features
 
-- A modern Python 3 codebase with type hinting and black formatting.
+- A modern python 3 codebase with type hinting and black formatting.
 - Lightweight, single-file web framework with zero dependencies.
 - A built-in static file server with support for *.gemini* directory map files.
 - Supports concurrent connections using an asynchronous event loop.
