@@ -32,6 +32,11 @@ An Experimental Gemini Server, v{__version__}
 https://github.com/michael-lazar/jetforce
 """
 
+EPILOG = """
+If the TLS cert/keyfile is not provided, a self-signed certificate will
+automatically be generated and saved to your temporary file directory.
+"""
+
 # Gemini response status codes
 STATUS_SUCCESS = 2
 STATUS_NOT_FOUND = 4
@@ -353,6 +358,7 @@ def run_server():
     parser = argparse.ArgumentParser(
         prog="jetforce",
         description="An Experimental Gemini Protocol Server",
+        epilog=EPILOG,
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
     parser.add_argument("--host", help="server host", default="127.0.0.1")
