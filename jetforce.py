@@ -58,7 +58,7 @@ class EchoApp:
 
     def __iter__(self) -> typing.Iterator[bytes]:
         self.send_status(STATUS_SUCCESS, "text/plain")
-        path = self.environ["PATH"]
+        path = self.environ["PATH_INFO"]
         yield f"Received path: {path}".encode()
 
 
@@ -90,7 +90,7 @@ class StaticDirectoryApp:
         return build_class
 
     def __iter__(self) -> typing.Iterator[bytes]:
-        url_path = pathlib.Path(self.environ["PATH"].strip("/"))
+        url_path = pathlib.Path(self.environ["PATH_INFO"].strip("/"))
         filesystem_path = (self.root / url_path).resolve()
 
         try:
@@ -162,13 +162,10 @@ class GeminiRequestHandler:
     def __init__(self, server: "GeminiServer", app: typing.Callable) -> None:
         self.server = server
         self.app = app
-
         self.reader: typing.Optional[asyncio.StreamReader] = None
         self.writer: typing.Optional[asyncio.StreamWriter] = None
-
         self.received_timestamp: typing.Optional[datetime.datetime] = None
-        self.client_ip: typing.Optional[str] = None
-        self.client_port: typing.Optional[int] = None
+        self.remote_addr: typing.Optional[str] = None
         self.path: typing.Optional[str] = None
         self.status: typing.Optional[int] = None
         self.mimetype: typing.Optional[str] = None
@@ -187,7 +184,7 @@ class GeminiRequestHandler:
         """
         self.reader = reader
         self.writer = writer
-        self.client_ip, self.client_port = writer.get_extra_info("peername")
+        self.remote_addr = writer.get_extra_info("peername")[0]
         self.received_timestamp = datetime.datetime.utcnow()
 
         try:
@@ -214,11 +211,10 @@ class GeminiRequestHandler:
         Construct a dictionary that will be passed to the application handler.
         """
         return {
-            "SERVER_HOST": self.server.host,
+            "SERVER_NAME": self.server.host,
             "SERVER_PORT": self.server.port,
-            "CLIENT_IP": self.client_ip,
-            "CLIENT_PORT": self.client_port,
-            "PATH": self.path,
+            "REMOTE_ADDR": self.remote_addr,
+            "PATH_INFO": self.path,
         }
 
     async def parse_request(self) -> None:
@@ -275,7 +271,7 @@ class GeminiRequestHandler:
         Log a gemini request using a format derived from the Common Log Format.
         """
         self.server.log_message(
-            f"{self.client_ip} "
+            f"{self.remote_addr} "
             f"[{self.received_timestamp:%d/%b/%Y:%H:%M:%S +0000}] "
             f'"{self.path}" '
             f"{self.status} "
@@ -354,7 +350,10 @@ def generate_tls_certificate(hostname: str) -> typing.Tuple[str, str]:
     return str(certfile), str(keyfile)
 
 
-def run_server():
+def run_server() -> None:
+    """
+    Entry point for running the command line directory server.
+    """
     parser = argparse.ArgumentParser(
         prog="jetforce",
         description="An Experimental Gemini Protocol Server",
@@ -363,11 +362,9 @@ def run_server():
     )
     parser.add_argument("--host", help="server host", default="127.0.0.1")
     parser.add_argument("--port", help="server port", type=int, default=1965)
-    parser.add_argument(
-        "--dir", help="local directory to serve files from", default="/var/gemini"
-    )
     parser.add_argument("--tls-certfile", help="TLS certificate file", metavar="FILE")
     parser.add_argument("--tls-keyfile", help="TLS private key file", metavar="FILE")
+    parser.add_argument("--dir", help="local directory to serve", default="/var/gemini")
     args = parser.parse_args()
 
     certfile, keyfile = args.tls_certfile, args.tls_keyfile
