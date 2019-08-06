@@ -28,3 +28,7 @@ $ git clone https://github.com/michael-lazar/jetforce
 $ cd jetforce
 $ python jetforce.py
 ```
+
+  ## TODO
+  
+ - Finish documentation :)
