@@ -1,9 +1,0 @@
-#!/usr/bin/env bash
-
-domain=${1:-localhost}
-
-echo "Generating ad-hoc SSL certificate for domain '${domain}'"
-openssl req \
-    -newkey rsa:2048 -nodes -keyout ${domain}.key \
-    -nodes -x509 -out ${domain}.crt \
-    -subj "/CN=${domain}"

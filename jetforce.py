@@ -5,7 +5,9 @@ import datetime
 import mimetypes
 import pathlib
 import ssl
+import subprocess
 import sys
+import tempfile
 import typing
 
 # Fail early to avoid crashing with an obscure error
@@ -326,6 +328,27 @@ class GeminiServer:
         print(message, file=sys.stderr)
 
 
+def generate_tls_certificate(hostname: str) -> typing.Tuple[str, str]:
+    """
+    Utility function to generate a self-signed SSL certificate key pair if
+    one isn't provided. This should only be used for development, know what
+    you're doing if you plan to make your server public!
+    """
+    certfile = pathlib.Path(tempfile.gettempdir()) / f"{hostname}.crt"
+    keyfile = pathlib.Path(tempfile.gettempdir()) / f"{hostname}.key"
+    if not certfile.exists() or not keyfile.exists():
+        print(f"Writing ad hoc TLS certificate to {certfile}")
+        subprocess.run(
+            [
+                f"openssl req -newkey rsa:2048 -nodes -keyout {keyfile}"
+                f' -nodes -x509 -out {certfile} -subj "/CN={hostname}"'
+            ],
+            shell=True,
+            check=True,
+        )
+    return str(certfile), str(keyfile)
+
+
 def run_server():
     parser = argparse.ArgumentParser(
         prog="jetforce",
@@ -337,22 +360,16 @@ def run_server():
     parser.add_argument(
         "--dir", help="local directory to serve files from", default="/var/gemini"
     )
-    parser.add_argument(
-        "--tls-certfile",
-        help="TLS certificate file",
-        metavar="FILE",
-        default="localhost.crt",
-    )
-    parser.add_argument(
-        "--tls-keyfile",
-        help="TLS private key file",
-        metavar="FILE",
-        default="localhost.key",
-    )
+    parser.add_argument("--tls-certfile", help="TLS certificate file", metavar="FILE")
+    parser.add_argument("--tls-keyfile", help="TLS private key file", metavar="FILE")
     args = parser.parse_args()
 
+    certfile, keyfile = args.tls_certfile, args.tls_keyfile
+    if not certfile:
+        certfile, keyfile = generate_tls_certificate("localhost")
+
     ssl_context = ssl.SSLContext()
-    ssl_context.load_cert_chain(args.tls_certfile, args.tls_keyfile)
+    ssl_context.load_cert_chain(certfile, keyfile)
 
     server = GeminiServer(
         host=args.host,
