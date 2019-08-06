@@ -3,6 +3,7 @@ import argparse
 import asyncio
 import datetime
 import mimetypes
+import os
 import pathlib
 import ssl
 import subprocess
@@ -91,14 +92,14 @@ class StaticDirectoryApp:
 
     def __iter__(self) -> typing.Iterator[bytes]:
         url_path = pathlib.Path(self.environ["PATH_INFO"].strip("/"))
-        filesystem_path = (self.root / url_path).resolve()
 
-        try:
-            filesystem_path.relative_to(self.root)
-        except ValueError:
+        filename = pathlib.Path(os.path.normpath(str(url_path)))
+        if filename.is_absolute() or filename.parts[0] == "..":
             # Guard against breaking out of the directory
             self.send_status(STATUS_NOT_FOUND, "Not Found")
             return
+        else:
+            filesystem_path = self.root / filename
 
         if filesystem_path.is_file():
             mimetype = self.guess_mimetype(filesystem_path.name)
