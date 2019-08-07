@@ -94,7 +94,7 @@ class StaticDirectoryApp:
         url_path = pathlib.Path(self.environ["PATH_INFO"].strip("/"))
 
         filename = pathlib.Path(os.path.normpath(str(url_path)))
-        if filename.is_absolute() or filename.parts[0] == "..":
+        if filename.is_absolute() or str(filename.name).startswith(".."):
             # Guard against breaking out of the directory
             self.send_status(STATUS_NOT_FOUND, "Not Found")
             return
