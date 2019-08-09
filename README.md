@@ -2,7 +2,7 @@
 
 <p align="center">An experimental python server framework for the new, under development Gemini Protocol.</p>
 
-<p align="center">Check out a live server running this code here: <strong>gemini://mozz.us</strong></p>.
+<p align="center">Check out a live server running this code here: <strong>gemini://mozz.us</strong>.</p>
 
 <p align="center">Learn more about Project Gemini from its designer, ~solderpunk, <a href="https://gopher.commons.host/gopher://zaibatsu.circumlunar.space/1/~solderpunk/gemini">here</a>.</p>
 
