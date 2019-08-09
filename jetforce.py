@@ -39,13 +39,12 @@ automatically be generated and saved to your temporary file directory.
 """
 
 # Gemini response status codes
-STATUS_SUCCESS = 2
-STATUS_NOT_FOUND = 4
-STATUS_SERVER_ERROR = 5
-
-# Gemini response status codes, provisional
-STATUS_MOVED = 3
-STATUS_TOO_MANY_REQUESTS = 9
+STATUS_INPUT_REQUIRED = 10
+STATUS_SUCCESS = 20
+STATUS_REDIRECT = 30
+STATUS_NOT_FOUND = 40
+STATUS_SERVER_ERROR = 50
+STATUS_CERTIFICATE_ERROR = 60
 
 
 class EchoApp:
