@@ -17,8 +17,13 @@ setuptools.setup(
     author_email="lazar.michael22@gmail.com",
     description="An Experimental Gemini Server",
     long_description=long_description(),
-    py_modules=["jetforce"],
-    entry_points={"console_scripts": ["jetforce=jetforce:run_server"]},
+    py_modules=["jetforce", "jetforce_client"],
+    entry_points={
+        "console_scripts": [
+            "jetforce=jetforce:run_server",
+            "jetforce-client=jetforce_client:run_client",
+        ]
+    },
     python_requires=">=3.7",
     keywords="gemini server tcp gopher asyncio",
     classifiers=[
