@@ -38,13 +38,31 @@ If the TLS cert/keyfile is not provided, a self-signed certificate will
 automatically be generated and saved to your temporary file directory.
 """
 
-# Gemini response status codes
-STATUS_INPUT_REQUIRED = 10
+STATUS_INPUT = 10
+
 STATUS_SUCCESS = 20
-STATUS_REDIRECT = 30
-STATUS_NOT_FOUND = 40
-STATUS_SERVER_ERROR = 50
-STATUS_CERTIFICATE_ERROR = 60
+STATUS_SUCCESS_END_OF_SESSION = 21
+
+STATUS_REDIRECT_TEMPORARY = 30
+STATUS_REDIRECT_PERMANENT = 31
+STATUS_TEMPORARY_FAILURE = 40
+STATUS_SERVER_UNAVAILABLE = 41
+STATUS_CGI_ERROR = 42
+STATUS_PROXY_ERROR = 43
+STATUS_SLOW_DOWN = 44
+
+STATUS_PERMANENT_FAILURE = 50
+STATUS_NOT_FOUND = 51
+STATUS_GONE = 52
+STATUS_PROXY_REQUEST_REFUSED = 53
+STATUS_BAD_REQUEST = 59
+
+STATUS_CLIENT_CERTIFICATE_REQUIRED = 60
+STATUS_TRANSIENT_CERTIFICATE_REQUESTED = 61
+STATUS_AUTHORISED_CERTIFICATE_REQUIRED = 62
+STATUS_CERTIFICATE_NOT_ACCEPTED = 63
+STATUS_FUTURE_CERTIFICATE_REJECTED = 64
+STATUS_EXPIRED_CERTIFICATE_REJECTED = 65
 
 
 class EchoApp:
@@ -199,7 +217,7 @@ class GeminiRequestHandler:
             for data in app:
                 await self.write_body(data)
         except Exception as e:
-            self.write_status(STATUS_SERVER_ERROR, str(e))
+            self.write_status(STATUS_CGI_ERROR, str(e))
             raise
         finally:
             await self.flush_status()
@@ -288,11 +306,17 @@ class GeminiServer:
     request_handler_class = GeminiRequestHandler
 
     def __init__(
-        self, host: str, port: int, ssl_context: ssl.SSLContext, app: typing.Callable
+        self,
+        host: str,
+        port: int,
+        ssl_context: ssl.SSLContext,
+        hostname: str,
+        app: typing.Callable,
     ) -> None:
         self.host = host
         self.port = port
         self.ssl_context = ssl_context
+        self.hostname = hostname
         self.app = app
 
     async def run(self) -> None:
@@ -305,6 +329,7 @@ class GeminiServer:
         )
 
         socket_info = server.sockets[0].getsockname()
+        self.log_message(f"Server hostname is {self.hostname}")
         self.log_message(f"Listening on {socket_info[0]}:{socket_info[1]}")
 
         async with server:
@@ -332,8 +357,7 @@ class GeminiServer:
 def generate_tls_certificate(hostname: str) -> typing.Tuple[str, str]:
     """
     Utility function to generate a self-signed SSL certificate key pair if
-    one isn't provided. This should only be used for development, know what
-    you're doing if you plan to make your server public!
+    one isn't provided. Results may vary depending on your version of OpenSSL.
     """
     certfile = pathlib.Path(tempfile.gettempdir()) / f"{hostname}.crt"
     keyfile = pathlib.Path(tempfile.gettempdir()) / f"{hostname}.key"
@@ -360,16 +384,17 @@ def run_server() -> None:
         epilog=EPILOG,
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
-    parser.add_argument("--host", help="server host", default="127.0.0.1")
-    parser.add_argument("--port", help="server port", type=int, default=1965)
+    parser.add_argument("--host", help="Address to bind server to", default="127.0.0.1")
+    parser.add_argument("--port", help="Port to bind server to", type=int, default=1965)
     parser.add_argument("--tls-certfile", help="TLS certificate file", metavar="FILE")
     parser.add_argument("--tls-keyfile", help="TLS private key file", metavar="FILE")
+    parser.add_argument("--hostname", help="Server hostname", default="localhost")
     parser.add_argument("--dir", help="local directory to serve", default="/var/gemini")
     args = parser.parse_args()
 
     certfile, keyfile = args.tls_certfile, args.tls_keyfile
     if not certfile:
-        certfile, keyfile = generate_tls_certificate("localhost")
+        certfile, keyfile = generate_tls_certificate(args.hostname)
 
     ssl_context = ssl.SSLContext()
     ssl_context.load_cert_chain(certfile, keyfile)
@@ -378,6 +403,7 @@ def run_server() -> None:
         host=args.host,
         port=args.port,
         ssl_context=ssl_context,
+        hostname=args.hostname,
         app=StaticDirectoryApp.serve_directory(args.dir),
     )
     asyncio.run(server.run())
