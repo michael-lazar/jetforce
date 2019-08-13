@@ -2,7 +2,7 @@
 """
 A dead-simple gemini client intended to be used for server development and testing.
 
-./jetforce-client
+./jetforce-client gemini://mozz.us
 """
 import argparse
 import socket
