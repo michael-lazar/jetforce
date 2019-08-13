@@ -17,6 +17,7 @@ setuptools.setup(
     author_email="lazar.michael22@gmail.com",
     description="An Experimental Gemini Server",
     long_description=long_description(),
+    long_description_content_type="text/markdown",
     py_modules=["jetforce", "jetforce_client"],
     entry_points={
         "console_scripts": [
