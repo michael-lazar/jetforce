@@ -41,7 +41,13 @@ def run_client():
     parser.add_argument(
         "--port", help="Optional port to connect to, will default to the URL"
     )
+    parser.add_argument("--certfile", help="Optional client certificate")
+    parser.add_argument("--keyfile", help="Optional client key")
     args = parser.parse_args()
+
+    if args.certfile:
+        context.load_cert_chain(args.certfile, args.keyfile)
+
     fetch(args.url, args.host, args.port)
 
 
