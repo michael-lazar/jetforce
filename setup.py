@@ -12,7 +12,7 @@ setuptools.setup(
     name="Jetforce",
     version="0.0.6",
     url="https://github.com/michael-lazar/jetforce",
-    license="GPL-3.0",
+    license="Other/Proprietary License",
     author="Michael Lazar",
     author_email="lazar.michael22@gmail.com",
     description="An Experimental Gemini Server",
