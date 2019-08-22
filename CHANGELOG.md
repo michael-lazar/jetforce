@@ -1,5 +1,16 @@
 # Jetforce Changelog
 
+### v0.0.6 (2019-08-22)
+
+- Significant refactoring of the base application interface.
+- Added built-in support for URL routing based on the request path.
+- Added support for accepting input using query strings.
+- Files with the ".gmi" extension are now recognized as text/gemini.
+- Added a new examples/ directory with the following applications
+  - A bare bones echo server
+  - A guestbook application
+  - An HTTP/HTTPS proxy server
+
 ### v0.0.5 (2019-08-12)
 
 Updates to conform to the v0.9.1 Gemini specification
