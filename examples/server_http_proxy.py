@@ -5,39 +5,28 @@ locally using the `w3m` tool, and render the output to the client as plain text.
 """
 import asyncio
 import subprocess
-import typing
-import urllib.parse
 
 import jetforce
+from jetforce import Response, Status
+
+app = jetforce.JetforceApplication()
 
 
-class HTTPProxyApplication(jetforce.BaseApplication):
-
-    command = [b"w3m", b"-dump"]
-
-    def __call__(
-        self, environ: dict, send_status: typing.Callable
-    ) -> typing.Iterator[bytes]:
-        url = environ["URL"]
-        url_parts = urllib.parse.urlparse(url)
-        if url_parts.scheme not in ("http", "https"):
-            return send_status(jetforce.STATUS_NOT_FOUND, "Invalid Resource")
-
-        try:
-            command = self.command + [url.encode()]
-            out = subprocess.run(command, stdout=subprocess.PIPE)
-            out.check_returncode()
-        except Exception:
-            send_status(jetforce.STATUS_CGI_ERROR, "Failed to load URL")
-        else:
-            send_status(jetforce.STATUS_SUCCESS, "text/plain")
-            yield out.stdout
+@app.route(scheme="https", strict_hostname=False)
+@app.route(scheme="http", strict_hostname=False)
+def proxy_request(request):
+    command = [b"w3m", b"-dump", request.url.encode()]
+    try:
+        out = subprocess.run(command, stdout=subprocess.PIPE)
+        out.check_returncode()
+    except Exception:
+        return Response(Status.CGI_ERROR, "Failed to load URL")
+    else:
+        return Response(Status.SUCCESS, "text/plain", out.stdout)
 
 
 if __name__ == "__main__":
-    parser = jetforce.build_argument_parser()
-    args = parser.parse_args()
-    app = HTTPProxyApplication()
+    args = jetforce.command_line_parser().parse_args()
     server = jetforce.GeminiServer(
         host=args.host,
         port=args.port,

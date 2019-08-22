@@ -2,20 +2,18 @@
 A simple Gemini server that echos back the request to the client.
 """
 import asyncio
-import typing
 
 import jetforce
 
 
-def echo(environ: dict, send_status: typing.Callable) -> typing.Iterator[bytes]:
+def echo(environ, send_status):
     url = environ["URL"]
-    send_status(jetforce.STATUS_SUCCESS, "text/gemini")
+    send_status(jetforce.Status.SUCCESS, "text/gemini")
     yield f"Received path: {url}".encode()
 
 
 if __name__ == "__main__":
-    parser = jetforce.build_argument_parser()
-    args = parser.parse_args()
+    args = jetforce.command_line_parser().parse_args()
     server = jetforce.GeminiServer(
         host=args.host,
         port=args.port,
