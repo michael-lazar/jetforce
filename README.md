@@ -11,7 +11,7 @@
     <img alt="pypi" src="https://img.shields.io/pypi/v/jetforce.svg?label=version"/>
   </a>
   <a href="https://github.com/michael-lazar/jetforce/LICENSE">
-    <img alt="GitHub" src="https://img.shields.io/github/license/michael-lazar/jetforce">
+    <img alt="License" src="https://img.shields.io/badge/license-FFSL%20v1-informational.svg">
   </a>
   <a href="https://github.com/psf/black">
     <img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg">
