@@ -198,13 +198,15 @@ class StaticDirectoryApplication(JetforceApplication):
     directory listing will be auto-generated.
     """
 
-    def __init__(self, directory: str = "/var/gemini"):
+    def __init__(self, directory: str = "/var/gemini", index_file: str = "index.gmi"):
         super().__init__()
         self.routes.append((RoutePattern(), self.serve_static_file))
 
         self.root = pathlib.Path(directory).resolve(strict=True)
+        self.index_file = index_file
         self.mimetypes = mimetypes.MimeTypes()
         self.mimetypes.add_type("text/gemini", ".gmi")
+        self.mimetypes.add_type("text/gemini", ".gemini")
 
     def serve_static_file(self, request: Request):
 
@@ -222,9 +224,9 @@ class StaticDirectoryApplication(JetforceApplication):
             generator = self.load_file(filesystem_path)
             return Response(Status.SUCCESS, mimetype, generator)
         elif filesystem_path.is_dir():
-            gemini_file = filesystem_path / ".gemini"
-            if gemini_file.exists():
-                generator = self.load_file(gemini_file)
+            index_file = filesystem_path / self.index_file
+            if index_file.exists():
+                generator = self.load_file(index_file)
             else:
                 generator = self.list_directory(url_path, filesystem_path)
             return Response(Status.SUCCESS, "text/gemini", generator)
@@ -519,10 +521,17 @@ def run_server() -> None:
     Entry point for running the command line static directory server.
     """
     parser = command_line_parser()
-    parser.add_argument("--dir", help="local directory to serve", default="/var/gemini")
+    parser.add_argument(
+        "--dir", help="Path on the filesystem to serve", default="/var/gemini"
+    )
+    parser.add_argument(
+        "--index-file",
+        help="The gemini directory index file [i.e. index.html]",
+        default="index.gmi",
+    )
     args = parser.parse_args()
 
-    app = StaticDirectoryApplication(args.dir)
+    app = StaticDirectoryApplication(args.dir, args.index_file)
     server = GeminiServer(
         host=args.host,
         port=args.port,
