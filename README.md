@@ -86,8 +86,8 @@ Jetforce will respond to any request containing a URL that don't match your host
 with a status of ``Proxy Request Refused``.
 
 Using python, you can modify this behavior to do fancy things like building a proxy
-server for HTTP requests. See [examples/http_proxy.py](examples/http_proxy.py) for
-more information.
+server for HTTP requests. See [server_http_proxy.py](examples/server_http_proxy.py) for
+an example of how to accomplish this.
 
 ## Serving Files
 
