@@ -81,8 +81,8 @@ $ openssl req -newkey rsa:2048 -nodes -keyout {hostname}.key \
 
 ### Hostname
 
-Because the gemini protocol sends the *whole* URL in the request, it's necessary
-to declare which hostname your server is expecting to recieve traffic under.
+Because the gemini protocol sends the *whole* URL in the request, it's required
+to declare which hostname your server is expecting to receive traffic under.
 Jetforce will respond to any requests containing URLs that don't match the hostname
 with a status of ``Proxy Request Refused``.
 
