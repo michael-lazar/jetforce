@@ -89,14 +89,24 @@ Using python, you can modify this behavior to do fancy things like building a pr
 server for HTTP requests. See [server_http_proxy.py](examples/server_http_proxy.py) for
 an example of how to accomplish this.
 
-## Serving Files
+### Serving Files
 
 Jetforce serves files from the ``/var/gemini/`` directory by default:
 
 - Files with the **.gmi** extension will be interpreted as *text/gemini*.
-- Other files will have their *mimetype* guessed based on their file extensions.
-- Directories will look for a file with the name **index.gmi**. If that does
+- Other files will have their *mimetype* guessed based on their file extension.
+- Directories will look for a file with the name **index.gmi**. If that file does
   not exist, a directory listing will be automatically generated to return.
 
 There is not currently any support for CGI scripts. This feature might be added
 in a future version.
+
+## License
+
+This project is licensed under the [Floodgap Free Software License](https://www.floodgap.com/software/ffsl/license.html).
+
+> The Floodgap Free Software License (FFSL) has one overriding mandate: that software
+> using it, or derivative works based on software that uses it, must be free. By free
+> we mean simply "free as in beer" -- you may put your work into open or closed source
+> packages as you see fit, whether or not you choose to release your changes or updates
+> publicly, but you must not ask any fee for it.
