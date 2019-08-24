@@ -55,11 +55,10 @@ optional arguments:
   --hostname HOSTNAME   Server hostname (default: localhost)
   --dir DIR             Path on the filesystem to serve (default: /var/gemini)
   --index-file INDEX_FILE
-                        The gemini directory index file [i.e. index.html]
-                        (default: index.gmi)
+                        The gemini directory index file (default: index.gmi)
 
 If the TLS cert/keyfile is not provided, a self-signed certificate will
-automatically be generated and saved to your temporary file directory.
+automatically be generated and saved to your temporary directory.
 ```
 
 ### TLS Certificates
@@ -89,3 +88,15 @@ with a status of ``Proxy Request Refused``.
 Using python, you can modify this behavior to do fancy things like building a proxy
 server for HTTP requests. See [examples/http_proxy.py](examples/http_proxy.py) for
 more information.
+
+## Serving Files
+
+Jetforce serves files from the ``/var/gemini/`` directory by default:
+
+- Files with the **.gmi** extension will be interpreted as *text/gemini*.
+- Other files will have their *mimetype* guessed based on their file extensions.
+- Directories will look for a file with the name **index.gmi**. If that does
+  not exist, a directory listing will be automatically generated to return.
+
+There is not currently any support for CGI scripts. This feature might be added
+in a future version.
