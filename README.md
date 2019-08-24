@@ -70,7 +70,7 @@ certificate, or obtain one from a Certificate Authority like
 
 In order to make local development easier, if you do not specify the certificate
 arguments, jetforce will automatically generate a temporary ad-hoc TLS certificate
-to use. Here's the OpenSSL command that jetforce runs internally:
+to use. Here's the OpenSSL command that jetforce uses internally:
 
 
 ```
