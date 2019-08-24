@@ -15,9 +15,9 @@ guestbook = pathlib.Path("guestbook.txt")
 app = jetforce.JetforceApplication()
 
 
-@app.route("$")
+@app.route("")
 def index(request):
-    data = ["Guestbook", "=>/submit Leave a Message", ""]
+    data = ["Guestbook", "=>/submit Sign the Guestbook", ""]
 
     guestbook.touch(exist_ok=True)
     with guestbook.open("r") as fp:

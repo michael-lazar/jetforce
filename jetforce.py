@@ -38,7 +38,7 @@ https://github.com/michael-lazar/jetforce
 
 EPILOG = """
 If the TLS cert/keyfile is not provided, a self-signed certificate will
-automatically be generated and saved to your temporary file directory.
+automatically be generated and saved to your temporary directory.
 """
 
 
@@ -417,12 +417,12 @@ class GeminiServer:
 
     def __init__(
         self,
-        host: str,
-        port: int,
-        certfile: typing.Optional[str],
-        keyfile: typing.Optional[str],
-        hostname: str,
         app: typing.Callable,
+        host: str = "127.0.0.1",
+        port: int = 1965,
+        certfile: typing.Optional[str] = None,
+        keyfile: typing.Optional[str] = None,
+        hostname: str = "localhost",
     ) -> None:
 
         self.host = host
@@ -525,9 +525,7 @@ def run_server() -> None:
         "--dir", help="Path on the filesystem to serve", default="/var/gemini"
     )
     parser.add_argument(
-        "--index-file",
-        help="The gemini directory index file [i.e. index.html]",
-        default="index.gmi",
+        "--index-file", help="The gemini directory index file", default="index.gmi"
     )
     args = parser.parse_args()
 
