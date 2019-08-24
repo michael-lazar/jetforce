@@ -82,7 +82,7 @@ $ openssl req -newkey rsa:2048 -nodes -keyout {hostname}.key \
 
 Because the gemini protocol sends the *whole* URL in the request, it's required
 to declare which hostname your server is expecting to receive traffic under.
-Jetforce will respond to any requests containing URLs that don't match the hostname
+Jetforce will respond to any request containing a URL that don't match the hostname
 with a status of ``Proxy Request Refused``.
 
 Using python, you can modify this behavior to do fancy things like building a proxy
