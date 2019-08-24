@@ -23,45 +23,24 @@
 
 ## Features
 
-Jetforce comes with two components:
-
 - A modern python codebase with type hinting and black formatting.
 - A built-in static file server with support for gemini directory files.
 - Lightweight, single-file framework with zero dependencies.
 - Supports concurrent connections using an asynchronous event loop.
 - Extendable - loosely implements the [WSGI](https://en.wikipedia.org/wiki/Web_Server_Gateway_Interface) server/application pattern.
 
-## Demo
-
-A live demonstration of the Jetforce server is available on gemini at the following URL:
-
----
-
-<p align="center">
-<b><a href="gemini://mozz.us">gemini://mozz.us</a></b><br>
-</p>
-
----
-
-
 ## Installation
 
-Requires Python 3.7+ and OpenSSL
-
-### pip
+Requires Python 3.7+ and OpenSSL. The latest release of Jetforce can be downloaded from [PyPI](https://pypi.org/project/Jetforce/):
 
 ```bash
 $ pip install jetforce
 ```
 
-### git
+Or, you can download the repository and run the script directly:
 
 ```bash
 $ git clone https://github.com/michael-lazar/jetforce
 $ cd jetforce
-$ python jetforce.py
+$ ./jetforce.py
 ```
-
-  ## TODO
-  
- - Finish documentation :)
