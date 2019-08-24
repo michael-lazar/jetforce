@@ -2,7 +2,7 @@
 
 <p align="center">An experimental python server for the new, under development Gemini Protocol.</p>
 
-<p align="center">Learn more about Project Gemini from its designer, ~solderpunk, <a href="https://gopher.commons.host/gopher://zaibatsu.circumlunar.space/1/~solderpunk/gemini">here</a>.</p>
+<p align="center">Learn more about Project Gemini <a href="https://gopher.commons.host/gopher://zaibatsu.circumlunar.space/1/~solderpunk/gemini">here</a>.</p>
 
 <p align="center"><img alt="rocket launch" src="resources/rocket.jpg"/></p>
 
@@ -23,9 +23,11 @@
 
 ## Features
 
-- A modern python 3 codebase with type hinting and black formatting.
-- Lightweight, single-file web framework with zero dependencies.
-- A built-in static file server with support for *.gemini* directory map files.
+Jetforce comes with two components:
+
+- A modern python codebase with type hinting and black formatting.
+- A built-in static file server with support for gemini directory files.
+- Lightweight, single-file framework with zero dependencies.
 - Supports concurrent connections using an asynchronous event loop.
 - Extendable - loosely implements the [WSGI](https://en.wikipedia.org/wiki/Web_Server_Gateway_Interface) server/application pattern.
 
