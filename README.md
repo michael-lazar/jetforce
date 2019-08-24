@@ -96,7 +96,7 @@ Jetforce serves files from the ``/var/gemini/`` directory by default:
 - Files with the **.gmi** extension will be interpreted as *text/gemini*.
 - Other files will have their *mimetype* guessed based on their file extension.
 - Directories will look for a file with the name **index.gmi**.
-- If an index file does not exist, a directory file listing will be generated.
+- If an index file does not exist, a directory listing will be generated.
 
 There is not currently any support for CGI scripts. This feature might be added
 in a future version.
