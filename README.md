@@ -1,25 +1,10 @@
-<h1 align="center">Jetforce</h1>
+# Jetforce
 
-<p align="center">An experimental python server for the new, under development Gemini Protocol.</p>
+An experimental python server for the new, under development Gemini Protocol.
 
-<p align="center">Learn more about Project Gemini <a href="https://gopher.commons.host/gopher://zaibatsu.circumlunar.space/1/~solderpunk/gemini">here</a>.</p>
+Learn more about Project Gemini [here](https://gopher.commons.host/gopher://zaibatsu.circumlunar.space/1/~solderpunk/gemini).
 
-<p align="center"><img alt="rocket launch" src="resources/rocket.jpg"/></p>
-
-<p align="center">
-  <a href="https://pypi.python.org/pypi/jetforce/">
-    <img alt="pypi" src="https://img.shields.io/pypi/v/jetforce.svg?label=version"/>
-  </a>
-  <a href="https://github.com/michael-lazar/jetforce/LICENSE">
-    <img alt="License" src="https://img.shields.io/badge/license-FFSL%20v1-informational.svg">
-  </a>
-  <a href="https://github.com/psf/black">
-    <img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg">
-  </a>
-  <a href="https://saythanks.io/to/michael-lazar">
-    <img alt="say-thanks" src="https://img.shields.io/badge/Say%20Thanks-!-1EAEDB.svg"/>
-  </a>
-</p>
+![Rocket Launch](resources/rocket.jpg)
 
 ## Features
 
