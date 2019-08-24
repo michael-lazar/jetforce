@@ -25,7 +25,7 @@ The latest release can be installed from [PyPI](https://pypi.org/project/Jetforc
 $ pip install jetforce
 ```
 
-Or, clone the repository and run the script directly
+Or, simply clone the repository and run the script directly
 
 ```
 $ git clone https://github.com/michael-lazar/jetforce
