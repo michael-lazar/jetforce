@@ -107,8 +107,7 @@ Jetforce serves files from the ``/var/gemini/`` directory by default:
 - Directories will look for a file with the name **index.gmi**.
 - If an index file does not exist, a directory listing will be generated.
 
-There is not currently any support for CGI scripts. This feature might be added
-in a future version.
+CGI scripts are not currently supported. This feature might be added in a future version.
 
 ## License
 
