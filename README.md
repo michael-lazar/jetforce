@@ -81,7 +81,7 @@ $ openssl req -newkey rsa:2048 -nodes -keyout {hostname}.key \
 #### TLS Client Certificates
 
 There are currently no plans to support transient self-signed client certificates.
-This is due to a techinical limitation of the python standand library's ``ssl``
+This is due to a techinical limitation of the python standard library's ``ssl``
 module, which is described in detail 
 [here](https://portal.mozz.us/?url=gemini%3A%2F%2Fmozz.us%2Fjournal%2F2019-08-21.txt).
 
