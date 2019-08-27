@@ -574,7 +574,7 @@ def run_server() -> None:
     """
     parser = command_line_parser()
     parser.add_argument(
-        "--root-dir", help="Root path on the filesystem to serve", default="/var/gemini"
+        "--dir", help="Root path on the filesystem to serve", default="/var/gemini"
     )
     parser.add_argument(
         "--cgi-dir",
@@ -586,7 +586,7 @@ def run_server() -> None:
     )
     args = parser.parse_args()
 
-    app = StaticDirectoryApplication(args.root_dir, args.index_file, args.cgi_dir)
+    app = StaticDirectoryApplication(args.dir, args.index_file, args.cgi_dir)
     server = GeminiServer(
         host=args.host,
         port=args.port,
