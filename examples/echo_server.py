@@ -7,7 +7,7 @@ import jetforce
 
 
 def echo(environ, send_status):
-    url = environ["URL"]
+    url = environ["GEMINI_URL"]
     send_status(jetforce.Status.SUCCESS, "text/gemini")
     yield f"Received path: {url}".encode()
 
