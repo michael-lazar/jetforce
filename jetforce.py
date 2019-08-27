@@ -273,7 +273,7 @@ class StaticDirectoryApplication(JetforceApplication):
         status_line = out.stdout.readline().strip()
         status_parts = status_line.split(maxsplit=1)
         if len(status_parts) != 2 or not status_parts[0].isdecimal():
-            return Response(Status.CGI_ERROR, "Script generated invalid response")
+            return Response(Status.CGI_ERROR, "Unexpected Error")
 
         status, meta = status_parts
 
