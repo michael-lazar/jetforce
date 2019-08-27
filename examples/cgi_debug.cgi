@@ -6,4 +6,5 @@ server.
 """
 import cgi
 
+print("200 text/html")
 cgi.test()
