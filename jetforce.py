@@ -204,7 +204,7 @@ class StaticDirectoryApplication(JetforceApplication):
         self,
         root_directory: str = "/var/gemini",
         index_file: str = "index.gmi",
-        cgi_directory: str = "/cgi-bin",
+        cgi_directory: str = "cgi-bin",
     ):
         super().__init__()
         self.routes.append((RoutePattern(), self.serve_static_file))
@@ -568,13 +568,19 @@ def command_line_parser() -> argparse.ArgumentParser:
         epilog=EPILOG,
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
-    parser.add_argument("--host", help="Address to bind server to", default="127.0.0.1")
-    parser.add_argument("--port", help="Port to bind server to", type=int, default=1965)
+    parser.add_argument("--host", help="Server address to bind to", default="127.0.0.1")
+    parser.add_argument("--port", help="Server port to bind to", type=int, default=1965)
     parser.add_argument(
-        "--tls-certfile", dest="certfile", help="TLS certificate file", metavar="FILE"
+        "--tls-certfile",
+        dest="certfile",
+        help="Server TLS certificate file",
+        metavar="FILE",
     )
     parser.add_argument(
-        "--tls-keyfile", dest="keyfile", help="TLS private key file", metavar="FILE"
+        "--tls-keyfile",
+        dest="keyfile",
+        help="Server TLS private key file",
+        metavar="FILE",
     )
     parser.add_argument("--hostname", help="Server hostname", default="localhost")
     return parser
@@ -586,15 +592,23 @@ def run_server() -> None:
     """
     parser = command_line_parser()
     parser.add_argument(
-        "--dir", help="Root path on the filesystem to serve", default="/var/gemini"
+        "--dir",
+        help="Root directory on the filesystem to serve",
+        default="/var/gemini",
+        metavar="DIR",
     )
     parser.add_argument(
         "--cgi-dir",
-        help="CGI script folder, relative to the server's root directory",
-        default="/cgi-bin",
+        help="CGI script directory, relative to the server's root directory",
+        default="cgi-bin",
+        metavar="DIR",
     )
     parser.add_argument(
-        "--index-file", help="The gemini directory index file", default="index.gmi"
+        "--index-file",
+        help="If a directory contains a file with this name, that file will be "
+        "served instead of auto-generating an index page",
+        default="index.gmi",
+        metavar="FILE",
     )
     args = parser.parse_args()
 

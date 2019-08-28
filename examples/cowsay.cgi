@@ -19,7 +19,7 @@ import urllib.parse
 
 query = os.environ["QUERY_STRING"]
 if not query:
-    print("10 Enter your cowsay message")
+    print("10 Enter your cowsay message: ")
     sys.exit()
 
 text = urllib.parse.unquote(query)

@@ -1,61 +1,63 @@
 # Jetforce
 
-An experimental python server for the new, under development Gemini Protocol.
-
-Learn more about Project Gemini [here](https://gopher.commons.host/gopher://zaibatsu.circumlunar.space/1/~solderpunk/gemini).
+An experimental TCP server for the new, under development
+[Gemini Protocol](https://gopher.commons.host/gopher://zaibatsu.circumlunar.space/1/~solderpunk/gemini).
 
 ![Rocket Launch](resources/rocket.jpg)
 
 ## Features
 
-- A modern python codebase with type hinting and black formatting.
-- A built-in static file server with support for gemini directory files.
-- Lightweight, single-file framework with zero dependencies.
+- A built-in static file server with support for gemini directories and
+  CGI scripts.
+- Lightweight, single-file framework with zero external dependencies.  
+- Modern python codebase with type hinting and black style formatting.
 - Supports concurrent connections using an asynchronous event loop.
-- Extendable - loosely implements the [WSGI](https://en.wikipedia.org/wiki/Web_Server_Gateway_Interface)
+- Extendable components that loosely implement the [WSGI](https://en.wikipedia.org/wiki/Web_Server_Gateway_Interface)
   server/application pattern.
 
 ## Installation
 
-Requires Python 3.7+ and OpenSSL.
+Requires Python 3.7+
 
-The latest release can be installed from [PyPI](https://pypi.org/project/Jetforce/)
+The latest release can be installed from [PyPI](https://pypi.org/project/Jetforce/):
 
-```
+```bash
 $ pip install jetforce
 ```
 
-Or, simply clone the repository and run the script directly
+Or, clone the repository and run the script directly:
 
-```
+```bash
 $ git clone https://github.com/michael-lazar/jetforce
 $ cd jetforce
-$ ./jetforce.py
+$ python3 jetforce.py
 ```
 
 ## Usage
 
 Use the ``--help`` flag to view command-line options:
 
-
-```
+```bash
 $ jetforce --help
 usage: jetforce [-h] [--host HOST] [--port PORT] [--tls-certfile FILE]
                 [--tls-keyfile FILE] [--hostname HOSTNAME] [--dir DIR]
-                [--index-file INDEX_FILE]
+                [--cgi-dir DIR] [--index-file FILE]
 
 An Experimental Gemini Protocol Server
 
 optional arguments:
-  -h, --help            show this help message and exit
-  --host HOST           Address to bind server to (default: 127.0.0.1)
-  --port PORT           Port to bind server to (default: 1965)
-  --tls-certfile FILE   TLS certificate file (default: None)
-  --tls-keyfile FILE    TLS private key file (default: None)
-  --hostname HOSTNAME   Server hostname (default: localhost)
-  --dir DIR             Path on the filesystem to serve (default: /var/gemini)
-  --index-file INDEX_FILE
-                        The gemini directory index file (default: index.gmi)
+  -h, --help           show this help message and exit
+  --host HOST          Server address to bind to (default: 127.0.0.1)
+  --port PORT          Server port to bind to (default: 1965)
+  --tls-certfile FILE  Server TLS certificate file (default: None)
+  --tls-keyfile FILE   Server TLS private key file (default: None)
+  --hostname HOSTNAME  Server hostname (default: localhost)
+  --dir DIR            Local directory to serve (default: /var/gemini)
+  --cgi-dir DIR        CGI script directory, relative to the server's root
+                       directory (default: cgi-bin)
+  --index-file FILE    If a directory contains a file with this name, that
+                       file will be served instead of auto-generating an index
+                       page (default: index.gmi)
 
 If the TLS cert/keyfile is not provided, a self-signed certificate will
 automatically be generated and saved to your temporary directory.
@@ -78,8 +80,6 @@ $ openssl req -newkey rsa:2048 -nodes -keyout {hostname}.key \
     -nodes -x509 -out {hostname}.crt -subj "/CN={hostname}"
 ```
 
-#### TLS Client Certificates
-
 There are currently no plans to support transient self-signed client certificates.
 This is due to a techinical limitation of the python standard library's ``ssl``
 module, which is described in detail 
@@ -90,13 +90,13 @@ Support for verified client certificates will be added in a future version.
 ### Hostname
 
 Because the gemini protocol sends the *whole* URL in the request, it's required
-that you declare which hostname your server is expecting to receive traffic under.
-Jetforce will respond to any request containing a URL that don't match your hostname
-with a status of ``Proxy Request Refused``.
+that you declare the hostname that your server is expecting to receive traffic
+under. Jetforce will reject any request that doesn't match your hostname with a
+status of ``Proxy Request Refused``.
 
-Using python, you can modify this behavior to do fancy things like building a proxy
-server for HTTP requests. See [http_proxy.py](examples/http_proxy.py) for
-an example of how to accomplish this.
+Using python, you can modify this behavior to do fancy things like building a
+proxy server for HTTP requests. See [http_proxy.py](examples/http_proxy.py) for
+an example of how this is done.
 
 ### Serving Files
 
@@ -107,7 +107,20 @@ Jetforce serves files from the ``/var/gemini/`` directory by default:
 - Directories will look for a file with the name **index.gmi**.
 - If an index file does not exist, a directory listing will be generated.
 
-CGI scripts are not currently supported. This feature might be added in a future version.
+### CGI Scripts
+
+Jetforce implements a slightly modified version of the official CGI
+specification. Because Gemini is a less complex than HTTP, the CGI interface is
+also inherently easier and more straightforward to use.
+
+The main difference in this implementation is that the CGI script is expected
+to write the entire gemini response *verbetim* to stdout:
+
+1. The status code and meta on the first line
+2. Any additional response body on subsequent lines
+
+Unlike HTTP's CGI, there are no request/response headers or other special
+fields to perform actions like redirects.
 
 ## License
 
