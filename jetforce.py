@@ -592,7 +592,7 @@ def command_line_parser() -> argparse.ArgumentParser:
 
 def run_server() -> None:
     """
-    Entry point for running the command line static directory server.
+    Entry point for running the static directory server.
     """
     parser = command_line_parser()
     parser.add_argument(
