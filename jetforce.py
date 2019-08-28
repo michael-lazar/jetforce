@@ -147,7 +147,9 @@ class JetforceApplication:
             typing.Tuple[RoutePattern, typing.Callable[[Request], Response]]
         ] = []
 
-    def __call__(self, environ: dict, send_status: typing.Callable):
+    def __call__(
+        self, environ: dict, send_status: typing.Callable
+    ) -> typing.Iterator[bytes]:
         request = Request(environ)
         for route_pattern, callback in self.routes[::-1]:
             if route_pattern.match(request):
@@ -217,7 +219,7 @@ class StaticDirectoryApplication(JetforceApplication):
         self.mimetypes.add_type("text/gemini", ".gmi")
         self.mimetypes.add_type("text/gemini", ".gemini")
 
-    def serve_static_file(self, request: Request):
+    def serve_static_file(self, request: Request) -> Response:
         """
         Convert a URL into a filesystem path, and attempt to serve the file
         or directory that is represented at that path.
@@ -255,7 +257,7 @@ class StaticDirectoryApplication(JetforceApplication):
         else:
             return Response(Status.NOT_FOUND, "Not Found")
 
-    def run_cgi_script(self, filesystem_path: pathlib.Path, environ: dict):
+    def run_cgi_script(self, filesystem_path: pathlib.Path, environ: dict) -> Response:
         script_name = str(filesystem_path)
         cgi_env = environ.copy()
         cgi_env["GATEWAY_INTERFACE"] = "GCI/1.1"
@@ -281,7 +283,7 @@ class StaticDirectoryApplication(JetforceApplication):
         body = codecs.iterencode(out.stdout, encoding="utf-8", errors="surrogateescape")
         return Response(int(status), meta, body)
 
-    def load_file(self, filesystem_path: pathlib.Path):
+    def load_file(self, filesystem_path: pathlib.Path) -> typing.Iterator[bytes]:
         """
         Load a file using a generator to allow streaming data to the TCP socket.
         """
@@ -291,7 +293,9 @@ class StaticDirectoryApplication(JetforceApplication):
                 yield data
                 data = fp.read(1024)
 
-    def list_directory(self, url_path: pathlib.Path, filesystem_path: pathlib.Path):
+    def list_directory(
+        self, url_path: pathlib.Path, filesystem_path: pathlib.Path
+    ) -> typing.Iterator[bytes]:
         """
         Auto-generate a text/gemini document based on the contents of the file system.
         """
@@ -308,7 +312,7 @@ class StaticDirectoryApplication(JetforceApplication):
             else:
                 yield f"=>/{url_path / file.name}\t{file.name}\r\n".encode()
 
-    def guess_mimetype(self, filename: str):
+    def guess_mimetype(self, filename: str) -> str:
         """
         Guess the mimetype of a file based on the file extension.
         """
@@ -498,7 +502,7 @@ class GeminiServer:
             certfile, keyfile = self.generate_tls_certificate(hostname)
 
         self.ssl_context = ssl.SSLContext()
-        self.ssl_context.verify_mode = ssl.CERT_NONE
+        self.ssl_context.verify_mode = ssl.CERT_OPTIONAL
         self.ssl_context.check_hostname = False
         self.ssl_context.load_cert_chain(certfile, keyfile)
 
@@ -520,7 +524,7 @@ class GeminiServer:
 
     async def accept_connection(
         self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter
-    ):
+    ) -> None:
         """
         Hook called by the socket server when a new connection is accepted.
         """
@@ -530,7 +534,7 @@ class GeminiServer:
         finally:
             writer.close()
 
-    def log_message(self, message: str):
+    def log_message(self, message: str) -> None:
         """
         Log a diagnostic server message.
         """
