@@ -1,7 +1,7 @@
 # Jetforce
 
-An experimental TCP server for the new, under development
-[Gemini Protocol](https://gopher.commons.host/gopher://zaibatsu.circumlunar.space/1/~solderpunk/gemini).
+An experimental TCP server for the new, under development Gemini Protocol.
+Learn more [here](https://gopher.commons.host/gopher://zaibatsu.circumlunar.space/1/~solderpunk/gemini).
 
 ![Rocket Launch](resources/rocket.jpg)
 
