@@ -348,6 +348,7 @@ class GeminiRequestHandler:
         self.writer: typing.Optional[asyncio.StreamWriter] = None
         self.received_timestamp: typing.Optional[datetime.datetime] = None
         self.remote_addr: typing.Optional[str] = None
+        self.client_cert: typing.Optional[dict] = None
         self.url: typing.Optional[urllib.parse.ParseResult] = None
         self.status: typing.Optional[int] = None
         self.meta: typing.Optional[str] = None
@@ -367,13 +368,14 @@ class GeminiRequestHandler:
         self.reader = reader
         self.writer = writer
         self.remote_addr = writer.get_extra_info("peername")[0]
+        self.client_cert = writer.get_extra_info("peercert")
         self.received_timestamp = datetime.datetime.utcnow()
 
         try:
             await self.parse_header()
         except Exception:
             # Malformed request, throw it away and exit immediately
-            self.write_status(Status.BAD_REQUEST, "Could not understand request line")
+            self.write_status(Status.BAD_REQUEST, "Malformed request")
             return await self.close_connection()
 
         try:
@@ -394,20 +396,26 @@ class GeminiRequestHandler:
         Variable names conform to the CGI spec defined in RFC 3875.
         """
         url_parts = urllib.parse.urlparse(self.url)
-        return {
+        environ = {
             "GEMINI_URL": self.url,
             "HOSTNAME": self.server.hostname,
             "PATH_INFO": url_parts.path,
             "QUERY_STRING": url_parts.query,
+            "REMOTE_ADDR": self.remote_addr,
+            "REMOTE_HOST": self.remote_addr,
             "SERVER_NAME": self.server.hostname,
             "SERVER_PORT": str(self.server.port),
             "SERVER_PROTOCOL": "GEMINI",
             "SERVER_SOFTWARE": f"jetforce/{__version__}",
-            "REMOTE_ADDR": self.remote_addr,
-            "REMOTE_HOST": self.remote_addr,
-            "REMOTE_USER": "",
-            "REQUEST_METHOD": "GET",
         }
+
+        if self.client_cert:
+            subject = dict(x[0] for x in self.client_cert["subject"])
+            environ.update(
+                {"AUTH_TYPE": "CERTIFICATE", "REMOTE_USER": subject["commonName"]}
+            )
+
+        return environ
 
     async def parse_header(self) -> None:
         """
