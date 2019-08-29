@@ -27,11 +27,13 @@ def proxy_request(request):
 
 if __name__ == "__main__":
     args = jetforce.command_line_parser().parse_args()
+    ssl_context = jetforce.make_ssl_context(
+        args.hostname, args.certfile, args.keyfile, args.cafile, args.capath
+    )
     server = jetforce.GeminiServer(
         host=args.host,
         port=args.port,
-        certfile=args.certfile,
-        keyfile=args.keyfile,
+        ssl_context=ssl_context,
         hostname=args.hostname,
         app=app,
     )
