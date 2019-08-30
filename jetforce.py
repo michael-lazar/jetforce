@@ -21,7 +21,7 @@ import urllib.parse
 if sys.version_info < (3, 7):
     sys.exit("Fatal Error: jetforce requires Python 3.7+")
 
-__version__ = "0.0.6"
+__version__ = "0.0.7"
 __title__ = "Jetforce Gemini Server"
 __author__ = "Michael Lazar"
 __license__ = "GNU General Public License v3.0"
