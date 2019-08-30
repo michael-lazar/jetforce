@@ -81,7 +81,7 @@ $ openssl req -newkey rsa:2048 -nodes -keyout {hostname}.key \
 ```
 
 There are currently no plans to support transient self-signed client certificates.
-This is due to a techinical limitation of the python standard library's ``ssl``
+This is due to a technical limitation of the python standard library's ``ssl``
 module, which is described in detail 
 [here](https://portal.mozz.us/?url=gemini%3A%2F%2Fmozz.us%2Fjournal%2F2019-08-21.txt).
 
@@ -114,7 +114,7 @@ specification. Because Gemini is a less complex than HTTP, the CGI interface is
 also inherently easier and more straightforward to use.
 
 The main difference in this implementation is that the CGI script is expected
-to write the entire gemini response *verbetim* to stdout:
+to write the entire gemini response *verbatim* to stdout:
 
 1. The status code and meta on the first line
 2. Any additional response body on subsequent lines
