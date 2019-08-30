@@ -125,10 +125,10 @@ expected to write the entire gemini response *verbatim* to stdout:
 1. The status code and meta on the first line
 2. The optional response body on subsequent lines
 
-Unlike CGI v1.1, there are no headers or other special values that the script
-can respond with.
+The script is not allowed to respond with HTTP headers like ``Content-Type``,
+or other special CGI headers like internal redirects.
 
-Some of the HTTP-specific environment variables like ``REQUEST_METHOD`` are not
+Some of the HTTP specific environment variables like ``REQUEST_METHOD`` are not
 used, because they don't make sense in the context of a Gemini request.
 
 ## License
