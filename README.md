@@ -126,7 +126,7 @@ expected to write the entire gemini response *verbatim* to stdout:
 2. The optional response body on subsequent lines
 
 The script is not allowed to respond with HTTP headers like ``Content-Type``,
-or other special CGI headers like internal redirects.
+or any other special CGI headers like internal file redirects.
 
 Some of the HTTP specific environment variables like ``REQUEST_METHOD`` are not
 used, because they don't make sense in the context of a Gemini request.
