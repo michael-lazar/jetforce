@@ -235,20 +235,23 @@ class StaticDirectoryApplication(JetforceApplication):
             if is_cgi and is_exe:
                 return self.run_cgi_script(filesystem_path, request.environ)
 
-            else:
-                mimetype = self.guess_mimetype(filesystem_path.name)
-                generator = self.load_file(filesystem_path)
-                return Response(Status.SUCCESS, mimetype, generator)
+            mimetype = self.guess_mimetype(filesystem_path.name)
+            generator = self.load_file(filesystem_path)
+            return Response(Status.SUCCESS, mimetype, generator)
 
         elif filesystem_path.is_dir():
+            if request.path and not request.path.endswith("/"):
+                url_parts = urllib.parse.urlparse(request.url)
+                url_parts = url_parts._replace(path=request.path + "/")
+                return Response(Status.REDIRECT_PERMANENT, url_parts.geturl())
+
             index_file = filesystem_path / self.index_file
             if index_file.exists():
                 generator = self.load_file(index_file)
                 return Response(Status.SUCCESS, "text/gemini", generator)
 
-            else:
-                generator = self.list_directory(url_path, filesystem_path)
-                return Response(Status.SUCCESS, "text/gemini", generator)
+            generator = self.list_directory(url_path, filesystem_path)
+            return Response(Status.SUCCESS, "text/gemini", generator)
 
         else:
             return Response(Status.NOT_FOUND, "Not Found")
@@ -310,7 +313,7 @@ class StaticDirectoryApplication(JetforceApplication):
                 # Skip hidden and temporary files for security reasons
                 continue
             elif file.is_dir():
-                yield f"=>/{url_path / file.name}\t{file.name}/\r\n".encode()
+                yield f"=>/{url_path / file.name}/\t{file.name}/\r\n".encode()
             else:
                 yield f"=>/{url_path / file.name}\t{file.name}\r\n".encode()
 

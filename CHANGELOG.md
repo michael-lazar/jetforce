@@ -1,5 +1,10 @@
 # Jetforce Changelog
 
+### Unreleased
+
+- Force URLs to always end in trailing slashes when serving a directory. This
+  reduces duplicate selectors and makes resolving relative links more reliable.
+
 ### v0.0.7 (2019-08-30)
 
 - Added support for a primitive version of CGI scripting.
