@@ -2,14 +2,17 @@
 
 ### Unreleased
 
+- The server will now return a redirect if a directory is requested but the URL
+  does not end in a trailing slash. This reduces duplicate selectors and makes
+  it easier for clients to resolve relative links.
+- Added a ``-V`` / ``--version`` argument to display the version and exit.
 - The server now returns a ``50 PERMENANT FAILURE`` response when a client
   requests a URL that does not exist on the server. This change is motivated by
-  mailing list discussions that a ``51 NOT FOUND`` status may not be
-  appropriate if the scheme/host component of the URL does not match the server.
-- Added ``-V`` / ``--version`` argument to display the version and exit.
-- Force URLs to always end in trailing slashes when serving a directory. This
-  reduces duplicate selectors and makes resolving relative links more reliable.
-
+  the suggestion that a ``51 NOT FOUND`` status might not always be appropriate
+  if the scheme/host component of the URL does not match.
+- Timestamps in log messages are now displayed to the server's local timezone.
+  The UTC offset is included in the timestamp as "+HHMM" to prevent ambiguity.
+  
 ### v0.0.7 (2019-08-30)
 
 - Added support for a primitive version of CGI scripting.

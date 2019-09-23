@@ -14,6 +14,7 @@ import ssl
 import subprocess
 import sys
 import tempfile
+import time
 import typing
 import urllib.parse
 
@@ -339,12 +340,14 @@ class GeminiRequestHandler:
     removed or slimmed-down.
     """
 
+    TIMESTAMP_FORMAT = "%d/%b/%Y:%H:%M:%S %z"
+
     def __init__(self, server: GeminiServer, app: typing.Callable) -> None:
         self.server = server
         self.app = app
         self.reader: typing.Optional[asyncio.StreamReader] = None
         self.writer: typing.Optional[asyncio.StreamWriter] = None
-        self.received_timestamp: typing.Optional[datetime.datetime] = None
+        self.received_timestamp: typing.Optional[time.struct_time] = None
         self.remote_addr: typing.Optional[str] = None
         self.client_cert: typing.Optional[dict] = None
         self.url: typing.Optional[urllib.parse.ParseResult] = None
@@ -367,7 +370,7 @@ class GeminiRequestHandler:
         self.writer = writer
         self.remote_addr = writer.get_extra_info("peername")[0]
         self.client_cert = writer.get_extra_info("peercert")
-        self.received_timestamp = datetime.datetime.utcnow()
+        self.received_timestamp = time.localtime()
 
         try:
             await self.parse_header()
@@ -481,7 +484,7 @@ class GeminiRequestHandler:
         """
         self.server.log_message(
             f"{self.remote_addr} "
-            f"[{self.received_timestamp:%d/%b/%Y:%H:%M:%S +0000}] "
+            f"[{time.strftime(self.TIMESTAMP_FORMAT, self.received_timestamp)}] "
             f'"{self.url}" '
             f"{self.status} "
             f'"{self.meta}" '
