@@ -66,12 +66,12 @@ optional arguments:
                        page (default: index.gmi)
 ```
 
-### Hostname
+### Setting the ``hostname``
 
 Because the gemini protocol sends the whole URL in the request, it's necessary
 to declare the hostname that your server is expecting to receive traffic under.
 Jetforce will reject any request that doesn't match your hostname with a status
-of ``Proxy Request Refused``.
+of ``50 PERMENANT FAILURE``.
 
 ### TLS Certificates
 
@@ -116,21 +116,35 @@ Jetforce will serve static files in the ``/var/gemini/`` directory:
 
 ### CGI Scripts
 
-Jetforce implements a slightly modified version of the official CGI
-specification. Because Gemini is a less complex than HTTP, the CGI interface is
-also inherently easier and more straightforward to use.
+Jetforce implements a simplified version of the CGI specification. It doesn't
+conform to the CGI [RFC 3875](https://tools.ietf.org/html/rfc3875)
+specification, but it gets the job done for Gemini.
 
-The main difference in jetforce's implementation is that the CGI script is
-expected to write the entire gemini response *verbatim* to stdout:
+Any executable file placed in the server's ``cgi-bin/`` directory will be
+considered a CGI script. When a CGI script is requested by a gemini client,
+the jetforce server will execute the script and pass in information about the
+request using environment variables:
 
-1. The status code and meta on the first line
-2. The optional response body on subsequent lines
+| Environment Variable | Example Value |
+| --- | --- |
+| GATEWAY_INTERFACE | GCI/1.1 |
+| GEMINI_URL | gemini://mozz.us/cgi-bin/debug.cgi?foobar
+| HOSTNAME | mozz.us |
+| PATH_INFO | /cgi-bin/debug.cgi |
+| QUERY_STRING | foobar |
+| REMOTE_ADDR | 10.10.0.2 |
+| REMOTE_HOST | 10.10.0.2 |
+| SCRIPT_NAME | /usr/local/www/mozz/gemini/cgi-bin/debug.cgi |
+| SERVER_NAME | mozz.us |
+| SERVER_PORT | 1965 |
+| SERVER_PROTOCOL | GEMINI |
+| SERVER_SOFTWARE | jetforce/0.0.7 |
 
-The script is not allowed to respond with HTTP headers like ``Content-Type``,
-or any other special CGI headers like internal file redirects.
-
-Some of the HTTP specific environment variables like ``REQUEST_METHOD`` are not
-used, because they don't make sense in the context of a Gemini request.
+The CGI script must then write the entire gemini response to the standard
+output stream. This includes the status code and meta string on the first
+line, and the optional response body on subsequent lines. The CGI script should
+not attempt to output the special header lines that are defined in the CGI
+specification and geared towards HTTP servers.
 
 ## License
 
