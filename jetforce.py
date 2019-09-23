@@ -193,9 +193,9 @@ class StaticDirectoryApplication(JetforceApplication):
     """
     Serve a static directory over Gemini.
 
-    If a directory contains a hidden file with the name ".gemini", that file
-    will be returned when the directory path is requested. Otherwise, a
-    directory listing will be auto-generated.
+    If a directory contains a file with the name "index.gmi", that file will
+    be returned when the directory path is requested. Otherwise, a directory
+    listing will be auto-generated. 
     """
 
     def __init__(
