@@ -24,7 +24,7 @@ if sys.version_info < (3, 7):
 __version__ = "0.1.0"
 __title__ = "Jetforce Gemini Server"
 __author__ = "Michael Lazar"
-__license__ = "GNU General Public License v3.0"
+__license__ = "Floodgap Free Software License"
 __copyright__ = "(c) 2019 Michael Lazar"
 
 ABOUT = fr"""
