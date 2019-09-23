@@ -70,9 +70,9 @@ optional arguments:
 
 The server's hostname should be set to the *DNS* name that you expect to
 receive traffic from. For example, if your jetforce server is running on
-*"gemini://cats.com"*, you should set the hostname to *"cat.com"*. Any URLs
+"gemini://cats.com", you should set the hostname to "cat.com". Any URLs
 that do not match this hostname will be refused by the server, including
-URLs that use a direct IP address such as *"gemini://174.138.124.169"*.
+URLs that use a direct IP address such as "gemini://174.138.124.169".
 
 ### TLS Certificates
 
