@@ -160,7 +160,7 @@ class JetforceApplication:
                         yield from response.body
                 break
         else:
-            send_status(Status.NOT_FOUND, "Not Found")
+            send_status(Status.PERMANENT_FAILURE, "URL not found on server")
 
     def route(
         self,

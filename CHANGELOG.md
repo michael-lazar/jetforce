@@ -2,7 +2,10 @@
 
 ### Unreleased
 
-- 
+- The server now returns a ``50 PERMENANT FAILURE`` response when a client
+  requests a URL that does not exist on the server. This change is motivated by
+  mailing list discussions that a ``51 NOT FOUND`` status may not be
+  appropriate if the scheme/host component of the URL does not match the server.
 - Added ``-V`` / ``--version`` argument to display the version and exit.
 - Force URLs to always end in trailing slashes when serving a directory. This
   reduces duplicate selectors and makes resolving relative links more reliable.
