@@ -195,7 +195,7 @@ class StaticDirectoryApplication(JetforceApplication):
 
     If a directory contains a file with the name "index.gmi", that file will
     be returned when the directory path is requested. Otherwise, a directory
-    listing will be auto-generated. 
+    listing will be auto-generated.
     """
 
     def __init__(
@@ -341,19 +341,21 @@ class GeminiRequestHandler:
 
     TIMESTAMP_FORMAT = "%d/%b/%Y:%H:%M:%S %z"
 
+    reader: asyncio.StreamReader
+    writer: asyncio.StreamWriter
+    received_timestamp: time.struct_time
+    remote_addr: str
+    client_crt: dict
+    url: str
+    status: int
+    meta: str
+    response_buffer: str
+    response_size: int
+
     def __init__(self, server: GeminiServer, app: typing.Callable) -> None:
         self.server = server
         self.app = app
-        self.reader: typing.Optional[asyncio.StreamReader] = None
-        self.writer: typing.Optional[asyncio.StreamWriter] = None
-        self.received_timestamp: typing.Optional[time.struct_time] = None
-        self.remote_addr: typing.Optional[str] = None
-        self.client_cert: typing.Optional[dict] = None
-        self.url: typing.Optional[urllib.parse.ParseResult] = None
-        self.status: typing.Optional[int] = None
-        self.meta: typing.Optional[str] = None
-        self.response_buffer: typing.Optional[str] = None
-        self.response_size: int = 0
+        self.response_size = 0
 
     async def handle(
         self, reader: asyncio.StreamReader, writer: asyncio.StreamWriter
@@ -467,7 +469,7 @@ class GeminiRequestHandler:
             self.response_size += len(data)
             self.writer.write(data)
             await self.writer.drain()
-        self.response_buffer = None
+        self.response_buffer = ""
 
     async def close_connection(self) -> None:
         """
@@ -522,9 +524,12 @@ class GeminiServer:
             self.accept_connection, self.host, self.port, ssl=self.ssl_context
         )
 
-        socket_info = server.sockets[0].getsockname()
+        if server.sockets:
+            socket_host, socket_port = server.sockets[0].getsockname()
+        else:
+            socket_host, socket_port = None, None
         self.log_message(f"Server hostname is {self.hostname}")
-        self.log_message(f"Listening on {socket_info[0]}:{socket_info[1]}")
+        self.log_message(f"Listening on {socket_host}:{socket_port}")
 
         async with server:
             await server.serve_forever()
