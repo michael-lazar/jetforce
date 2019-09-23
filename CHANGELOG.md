@@ -2,6 +2,8 @@
 
 ### Unreleased
 
+- 
+- Added ``-V`` / ``--version`` argument to display the version and exit.
 - Force URLs to always end in trailing slashes when serving a directory. This
   reduces duplicate selectors and makes resolving relative links more reliable.
 

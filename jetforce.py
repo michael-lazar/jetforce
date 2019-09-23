@@ -616,6 +616,9 @@ def command_line_parser() -> argparse.ArgumentParser:
         description="An Experimental Gemini Protocol Server",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
+    parser.add_argument(
+        "-V", "--version", action="version", version="jetforce " + __version__
+    )
     parser.add_argument("--host", help="Server address to bind to", default="127.0.0.1")
     parser.add_argument("--port", help="Server port to bind to", type=int, default=1965)
     parser.add_argument("--hostname", help="Server hostname", default="localhost")
