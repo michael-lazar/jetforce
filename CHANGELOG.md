@@ -1,17 +1,15 @@
 # Jetforce Changelog
 
-### Unreleased
+### v0.1.0 (2019-09-22)
 
 - The server will now return a redirect if a directory is requested but the URL
-  does not end in a trailing slash. This reduces duplicate selectors and makes
-  it easier for clients to resolve relative links.
+  does not end in a trailing slash. This is intended to reduce duplicate
+  selectors and make it easier for clients to resolve relative links.
 - Added a ``-V`` / ``--version`` argument to display the version and exit.
-- The server now returns a ``50 PERMENANT FAILURE`` response when a client
-  requests a URL that does not exist on the server. This change is motivated by
-  the suggestion that a ``51 NOT FOUND`` status might not always be appropriate
-  if the scheme/host component of the URL does not match.
-- Timestamps in log messages are now displayed to the server's local timezone.
-  The UTC offset is included in the timestamp as "+HHMM" to prevent ambiguity.
+- The server now returns an error code of ``50 PERMENANT FAILURE`` by default
+  if the URL does not match the server's scheme or hostname.
+- Timestamps in log messages are now displayed in the server's local timezone.
+  As before, the UTC offset is included as "+HHMM" to avoid ambiguity.
   
 ### v0.0.7 (2019-08-30)
 
