@@ -123,8 +123,8 @@ specification for CGI, but it gets the job done for the purposes of Gemini.
 
 Any executable file placed in the server's ``cgi-bin/`` directory will be
 considered a CGI script. When a CGI script is requested by a gemini client,
-the jetforce server will execute the script and pass in information about the
-request using environment variables:
+the jetforce server will execute the script and pass along information about
+the request using environment variables:
 
 | Variable Name | Example |
 | --- | --- |
