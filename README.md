@@ -201,6 +201,13 @@ And I can view the server logs using
 journalctl -u jetforce -f
 ```
 
+*WARNING*
+
+The internet can be a scary place. You (yes you!) are responsible for securing your
+server and setting up the appropriate access permissions. This likely means *not*
+running jetforce as the root user. Security best practices are outside of the scope
+of this README and depends on your individual threat model.
+
 
 ## License
 
