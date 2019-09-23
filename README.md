@@ -68,10 +68,11 @@ optional arguments:
 
 ### Setting the ``hostname``
 
-Because the gemini protocol sends the whole URL in the request, it's necessary
-to declare the hostname that your server is expecting to receive traffic under.
-Jetforce will reject any request that doesn't match your hostname with a status
-of ``50 PERMENANT FAILURE``.
+The server's hostname should be set to the *DNS* name that you expect to
+receive traffic from. For example, if your jetforce server is running on
+"gemini://cats.com", you should set the hostname to "cat.com". Any URLs that
+do not match this hostname will be refused by the server, including URLs that
+use an external IP address such as "gemini://174.138.124.169".
 
 ### TLS Certificates
 
@@ -125,7 +126,7 @@ considered a CGI script. When a CGI script is requested by a gemini client,
 the jetforce server will execute the script and pass in information about the
 request using environment variables:
 
-| Environment Variable | Example Value |
+| Variable Name | Example |
 | --- | --- |
 | GATEWAY_INTERFACE | GCI/1.1 |
 | GEMINI_URL | gemini://mozz.us/cgi-bin/debug.cgi?foobar
