@@ -117,9 +117,9 @@ Jetforce will serve static files in the ``/var/gemini/`` directory:
 
 ### CGI Scripts
 
-Jetforce implements a simplified version of the CGI specification. It doesn't
-conform to the CGI [RFC 3875](https://tools.ietf.org/html/rfc3875)
-specification, but it gets the job done for Gemini.
+Jetforce supports a simplified version of CGI scripting. It doesn't
+exactly follow the [RFC 3875](https://tools.ietf.org/html/rfc3875)
+specification for CGI, but it gets the job done for Gemini.
 
 Any executable file placed in the server's ``cgi-bin/`` directory will be
 considered a CGI script. When a CGI script is requested by a gemini client,
