@@ -39,7 +39,7 @@ Use the ``--help`` flag to view command-line options:
 
 ```bash
 $ jetforce --help
-usage: jetforce [-h] [--host HOST] [--port PORT] [--hostname HOSTNAME]
+usage: jetforce [-h] [-V] [--host HOST] [--port PORT] [--hostname HOSTNAME]
                 [--tls-certfile FILE] [--tls-keyfile FILE] [--tls-cafile FILE]
                 [--tls-capath DIR] [--dir DIR] [--cgi-dir DIR]
                 [--index-file FILE]
@@ -48,6 +48,7 @@ An Experimental Gemini Protocol Server
 
 optional arguments:
   -h, --help           show this help message and exit
+  -V, --version        show program's version number and exit
   --host HOST          Server address to bind to (default: 127.0.0.1)
   --port PORT          Server port to bind to (default: 1965)
   --hostname HOSTNAME  Server hostname (default: localhost)
