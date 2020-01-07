@@ -18,11 +18,12 @@ setuptools.setup(
     description="An Experimental Gemini Server",
     long_description=long_description(),
     long_description_content_type="text/markdown",
-    py_modules=["jetforce", "jetforce_client"],
+    py_modules=["jetforce", "jetforce_client", "jetforce_diagnostics"],
     entry_points={
         "console_scripts": [
             "jetforce=jetforce:run_server",
             "jetforce-client=jetforce_client:run_client",
+            "jetforce-diagnostics=jetforce_diagnostics:run",
         ]
     },
     python_requires=">=3.7",
