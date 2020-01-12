@@ -190,6 +190,22 @@ class BaseCheck:
         style = "success" if response.status.startswith("5") else "failure"
         log(f"Received status of {response.status!r}", style)
 
+    def assert_proxy_refused(self, response: GeminiResponse) -> None:
+        """
+        Helper method to assert that a response returned a permanent.
+        """
+        log("Status should return a failure code (53 PROXY REQUEST REFUSED)")
+        style = "success" if response.status == "53" else "failure"
+        log(f"Received status of {response.status!r}", style)
+
+    def assert_bad_request(self, response: GeminiResponse) -> None:
+        """
+        Helper method to assert that a response returned a permanent.
+        """
+        log("Status should return a failure code (59 BAD REQUEST)")
+        style = "success" if response.status == "59" else "failure"
+        log(f"Received status of {response.status!r}", style)
+
 
 class IPv4Address(BaseCheck):
     """Establish a connection over an IPv4 address"""
@@ -542,7 +558,7 @@ class URLWrongPort(BaseCheck):
     def check(self) -> None:
         url = f"gemini://{self.args.host}:443/\r\n"
         response = self.make_request(url)
-        self.assert_permanent_failure(response)
+        self.assert_proxy_refused(response)
 
 
 class URLWrongHost(BaseCheck):
@@ -551,7 +567,7 @@ class URLWrongHost(BaseCheck):
     def check(self) -> None:
         url = f"gemini://wikipedia.org/\r\n"
         response = self.make_request(url)
-        self.assert_permanent_failure(response)
+        self.assert_proxy_refused(response)
 
 
 class URLSchemeHTTP(BaseCheck):
@@ -560,7 +576,7 @@ class URLSchemeHTTP(BaseCheck):
     def check(self) -> None:
         url = f"http://{self.netloc}/\r\n"
         response = self.make_request(url)
-        self.assert_permanent_failure(response)
+        self.assert_proxy_refused(response)
 
 
 class URLSchemeHTTPS(BaseCheck):
@@ -569,7 +585,7 @@ class URLSchemeHTTPS(BaseCheck):
     def check(self) -> None:
         url = f"https://{self.netloc}/\r\n"
         response = self.make_request(url)
-        self.assert_permanent_failure(response)
+        self.assert_proxy_refused(response)
 
 
 class URLSchemeGopher(BaseCheck):
@@ -578,7 +594,7 @@ class URLSchemeGopher(BaseCheck):
     def check(self) -> None:
         url = f"gopher://{self.netloc}/\r\n"
         response = self.make_request(url)
-        self.assert_permanent_failure(response)
+        self.assert_proxy_refused(response)
 
 
 class URLEmpty(BaseCheck):
@@ -587,7 +603,7 @@ class URLEmpty(BaseCheck):
     def check(self) -> None:
         url = f"\r\n"
         response = self.make_request(url)
-        self.assert_permanent_failure(response)
+        self.assert_bad_request(response)
 
 
 class URLRelative(BaseCheck):
@@ -596,7 +612,16 @@ class URLRelative(BaseCheck):
     def check(self) -> None:
         url = f"/\r\n"
         response = self.make_request(url)
-        self.assert_permanent_failure(response)
+        self.assert_bad_request(response)
+
+
+class URLInvalid(BaseCheck):
+    """Random text should not be accepted by the server"""
+
+    def check(self) -> None:
+        url = f"Hello Gemini!\r\n"
+        response = self.make_request(url)
+        self.assert_bad_request(response)
 
 
 class URLDotEscape(BaseCheck):
@@ -635,6 +660,7 @@ CHECKS = [
     URLSchemeGopher,
     URLEmpty,
     URLRelative,
+    URLInvalid,
     URLDotEscape,
 ]
 
