@@ -310,8 +310,8 @@ class StaticDirectoryApplication(JetforceApplication):
             yield f"=>/{url_path.parent}\t..\r\n".encode()
 
         for file in sorted(filesystem_path.iterdir()):
-            if file.name.startswith((".", "~")):
-                # Skip hidden and temporary files for security reasons
+            if file.name.startswith("."):
+                # Skip hidden directories/files that may contain sensitive info
                 continue
             elif file.is_dir():
                 yield f"=>/{url_path / file.name}/\t{file.name}/\r\n".encode()
