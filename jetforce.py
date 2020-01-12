@@ -253,6 +253,14 @@ class StaticDirectoryApplication(JetforceApplication):
 
         filesystem_path = self.root / filename
 
+        try:
+            if not os.access(filesystem_path, os.R_OK):
+                # File not readable
+                return Response(Status.NOT_FOUND, "Not Found")
+        except OSError:
+            # Filename too large, etc.
+            return Response(Status.NOT_FOUND, "Not Found")
+
         if filesystem_path.is_file():
             is_cgi = str(filename).startswith(self.cgi_directory)
             is_exe = os.access(filesystem_path, os.X_OK)
@@ -432,8 +440,8 @@ class GeminiRequestHandler:
             app = self.app(environ, self.write_status)
             for data in app:
                 await self.write_body(data)
-        except Exception as e:
-            self.write_status(Status.CGI_ERROR, str(e))
+        except Exception:
+            self.write_status(Status.CGI_ERROR, "An unexpected error occurred")
             raise
         finally:
             await self.close_connection()
