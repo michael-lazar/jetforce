@@ -118,7 +118,9 @@ class RoutePattern:
 
     path: str = ""
     scheme: str = "gemini"
+
     strict_hostname: bool = True
+    strict_port: bool = True
     strict_trailing_slash: bool = False
 
     def match(self, request: Request) -> bool:
@@ -126,9 +128,13 @@ class RoutePattern:
         Check if the given request URL matches this route pattern.
         """
         server_hostname = request.environ["HOSTNAME"]
+        server_port = int(request.environ["SERVER_PORT"])
 
         if self.strict_hostname and request.hostname != server_hostname:
             return False
+        if self.strict_port and request.port is not None:
+            if request.port != server_port:
+                return False
         if self.scheme and self.scheme != request.scheme:
             return False
 
