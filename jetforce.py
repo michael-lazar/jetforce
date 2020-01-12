@@ -161,18 +161,18 @@ class JetforceApplication:
 
         for route_pattern, callback in self.routes[::-1]:
             if route_pattern.match(request):
-                response = callback(request)
-                send_status(response.status, response.meta)
-                if response.body:
-                    if isinstance(response.body, bytes):
-                        yield response.body
-                    elif isinstance(response.body, str):
-                        yield response.body.encode()
-                    else:
-                        yield from response.body
                 break
         else:
-            send_status(Status.PERMANENT_FAILURE, "Not Found")
+            callback = self.default_callback
+
+        response = callback(request)
+        send_status(response.status, response.meta)
+        if isinstance(response.body, bytes):
+            yield response.body
+        elif isinstance(response.body, str):
+            yield response.body.encode()
+        elif response.body:
+            yield from response.body
 
     def route(
         self,
@@ -199,6 +199,12 @@ class JetforceApplication:
             return func
 
         return wrap
+
+    def default_callback(self, request: Request) -> Response:
+        """
+        Set the error response based on the URL type.
+        """
+        return Response(Status.PERMANENT_FAILURE, "Not Found")
 
 
 class StaticDirectoryApplication(JetforceApplication):
@@ -338,6 +344,29 @@ class StaticDirectoryApplication(JetforceApplication):
             return f"{mime}; charset={encoding}"
         else:
             return mime or "text/plain"
+
+    def default_callback(self, request: Request) -> Response:
+        """
+        Since the StaticDirectoryApplication only serves gemini URLs, return
+        a proxy request refused for suspicious URLs.
+        """
+        if request.scheme != "gemini":
+            return Response(
+                Status.PROXY_REQUEST_REFUSED,
+                "This server does not allow proxy requests",
+            )
+        elif request.hostname != request.environ["HOSTNAME"]:
+            return Response(
+                Status.PROXY_REQUEST_REFUSED,
+                "This server does not allow proxy requests",
+            )
+        elif request.port and request.port != request.environ["SERVER_PORT"]:
+            return Response(
+                Status.PROXY_REQUEST_REFUSED,
+                "This server does not allow proxy requests",
+            )
+        else:
+            return Response(Status.NOT_FOUND, "Not Found")
 
 
 class GeminiRequestHandler:
