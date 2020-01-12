@@ -82,8 +82,15 @@ class Request:
         self.url = environ["GEMINI_URL"]
 
         url_parts = urllib.parse.urlparse(self.url)
-        # If scheme is missing, infer it as gemini://
-        self.scheme = url_parts.scheme or "gemini"
+        if not url_parts.hostname:
+            raise ValueError("URL must contain a `hostname` part")
+
+        if not url_parts.scheme:
+            # If scheme is missing, infer it to be gemini://
+            self.scheme = "gemini"
+        else:
+            self.scheme = url_parts.scheme
+
         self.hostname = url_parts.hostname
         self.port = url_parts.port
         self.path = url_parts.path
@@ -146,7 +153,12 @@ class JetforceApplication:
     def __call__(
         self, environ: dict, send_status: typing.Callable
     ) -> typing.Iterator[bytes]:
-        request = Request(environ)
+        try:
+            request = Request(environ)
+        except Exception:
+            send_status(Status.BAD_REQUEST, "Unrecognized URL format")
+            return
+
         for route_pattern, callback in self.routes[::-1]:
             if route_pattern.match(request):
                 response = callback(request)
@@ -160,7 +172,7 @@ class JetforceApplication:
                         yield from response.body
                 break
         else:
-            send_status(Status.PERMANENT_FAILURE, "Unrecognized URL")
+            send_status(Status.PERMANENT_FAILURE, "Not Found")
 
     def route(
         self,
