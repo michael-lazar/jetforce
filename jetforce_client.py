@@ -1,4 +1,4 @@
-#!/usr/bin/env python3.7
+#!/usr/bin/env python3
 """
 A dead-simple gemini client intended to be used for server development and testing.
 

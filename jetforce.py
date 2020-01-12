@@ -1,4 +1,4 @@
-#!/usr/bin/env python3.7
+#!/usr/bin/env python3
 from __future__ import annotations
 
 import argparse
@@ -17,7 +17,6 @@ import time
 import typing
 import urllib.parse
 
-# Fail early to avoid crashing with some obscure error
 if sys.version_info < (3, 7):
     sys.exit("Fatal Error: jetforce requires Python 3.7+")
 
@@ -25,7 +24,7 @@ __version__ = "0.1.0"
 __title__ = "Jetforce Gemini Server"
 __author__ = "Michael Lazar"
 __license__ = "Floodgap Free Software License"
-__copyright__ = "(c) 2019 Michael Lazar"
+__copyright__ = "(c) 2020 Michael Lazar"
 
 ABOUT = fr"""
 You are now riding on...
