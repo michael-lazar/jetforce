@@ -241,7 +241,7 @@ class StaticDirectoryApplication(JetforceApplication):
             return Response(Status.SUCCESS, mimetype, generator)
 
         elif filesystem_path.is_dir():
-            if request.path and not request.path.endswith("/"):
+            if not request.path.endswith("/"):
                 url_parts = urllib.parse.urlparse(request.url)
                 url_parts = url_parts._replace(path=request.path + "/")
                 return Response(Status.REDIRECT_PERMANENT, url_parts.geturl())
@@ -346,7 +346,7 @@ class GeminiRequestHandler:
     writer: asyncio.StreamWriter
     received_timestamp: time.struct_time
     remote_addr: str
-    client_crt: dict
+    client_cert: dict
     url: str
     status: int
     meta: str
