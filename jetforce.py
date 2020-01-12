@@ -83,7 +83,8 @@ class Request:
         self.url = environ["GEMINI_URL"]
 
         url_parts = urllib.parse.urlparse(self.url)
-        self.scheme = url_parts.scheme
+        # If scheme is missing, infer it as gemini://
+        self.scheme = url_parts.scheme or "gemini"
         self.hostname = url_parts.hostname
         self.port = url_parts.port
         self.path = url_parts.path
