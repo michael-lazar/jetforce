@@ -76,7 +76,7 @@ URLs that use a direct IP address such as "gemini://174.138.124.169".
 
 ### Setting the ``host``
 
-The server's host should be set to the local socket address that you want to
+The server's host should be set to the local socket that you want to
 bind to:
 
 - ``--host "127.0.0.1"`` - Accept local connections only
