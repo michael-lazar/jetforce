@@ -1,5 +1,35 @@
 # Jetforce Changelog
 
+### Unreleased
+
+#### Features
+
+- Added support for python 3.8. 
+- Added a new server diagnostics tool ``jetforce-diagnostics``.
+- Added ability to binding to IPv6 addresses (if supported by your OS):
+  - For IPv4        : --host "0.0.0.0"
+  - For IPv6        : --host "::"
+  - For IPv4 + IPv6 : --host ""
+- Various improvements have been made to the project documentation.
+
+#### Bugfixes
+
+- A URL missing a scheme will now be interpreted as "gemini://".
+- A request to the root URL without a trailing slash will now return a 31
+  permanent redirect.
+- Requests containing an invalid or unparsable URL format will now return a
+  status of 59 Bad Request instead of 50 Permanent Failure.
+- Files starting with ``~`` will now be included in directory listings. 
+- Requests containing an incorrect scheme, hostname, or port will now return a
+  53 Proxy Refused instead of a 50 Permanent Failure.
+- The port number in the URL (if provided) is now validated against the
+  server's port number. 
+- OS errors when attempting to read a file will return a 51 NOT FOUND status
+  instead of a 42 CGI Error. This is a precaution to prevent leaking sensitive
+  information about the server's filesystem.
+- For security, unhandled exceptions now display a generic error message
+  instead of the specific exception string.
+
 ### v0.1.0 (2019-09-22)
 
 - The server will now return a redirect if a directory is requested but the URL
