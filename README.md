@@ -74,6 +74,16 @@ receive traffic from. For example, if your jetforce server is running on
 that do not match this hostname will be refused by the server, including
 URLs that use a direct IP address such as "gemini://174.138.124.169".
 
+### Setting the ``host``
+
+The server's host should be set to the local socket address that you want to
+bind to:
+
+- ``--host 127.0.0.1`` - Accept local connections only
+- ``--host 0.0.0.0`` - Accept remote connections over IPv4
+- ``--host ::`` - Accept remote connections over IPv6
+- ``--host ""`` - Accept remote connections over any interface (IPv4 + IPv6)
+
 ### TLS Certificates
 
 The gemini specification *requires* that all connections be sent over TLS.

@@ -9,6 +9,7 @@ import mimetypes
 import os
 import pathlib
 import re
+import socket
 import ssl
 import subprocess
 import sys
@@ -579,12 +580,13 @@ class GeminiServer:
             self.accept_connection, self.host, self.port, ssl=self.ssl_context
         )
 
-        if server.sockets:
-            socket_host, socket_port = server.sockets[0].getsockname()
-        else:
-            socket_host, socket_port = None, None
         self.log_message(f"Server hostname is {self.hostname}")
-        self.log_message(f"Listening on {socket_host}:{socket_port}")
+        for sock in server.sockets:
+            sock_ip, sock_port, *_ = sock.getsockname()
+            if sock.family == socket.AF_INET:
+                self.log_message(f"Listening on {sock_ip}:{sock_port}")
+            else:
+                self.log_message(f"Listening on [{sock_ip}]:{sock_port}")
 
         async with server:
             await server.serve_forever()
