@@ -79,9 +79,9 @@ URLs that use a direct IP address such as "gemini://174.138.124.169".
 The server's host should be set to the local socket address that you want to
 bind to:
 
-- ``--host 127.0.0.1`` - Accept local connections only
-- ``--host 0.0.0.0`` - Accept remote connections over IPv4
-- ``--host ::`` - Accept remote connections over IPv6
+- ``--host "127.0.0.1"`` - Accept local connections only
+- ``--host "0.0.0.0"`` - Accept remote connections over IPv4
+- ``--host "::"`` - Accept remote connections over IPv6
 - ``--host ""`` - Accept remote connections over any interface (IPv4 + IPv6)
 
 ### TLS Certificates
