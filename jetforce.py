@@ -1,4 +1,37 @@
 #!/usr/bin/env python3
+"""
+Jetforce, an experimental Gemini server.
+
+Overview
+--------
+
+GeminiServer:
+    An asynchronous TCP server built on top of python's asyncio stream
+    abstraction. This is a lightweight class that accepts incoming requests,
+    logs them, and sends them to a configurable request handler to be processed.
+
+GeminiRequestHandler:
+    The request handler manages the life of a single gemini request. It exposes
+    a simplified interface to read the request URL and write the gemini response
+    status line and body to the socket. The request URL and other server
+    information is stuffed into an ``environ`` dictionary that encapsulates the
+    request at a low level. This dictionary, along with a callback to write the
+    response data, and passed to a configurable "application" function or class.
+
+JetforceApplication:
+    This is a base class for writing jetforce server applications. It doesn't
+    anything on its own, but it does provide a convenient interface to define
+    custom server endpoints using route decorators. If you want to utilize
+    jetforce as a library and write your own server in python, this is the class
+    that you want to extend. The examples/ directory contains some examples of
+    how to accomplish this.
+
+StaticDirectoryApplication:
+    This is a pre-built application that serves files from a static directory.
+    It provides an "out-of-the-box" gemini server without needing to write any
+    lines of code. This is what is invoked when you launch jetforce from the
+    command line.
+"""
 from __future__ import annotations
 
 import argparse
@@ -150,6 +183,13 @@ class RoutePattern:
 class JetforceApplication:
     """
     Base Jetforce application class with primitive URL routing.
+
+    This is a base class for writing jetforce server applications. It doesn't
+    anything on its own, but it does provide a convenient interface to define
+    custom server endpoints using route decorators. If you want to utilize
+    jetforce as a library and write your own server in python, this is the class
+    that you want to extend. The examples/ directory contains some examples of
+    how to accomplish this.
     """
 
     def __init__(self):
@@ -216,7 +256,12 @@ class JetforceApplication:
 
 class StaticDirectoryApplication(JetforceApplication):
     """
-    Serve a static directory over Gemini.
+    Application for serving static files & CGI over gemini.
+
+    This is a pre-built application that serves files from a static directory.
+    It provides an "out-of-the-box" gemini server without needing to write any
+    lines of code. This is what is invoked when you launch jetforce from the
+    command line.
 
     If a directory contains a file with the name "index.gmi", that file will
     be returned when the directory path is requested. Otherwise, a directory
@@ -388,11 +433,18 @@ class GeminiRequestHandler:
     """
     Handle a single Gemini Protocol TCP request.
 
+    The request handler manages the life of a single gemini request. It exposes
+    a simplified interface to read the request URL and write the gemini response
+    status line and body to the socket. The request URL and other server
+    information is stuffed into an ``environ`` dictionary that encapsulates the
+    request at a low level. This dictionary, along with a callback to write the
+    response data, and passed to a configurable "application" function or class.
+
     This design borrows heavily from the standard library's HTTP request
     handler (http.server.BaseHTTPRequestHandler). However, I did not make any
     attempts to directly emulate the existing conventions, because Gemini is an
     inherently simpler protocol than HTTP and much of the boilerplate could be
-    removed or slimmed-down.
+    removed.
     """
 
     TIMESTAMP_FORMAT = "%d/%b/%Y:%H:%M:%S %z"
@@ -551,7 +603,10 @@ class GeminiRequestHandler:
 
 class GeminiServer:
     """
-    An asynchronous TCP server that understands the Gemini Protocol.
+    An asynchronous TCP server that uses the asyncio stream abstraction.
+
+    This is a lightweight class that accepts incoming requests, logs them, and
+    sends them to a configurable request handler to be processed.
     """
 
     request_handler_class = GeminiRequestHandler
