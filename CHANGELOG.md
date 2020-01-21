@@ -2,6 +2,10 @@
 
 ### Unreleased
 
+N/A
+
+### v0.2.0 (2012-01-21)
+
 #### Features
 
 - Added support for python 3.8. 
