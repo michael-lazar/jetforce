@@ -108,12 +108,12 @@ connections will have the ``REMOTE_USER`` variable added to their environment,
 which contains the client certificate's CN attribute. Instructions on how to
 generate TLS client certificates are outside of the scope of this readme, but
 you can find many helpful tutorials
-[online](https://portal.mozz.us/?url=gemini%3A%2F%2Fmozz.us%2Fjournal%2F2019-08-21.txt).
+[online](https://www.makethenmakeinstall.com/2014/05/ssl-client-authentication-step-by-step/).
 
 There are currently no plans to support unverified (transient) client
 certificates. This is due to a technical limitation of the python standard
 library's ``ssl`` module, which is described in detail 
-[here](https://portal.mozz.us/?url=gemini%3A%2F%2Fmozz.us%2Fjournal%2F2019-08-21.txt).
+[here](https://portal.mozz.us/gemini/mozz.us/journal/2019-08-21_transient_tls_certs.gmi).
 
 ### Static Files
 
