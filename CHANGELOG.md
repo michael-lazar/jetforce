@@ -2,7 +2,10 @@
 
 ### Unreleased
 
-N/A
+- Allow virtual hosting by specifying an alternate hostname in the application
+  route pattern.
+- Jetforce will no longer raise an exception when attempting to log dropped
+  connections or other malformed requests.
 
 ### v0.2.0 (2012-01-21)
 

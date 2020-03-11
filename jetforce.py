@@ -152,6 +152,7 @@ class RoutePattern:
 
     path: str = ""
     scheme: str = "gemini"
+    hostname: typing.Optional[str] = None
 
     strict_hostname: bool = True
     strict_port: bool = True
@@ -161,7 +162,10 @@ class RoutePattern:
         """
         Check if the given request URL matches this route pattern.
         """
-        server_hostname = request.environ["HOSTNAME"]
+        if self.hostname is None:
+            server_hostname = request.environ["HOSTNAME"]
+        else:
+            server_hostname = self.hostname
         server_port = int(request.environ["SERVER_PORT"])
 
         if self.strict_hostname and request.hostname != server_hostname:
@@ -225,6 +229,7 @@ class JetforceApplication:
         self,
         path: str = "",
         scheme: str = "gemini",
+        hostname: typing.Optional[str] = None,
         strict_hostname: bool = True,
         strict_trailing_slash: bool = False,
     ) -> typing.Callable:
@@ -238,7 +243,7 @@ class JetforceApplication:
                 return Response(Status.SUCCESS, 'text/plain', 'Hello world!')
         """
         route_pattern = RoutePattern(
-            path, scheme, strict_hostname, strict_trailing_slash
+            path, scheme, hostname, strict_hostname, strict_trailing_slash
         )
 
         def wrap(func: typing.Callable) -> typing.Callable:
@@ -591,14 +596,18 @@ class GeminiRequestHandler:
         """
         Log a gemini request using a format derived from the Common Log Format.
         """
-        self.server.log_message(
-            f"{self.remote_addr} "
-            f"[{time.strftime(self.TIMESTAMP_FORMAT, self.received_timestamp)}] "
-            f'"{self.url}" '
-            f"{self.status} "
-            f'"{self.meta}" '
-            f"{self.response_size}"
-        )
+        try:
+            self.server.log_message(
+                f"{self.remote_addr} "
+                f"[{time.strftime(self.TIMESTAMP_FORMAT, self.received_timestamp)}] "
+                f'"{self.url}" '
+                f"{self.status} "
+                f'"{self.meta}" '
+                f"{self.response_size}"
+            )
+        except AttributeError:
+            # Malformed request or dropped connection
+            pass
 
 
 class GeminiServer:
