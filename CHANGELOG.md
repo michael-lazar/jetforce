@@ -6,6 +6,10 @@
   route pattern.
 - Jetforce will no longer raise an exception when attempting to log dropped
   connections or other malformed requests.
+- Added the following CGI variables for client certificates:
+  - TLS_CLIENT_NOT_BEFORE
+  - TLS_CLIENT_NOT_AFTER
+  - TLS_CLIENT_SERIAL_NUMBER
 
 ### v0.2.0 (2012-01-21)
 

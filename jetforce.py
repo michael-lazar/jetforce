@@ -527,7 +527,13 @@ class GeminiRequestHandler:
         if self.client_cert:
             subject = dict(x[0] for x in self.client_cert["subject"])
             environ.update(
-                {"AUTH_TYPE": "CERTIFICATE", "REMOTE_USER": subject["commonName"]}
+                {
+                    "AUTH_TYPE": "CERTIFICATE",
+                    "REMOTE_USER": subject["commonName"],
+                    "TLS_CLIENT_NOT_BEFORE": self.client_cert["notBefore"],
+                    "TLS_CLIENT_NOT_AFTER": self.client_cert["notAfter"],
+                    "TLS_CLIENT_SERIAL_NUMBER": self.client_cert["serialNumber"],
+                }
             )
 
         return environ
