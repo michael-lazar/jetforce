@@ -2,14 +2,14 @@
 
 ### Unreleased
 
-- Allow virtual hosting by specifying an alternate hostname in the application
-  route pattern.
+- A hostname can now be specified in route patterns, to facilitate virtual
+  hosting on a single jetforce server.
+- Route patterns now use ``re.fullmatch()`` and will no longer trigger on
+  partial matches.
 - Jetforce will no longer raise an exception when attempting to log dropped
   connections or other malformed requests.
 - Added the following CGI variables for client certificates:
-  - TLS_CLIENT_NOT_BEFORE
-  - TLS_CLIENT_NOT_AFTER
-  - TLS_CLIENT_SERIAL_NUMBER
+  TLS_CLIENT_NOT_BEFORE, TLS_CLIENT_NOT_AFTER, TLS_CLIENT_SERIAL_NUMBER
 
 ### v0.2.0 (2012-01-21)
 

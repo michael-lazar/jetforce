@@ -181,7 +181,7 @@ class RoutePattern:
         else:
             request_path = request.path.rstrip("/")
 
-        return bool(re.match(self.path, request_path))
+        return bool(re.fullmatch(self.path, request_path))
 
 
 class JetforceApplication:
