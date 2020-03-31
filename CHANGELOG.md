@@ -2,8 +2,10 @@
 
 ### Unreleased
 
-- A hostname can now be specified in route patterns, to facilitate virtual
-  hosting on a single jetforce server.
+### v0.2.1 (2012-03-31)
+
+- A hostname can now be specified in the route pattern, to facilitate running
+  multiple vhosts on a single jetforce server.
 - Route patterns now use ``re.fullmatch()`` and will no longer trigger on
   partial matches.
 - Jetforce will no longer raise an exception when attempting to log dropped
