@@ -2,6 +2,10 @@
 
 ### Unreleased
 
+### v0.2.2 (2012-03-31)
+
+- Fix a regression in path matching for the static directory application.
+  
 ### v0.2.1 (2012-03-31)
 
 - A hostname can now be specified in the route pattern, to facilitate running

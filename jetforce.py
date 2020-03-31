@@ -54,7 +54,7 @@ import urllib.parse
 if sys.version_info < (3, 7):
     sys.exit("Fatal Error: jetforce requires Python 3.7+")
 
-__version__ = "0.2.1"
+__version__ = "0.2.2"
 __title__ = "Jetforce Gemini Server"
 __author__ = "Michael Lazar"
 __license__ = "Floodgap Free Software License"
@@ -150,7 +150,7 @@ class RoutePattern:
     A pattern for matching URLs with a single endpoint or route.
     """
 
-    path: str = ""
+    path: str = ".*"
     scheme: str = "gemini"
     hostname: typing.Optional[str] = None
 

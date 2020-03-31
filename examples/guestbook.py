@@ -15,7 +15,7 @@ guestbook = pathlib.Path("guestbook.txt")
 app = jetforce.JetforceApplication()
 
 
-@app.route("")
+@app.route("", strict_trailing_slash=False)
 def index(request):
     data = ["Guestbook", "=>/submit Sign the Guestbook", ""]
 
