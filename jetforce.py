@@ -158,7 +158,7 @@ class RoutePattern:
     strict_port: bool = True
     strict_trailing_slash: bool = False
 
-    def match(self, request: Request) -> bool:
+    def match(self, request: Request) -> typing.Optional[re.Match]:
         """
         Check if the given request URL matches this route pattern.
         """
@@ -169,19 +169,19 @@ class RoutePattern:
         server_port = int(request.environ["SERVER_PORT"])
 
         if self.strict_hostname and request.hostname != server_hostname:
-            return False
+            return
         if self.strict_port and request.port is not None:
             if request.port != server_port:
-                return False
+                return
         if self.scheme and self.scheme != request.scheme:
-            return False
+            return
 
         if self.strict_trailing_slash:
             request_path = request.path
         else:
             request_path = request.path.rstrip("/")
 
-        return bool(re.fullmatch(self.path, request_path))
+        return re.fullmatch(self.path, request_path)
 
 
 class JetforceApplication:
@@ -227,7 +227,7 @@ class JetforceApplication:
 
     def route(
         self,
-        path: str = "",
+        path: str = ".*",
         scheme: str = "gemini",
         hostname: typing.Optional[str] = None,
         strict_hostname: bool = True,
