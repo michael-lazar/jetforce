@@ -529,7 +529,7 @@ class GeminiRequestHandler:
             environ.update(
                 {
                     "AUTH_TYPE": "CERTIFICATE",
-                    "REMOTE_USER": subject["commonName"],
+                    "REMOTE_USER": subject.get("commonName", ""),
                     "TLS_CLIENT_NOT_BEFORE": self.client_cert["notBefore"],
                     "TLS_CLIENT_NOT_AFTER": self.client_cert["notAfter"],
                     "TLS_CLIENT_SERIAL_NUMBER": self.client_cert["serialNumber"],

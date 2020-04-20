@@ -2,6 +2,8 @@
 
 ### Unreleased
 
+- Allow a client certificate subject's CN to be blank.
+
 ### v0.2.2 (2012-03-31)
 
 - Fix a regression in path matching for the static directory application.
