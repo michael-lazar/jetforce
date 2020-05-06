@@ -141,7 +141,7 @@ class BaseCheck:
         with socket.create_connection(
             (self.args.host, self.args.port), timeout=5
         ) as sock:
-            with context.wrap_socket(sock) as ssock:
+            with context.wrap_socket(sock, server_hostname = self.netloc) as ssock:
                 yield ssock
 
     def make_request(self, url: str) -> GeminiResponse:
