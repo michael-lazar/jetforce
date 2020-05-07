@@ -298,10 +298,40 @@ class StaticDirectoryApplication(JetforceApplication):
         url_path = pathlib.Path(request.path.strip("/"))
 
         filename = pathlib.Path(os.path.normpath(str(url_path)))
+        
         if filename.is_absolute() or str(filename.name).startswith(".."):
             # Guard against breaking out of the directory
             return Response(Status.NOT_FOUND, "Not Found")
 
+        
+        if str(filename).startswith(self.cgi_directory):
+            # CGI needs special treatment to account for extra-path
+            # PATH_INFO component (RCFC3875 section 4.1.5)
+
+            # Identify shortest path that is not a directory
+            url_buildup = ''
+            for i in range(1, len(url_path.parts)+1):
+                url_buildup = '/'.join(url_path.parts[:i])
+                filename = pathlib.Path(os.path.normpath(str(url_buildup)))
+                filesystem_path = self.root / filename
+
+                try:
+                  if (filesystem_path.is_file() and
+                      os.access(filesystem_path, os.R_OK) and
+                      os.access(filesystem_path, os.X_OK)):
+                      path_info = '/'.join(url_path.parts[i:])
+
+                      if len(path_info) > 0:
+                          # If PATH_INFO is non-empty, it should include the slash
+                          path_info = '/' + path_info
+                      
+                      return self.run_cgi_script(filesystem_path, request.environ, path_info)
+                  
+                except OSError:
+                    # Filename too large, etc.
+                    return Response(Status.NOT_FOUND, "Not Found")
+
+                
         filesystem_path = self.root / filename
 
         try:
@@ -313,11 +343,6 @@ class StaticDirectoryApplication(JetforceApplication):
             return Response(Status.NOT_FOUND, "Not Found")
 
         if filesystem_path.is_file():
-            is_cgi = str(filename).startswith(self.cgi_directory)
-            is_exe = os.access(filesystem_path, os.X_OK)
-            if is_cgi and is_exe:
-                return self.run_cgi_script(filesystem_path, request.environ)
-
             mimetype = self.guess_mimetype(filesystem_path.name)
             generator = self.load_file(filesystem_path)
             return Response(Status.SUCCESS, mimetype, generator)
@@ -339,7 +364,7 @@ class StaticDirectoryApplication(JetforceApplication):
         else:
             return Response(Status.NOT_FOUND, "Not Found")
 
-    def run_cgi_script(self, filesystem_path: pathlib.Path, environ: dict) -> Response:
+    def run_cgi_script(self, filesystem_path: pathlib.Path, environ: dict, path_info: str) -> Response:
         """
         Execute the given file as a CGI script and return the script's stdout
         stream to the client.
@@ -348,6 +373,7 @@ class StaticDirectoryApplication(JetforceApplication):
         cgi_env = environ.copy()
         cgi_env["GATEWAY_INTERFACE"] = "GCI/1.1"
         cgi_env["SCRIPT_NAME"] = script_name
+        cgi_env["PATH_INFO"] = path_info
 
         # Decode the stream as unicode so we can parse the status line
         # Use surrogateescape to preserve any non-UTF8 byte sequences.
@@ -514,7 +540,6 @@ class GeminiRequestHandler:
         environ = {
             "GEMINI_URL": self.url,
             "HOSTNAME": self.server.hostname,
-            "PATH_INFO": url_parts.path,
             "QUERY_STRING": url_parts.query,
             "REMOTE_ADDR": self.remote_addr,
             "REMOTE_HOST": self.remote_addr,
