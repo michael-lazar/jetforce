@@ -72,6 +72,80 @@ An Experimental Gemini Server, v{__version__}
 https://github.com/michael-lazar/jetforce
 """
 
+# fmt: off
+# noinspection PyTypeChecker
+parser = argparse.ArgumentParser(
+    prog="jetforce",
+    description="An Experimental Gemini Protocol Server",
+    formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+)
+parser.add_argument(
+    "-V", "--version",
+    action="version",
+    version="jetforce " + __version__
+)
+parser.add_argument(
+    "--host",
+    help="Server address to bind to",
+    default="127.0.0.1"
+)
+parser.add_argument(
+    "--port",
+    help="Server port to bind to",
+    type=int,
+    default=1965
+)
+parser.add_argument(
+    "--hostname",
+    help="Server hostname",
+    default="localhost"
+)
+parser.add_argument(
+    "--tls-certfile",
+    dest="certfile",
+    help="Server TLS certificate file",
+    metavar="FILE",
+)
+parser.add_argument(
+    "--tls-keyfile",
+    dest="keyfile",
+    help="Server TLS private key file",
+    metavar="FILE",
+)
+parser.add_argument(
+    "--tls-cafile",
+    dest="cafile",
+    help="A CA file to use for validating clients",
+    metavar="FILE",
+)
+parser.add_argument(
+    "--tls-capath",
+    dest="capath",
+    help="A directory containing CA files for validating clients",
+    metavar="DIR",
+)
+# Arguments below this line are specific to the StaticDirectoryApplication
+parser.add_argument(
+    "--dir",
+    help="Root directory on the filesystem to serve",
+    default="/var/gemini",
+    metavar="DIR",
+)
+parser.add_argument(
+    "--cgi-dir",
+    help="CGI script directory, relative to the server's root directory",
+    default="cgi-bin",
+    metavar="DIR",
+)
+parser.add_argument(
+    "--index-file",
+    help="If a directory contains a file with this name, "
+         "that file will be served instead of auto-generating an index page",
+    default="index.gmi",
+    metavar="FILE",
+)
+# fmt: on
+
 
 class Status:
     """
@@ -739,87 +813,16 @@ def make_ssl_context(
     return context
 
 
-def command_line_parser() -> argparse.ArgumentParser:
-    """
-    Construct the default argument parser when launching the server from
-    the command line. These are meant to be application-agnostic arguments
-    that could apply to any subclass of the JetforceApplication.
-    """
-    parser = argparse.ArgumentParser(
-        prog="jetforce",
-        description="An Experimental Gemini Protocol Server",
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-    )
-    parser.add_argument(
-        "-V", "--version", action="version", version="jetforce " + __version__
-    )
-    parser.add_argument("--host", help="Server address to bind to", default="127.0.0.1")
-    parser.add_argument("--port", help="Server port to bind to", type=int, default=1965)
-    parser.add_argument("--hostname", help="Server hostname", default="localhost")
-    parser.add_argument(
-        "--tls-certfile",
-        dest="certfile",
-        help="Server TLS certificate file",
-        metavar="FILE",
-    )
-    parser.add_argument(
-        "--tls-keyfile",
-        dest="keyfile",
-        help="Server TLS private key file",
-        metavar="FILE",
-    )
-    parser.add_argument(
-        "--tls-cafile",
-        dest="cafile",
-        help="A CA file to use for validating clients",
-        metavar="FILE",
-    )
-    parser.add_argument(
-        "--tls-capath",
-        dest="capath",
-        help="A directory containing CA files for validating clients",
-        metavar="DIR",
-    )
-    return parser
-
-
 def run_server() -> None:
     """
     Entry point for running the static directory server.
     """
-    parser = command_line_parser()
-    parser.add_argument(
-        "--dir",
-        help="Root directory on the filesystem to serve",
-        default="/var/gemini",
-        metavar="DIR",
-    )
-    parser.add_argument(
-        "--cgi-dir",
-        help="CGI script directory, relative to the server's root directory",
-        default="cgi-bin",
-        metavar="DIR",
-    )
-    parser.add_argument(
-        "--index-file",
-        help="If a directory contains a file with this name, that file will be "
-        "served instead of auto-generating an index page",
-        default="index.gmi",
-        metavar="FILE",
-    )
     args = parser.parse_args()
-
     app = StaticDirectoryApplication(args.dir, args.index_file, args.cgi_dir)
     ssl_context = make_ssl_context(
         args.hostname, args.certfile, args.keyfile, args.cafile, args.capath
     )
-    server = GeminiServer(
-        host=args.host,
-        port=args.port,
-        ssl_context=ssl_context,
-        hostname=args.hostname,
-        app=app,
-    )
+    server = GeminiServer(app, args.host, args.port, ssl_context, args.hostname)
     asyncio.run(server.run())
 
 
