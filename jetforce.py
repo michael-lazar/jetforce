@@ -44,7 +44,6 @@ import pathlib
 import re
 import socket
 import socketserver
-import ssl
 import subprocess
 import sys
 import tempfile
@@ -56,6 +55,7 @@ from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
+from OpenSSL import SSL
 
 if sys.version_info < (3, 7):
     sys.exit("Fatal Error: jetforce requires Python 3.7+")
@@ -693,7 +693,7 @@ class GeminiServer(socketserver.ThreadingTCPServer):
         app: typing.Callable,
         host: str = "127.0.0.1",
         port: int = 1965,
-        ssl_context: ssl.SSLContext = None,
+        ssl_context: SSL.Context = None,
         hostname: str = "localhost",
     ) -> None:
 
@@ -723,16 +723,14 @@ class GeminiServer(socketserver.ThreadingTCPServer):
 
         self.serve_forever()
 
-    def get_request(self):
+    def get_request(self) -> typing.Tuple[SSL.Connection, typing.Tuple[str, int]]:
         """
         Wrap the incoming request in an SSL connection.
         """
         # noinspection PyTupleAssignmentBalance
         sock, client_addr = super(GeminiServer, self).get_request()
-        ssl_sock = self.ssl_context.wrap_socket(
-            sock, server_side=True, do_handshake_on_connect=False
-        )
-        return ssl_sock, client_addr
+        sock = SSL.Connection(self.ssl_context, sock)
+        return sock, client_addr
 
     def log_message(self, message: str) -> None:
         """
@@ -790,35 +788,24 @@ def make_ssl_context(
     keyfile: typing.Optional[str] = None,
     cafile: typing.Optional[str] = None,
     capath: typing.Optional[str] = None,
-) -> ssl.SSLContext:
+) -> SSL.Context:
     """
     Generate a sane default SSL context for a Gemini server.
-
-    For more information on what these variables mean and what values they can
-    contain, see the python standard library documentation:
-
-        https://docs.python.org/3/library/ssl.html#ssl-contexts
-
-    verify_mode: ssl.CERT_OPTIONAL
-        A client certificate request is sent to the client. The client may
-        either ignore the request or send a certificate in order perform TLS
-        client cert authentication. If the client chooses to send a certificate,
-        it is verified. Any verification error immediately aborts the TLS
-        handshake.
     """
     if certfile is None:
         certfile, keyfile = generate_ad_hoc_certificate(hostname)
 
-    context = ssl.SSLContext()
-    context.verify_mode = ssl.CERT_OPTIONAL
-    context.load_cert_chain(certfile, keyfile)
-
-    if not cafile and not capath:
-        # Load from the system's default client CA directory
-        context.load_default_certs(purpose=ssl.Purpose.CLIENT_AUTH)
-    else:
-        # Use a custom CA for validating client certificates
+    context = SSL.Context(SSL.TLSv1_2_METHOD)
+    context.use_certificate_file(certfile)
+    context.use_privatekey_file(keyfile or certfile)
+    context.check_privatekey()
+    if cafile or capath:
         context.load_verify_locations(cafile, capath)
+
+    def verify_cb(connection, x509, err_no, err_depth, return_code):
+        pass
+
+    context.set_verify(SSL.VERIFY_PEER, verify_cb)
 
     return context
 
