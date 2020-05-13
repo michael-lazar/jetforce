@@ -16,7 +16,7 @@ setuptools.setup(
     author="Michael Lazar",
     author_email="lazar.michael22@gmail.com",
     description="An Experimental Gemini Server",
-    install_requires=["cryptography", "pyopenssl"],
+    install_requires=["cryptography", "pyopenssl", "twisted"],
     long_description=long_description(),
     long_description_content_type="text/markdown",
     py_modules=["jetforce", "jetforce_client", "jetforce_diagnostics"],
