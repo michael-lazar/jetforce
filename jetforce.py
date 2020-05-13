@@ -89,80 +89,6 @@ An Experimental Gemini Server, v{__version__}
 https://github.com/michael-lazar/jetforce
 """
 
-# fmt: off
-# noinspection PyTypeChecker
-parser = argparse.ArgumentParser(
-    prog="jetforce",
-    description="An Experimental Gemini Protocol Server",
-    formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-)
-parser.add_argument(
-    "-V", "--version",
-    action="version",
-    version="jetforce " + __version__
-)
-parser.add_argument(
-    "--host",
-    help="Server address to bind to",
-    default="127.0.0.1"
-)
-parser.add_argument(
-    "--port",
-    help="Server port to bind to",
-    type=int,
-    default=1965
-)
-parser.add_argument(
-    "--hostname",
-    help="Server hostname",
-    default="localhost"
-)
-parser.add_argument(
-    "--tls-certfile",
-    dest="certfile",
-    help="Server TLS certificate file",
-    metavar="FILE",
-)
-parser.add_argument(
-    "--tls-keyfile",
-    dest="keyfile",
-    help="Server TLS private key file",
-    metavar="FILE",
-)
-parser.add_argument(
-    "--tls-cafile",
-    dest="cafile",
-    help="A CA file to use for validating clients",
-    metavar="FILE",
-)
-parser.add_argument(
-    "--tls-capath",
-    dest="capath",
-    help="A directory containing CA files for validating clients",
-    metavar="DIR",
-)
-# Arguments below this line are specific to the StaticDirectoryApplication
-parser.add_argument(
-    "--dir",
-    help="Root directory on the filesystem to serve",
-    default="/var/gemini",
-    metavar="DIR",
-)
-parser.add_argument(
-    "--cgi-dir",
-    help="CGI script directory, relative to the server's root directory",
-    default="cgi-bin",
-    metavar="DIR",
-)
-parser.add_argument(
-    "--index-file",
-    help="If a directory contains a file with this name, "
-         "that file will be served instead of auto-generating an index page",
-    default="index.gmi",
-    metavar="FILE",
-)
-# fmt: on
-
 
 class Status:
     """
@@ -392,6 +318,16 @@ class JetforceApplication:
         """
         return Response(Status.PERMANENT_FAILURE, "Not Found")
 
+    @classmethod
+    def add_arguments(cls, parser: argparse.ArgumentParser) -> None:
+        """
+        Add any application-specific arguments to the GeminiServer parser.
+
+        The destination variables for these arguments should match the method
+        signature for this class's __init__ method.
+        """
+        return
+
 
 class StaticDirectoryApplication(JetforceApplication):
     """
@@ -423,6 +359,33 @@ class StaticDirectoryApplication(JetforceApplication):
         self.mimetypes = mimetypes.MimeTypes()
         self.mimetypes.add_type("text/gemini", ".gmi")
         self.mimetypes.add_type("text/gemini", ".gemini")
+
+    @classmethod
+    def add_arguments(cls, parser: argparse.ArgumentParser):
+        # fmt: off
+        parser.add_argument(
+            "--dir",
+            help="Root directory on the filesystem to serve",
+            default="/var/gemini",
+            metavar="DIR",
+            dest="root_directory",
+        )
+        parser.add_argument(
+            "--cgi-dir",
+            help="CGI script directory, relative to the server's root directory",
+            default="cgi-bin",
+            metavar="DIR",
+            dest="cgi_directory",
+        )
+        parser.add_argument(
+            "--index-file",
+            help="If a directory contains a file with this name, "
+                 "that file will be served instead of auto-generating an index page",
+            default="index.gmi",
+            metavar="FILE",
+            dest="index_file",
+        )
+        # fmt: on
 
     def serve_static_file(self, request: Request) -> Response:
         """
@@ -459,6 +422,7 @@ class StaticDirectoryApplication(JetforceApplication):
         elif filesystem_path.is_dir():
             if not request.path.endswith("/"):
                 url_parts = urllib.parse.urlparse(request.url)
+                # noinspection PyProtectedMember
                 url_parts = url_parts._replace(path=request.path + "/")
                 return Response(Status.REDIRECT_PERMANENT, url_parts.geturl())
 
@@ -893,14 +857,101 @@ class GeminiServer(Factory):
 
         self.reactor.run()
 
+    @classmethod
+    def build_argument_parser(cls):
+        """
+        Build the default command line argument parser for the jetforce server.
+        """
+        # fmt: off
+        # noinspection PyTypeChecker
+        parser = argparse.ArgumentParser(
+            prog="jetforce",
+            description="An Experimental Gemini Protocol Server",
+            formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        )
+        parser.add_argument(
+            "-V", "--version",
+            action="version",
+            version="jetforce " + __version__
+        )
+        parser.add_argument(
+            "--host",
+            help="Server address to bind to",
+            default="127.0.0.1"
+        )
+        parser.add_argument(
+            "--port",
+            help="Server port to bind to",
+            type=int,
+            default=1965
+        )
+        parser.add_argument(
+            "--hostname",
+            help="Server hostname",
+            default="localhost"
+        )
+        parser.add_argument(
+            "--tls-certfile",
+            dest="certfile",
+            help="Server TLS certificate file",
+            metavar="FILE",
+        )
+        parser.add_argument(
+            "--tls-keyfile",
+            dest="keyfile",
+            help="Server TLS private key file",
+            metavar="FILE",
+        )
+        parser.add_argument(
+            "--tls-cafile",
+            dest="cafile",
+            help="A CA file to use for validating clients",
+            metavar="FILE",
+        )
+        parser.add_argument(
+            "--tls-capath",
+            dest="capath",
+            help="A directory containing CA files for validating clients",
+            metavar="DIR",
+        )
+        # fmt: on
+        return parser
+
+    @classmethod
+    def from_argparse(
+        cls, app_class: typing.Type[JetforceApplication], reactor: ReactorBase = reactor
+    ):
+        """
+        Shortcut to parse command line arguments and build a server instance.
+
+        This only works with class-based Jetforce applications that subclass
+        from JetforceApplication.
+        """
+        parser = cls.build_argument_parser()
+        app_class.add_arguments(parser)
+
+        server_keys = [
+            "host",
+            "port",
+            "hostname",
+            "certfile",
+            "keyfile",
+            "cafile",
+            "capath",
+        ]
+        args = vars(parser.parse_args())
+        server_args = {k: v for k, v in args.items() if k in server_keys}
+        extra_args = {k: v for k, v in args.items() if k not in server_keys}
+
+        app = app_class(**extra_args)
+        return cls(app, reactor, **server_args)
+
 
 def run_server() -> None:
     """
     Entry point for running the static directory server.
     """
-    args = parser.parse_args()
-    app = StaticDirectoryApplication(args.dir, args.index_file, args.cgi_dir)
-    server = GeminiServer(app, **vars(args))
+    server = GeminiServer.from_argparse(app_class=StaticDirectoryApplication)
     server.run()
 
 
