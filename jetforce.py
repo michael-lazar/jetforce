@@ -61,12 +61,10 @@ from twisted.internet.address import IPv4Address, IPv6Address
 from twisted.internet.base import ReactorBase
 from twisted.internet.endpoints import SSL4ServerEndpoint
 from twisted.internet.protocol import Factory
-from twisted.internet.ssl import CertificateOptions
+from twisted.internet.ssl import CertificateOptions, TLSVersion
 from twisted.internet.tcp import Port
 from twisted.protocols.basic import LineOnlyReceiver
-
-CN = x509.NameOID.COMMON_NAME
-
+from twisted.python.randbytes import secureRandom
 
 if sys.version_info < (3, 7):
     sys.exit("Fatal Error: jetforce requires Python 3.7+")
@@ -88,6 +86,8 @@ ___ _  /_  _ \  __/_  /_ _  __ \_  ___/  ___/  _ \
 An Experimental Gemini Server, v{__version__}
 https://github.com/michael-lazar/jetforce
 """
+
+CN = x509.NameOID.COMMON_NAME
 
 
 class Status:
@@ -199,49 +199,6 @@ class RoutePattern:
             request_path = request.path.rstrip("/")
 
         return re.fullmatch(self.path, request_path)
-
-
-def generate_ad_hoc_certificate(hostname: str) -> typing.Tuple[str, str]:
-    """
-    Utility function to generate an ad-hoc self-signed SSL certificate.
-    """
-    certfile = os.path.join(tempfile.gettempdir(), f"{hostname}.crt")
-    keyfile = os.path.join(tempfile.gettempdir(), f"{hostname}.key")
-
-    if not os.path.exists(certfile) or not os.path.exists(keyfile):
-        backend = default_backend()
-
-        print("Generating private key...", file=sys.stderr)
-        private_key = rsa.generate_private_key(65537, 2048, default_backend())
-        with open(keyfile, "wb") as fp:
-            # noinspection PyTypeChecker
-            key_data = private_key.private_bytes(
-                serialization.Encoding.PEM,
-                format=serialization.PrivateFormat.TraditionalOpenSSL,
-                encryption_algorithm=serialization.NoEncryption(),
-            )
-            fp.write(key_data)
-
-        print("Generating certificate...", file=sys.stderr)
-        common_name = x509.NameAttribute(CN, hostname)
-        subject_name = x509.Name([common_name])
-        not_valid_before = datetime.datetime.utcnow()
-        not_valid_after = not_valid_before + datetime.timedelta(days=365)
-        certificate = x509.CertificateBuilder(
-            subject_name=subject_name,
-            issuer_name=subject_name,
-            public_key=private_key.public_key(),
-            serial_number=x509.random_serial_number(),
-            not_valid_before=not_valid_before,
-            not_valid_after=not_valid_after,
-        )
-        certificate = certificate.sign(private_key, hashes.SHA256(), backend)
-        with open(certfile, "wb") as fp:
-            # noinspection PyTypeChecker
-            cert_data = certificate.public_bytes(serialization.Encoding.PEM)
-            fp.write(cert_data)
-
-    return certfile, keyfile
 
 
 class JetforceApplication:
@@ -532,45 +489,6 @@ class StaticDirectoryApplication(JetforceApplication):
             return Response(Status.NOT_FOUND, "Not Found")
 
 
-class GeminiTLSContextFactory:
-    """
-    Generate a sane default SSL context for a Gemini server.
-    """
-
-    def __init__(
-        self,
-        hostname: str = "localhost",
-        certfile: typing.Optional[str] = None,
-        keyfile: typing.Optional[str] = None,
-        cafile: typing.Optional[str] = None,
-        capath: typing.Optional[str] = None,
-    ):
-        if certfile is None:
-            certfile, keyfile = generate_ad_hoc_certificate(hostname)
-
-        context = SSL.Context(SSL.TLSv1_2_METHOD)
-        context.use_certificate_file(certfile)
-        context.use_privatekey_file(keyfile or certfile)
-        context.check_privatekey()
-        if cafile or capath:
-            context.load_verify_locations(cafile, capath)
-        context.set_verify(SSL.VERIFY_PEER, self.verify_cb)
-        self.context = context
-
-    def getContext(self) -> SSL.Context:
-        """
-        Return the SSL context, this method must be implemented for twisted.
-        """
-        return self.context
-
-    def verify_cb(self, connection, x509, err_no, err_depth, return_code):
-        """
-        Disable all peer certificate validation at the openSSL level in order
-        to allow self-signed client certificates.
-        """
-        return True
-
-
 class GeminiProtocol(LineOnlyReceiver):
     """
     Handle a single Gemini Protocol TCP request.
@@ -763,6 +681,146 @@ class GeminiProtocol(LineOnlyReceiver):
             self.server.log_message(message)
 
 
+def generate_ad_hoc_certificate(hostname: str) -> typing.Tuple[str, str]:
+    """
+    Utility function to generate an ad-hoc self-signed SSL certificate.
+    """
+    certfile = os.path.join(tempfile.gettempdir(), f"{hostname}.crt")
+    keyfile = os.path.join(tempfile.gettempdir(), f"{hostname}.key")
+
+    if not os.path.exists(certfile) or not os.path.exists(keyfile):
+        backend = default_backend()
+
+        print("Generating private key...", file=sys.stderr)
+        private_key = rsa.generate_private_key(65537, 2048, backend)
+        with open(keyfile, "wb") as fp:
+            # noinspection PyTypeChecker
+            key_data = private_key.private_bytes(
+                serialization.Encoding.PEM,
+                format=serialization.PrivateFormat.TraditionalOpenSSL,
+                encryption_algorithm=serialization.NoEncryption(),
+            )
+            fp.write(key_data)
+
+        print("Generating certificate...", file=sys.stderr)
+        common_name = x509.NameAttribute(CN, hostname)
+        subject_name = x509.Name([common_name])
+        not_valid_before = datetime.datetime.utcnow()
+        not_valid_after = not_valid_before + datetime.timedelta(days=365)
+        certificate = x509.CertificateBuilder(
+            subject_name=subject_name,
+            issuer_name=subject_name,
+            public_key=private_key.public_key(),
+            serial_number=x509.random_serial_number(),
+            not_valid_before=not_valid_before,
+            not_valid_after=not_valid_after,
+        )
+        certificate = certificate.sign(private_key, hashes.SHA256(), backend)
+        with open(certfile, "wb") as fp:
+            # noinspection PyTypeChecker
+            cert_data = certificate.public_bytes(serialization.Encoding.PEM)
+            fp.write(cert_data)
+
+    return certfile, keyfile
+
+
+class GeminiOpenSSLCertificateOptions(CertificateOptions):
+    """
+    CertificateOptions is a factory function that twisted uses to do all of the
+    gnarly OpenSSL setup and return a PyOpenSSL context object. Unfortunately,
+    it doesn't do *exactly* what I need it to do, so I need to subclass to add
+    some custom behavior.
+
+    References:
+        https://twistedmatrix.com/documents/16.1.1/core/howto/ssl.html
+        https://github.com/urllib3/urllib3/blob/master/src/urllib3/util/ssl_.py
+        https://github.com/twisted/twisted/blob/trunk/src/twisted/internet/_sslverify.py
+    """
+
+    def verify_callback(self, conn, cert, errno, depth, preverify_ok):
+        """
+        Callback used by OpenSSL for client certificate verification.
+
+        preverify_ok returns the verification result that OpenSSL has already
+        obtained, so return this value to cede control to the underlying
+        library. Returning true will always allow client certificates, even if
+        they are self-signed.
+        """
+        return preverify_ok
+
+    def proto_select_callback(self, conn, protocols):
+        """
+        Callback used by OpenSSL for ALPN support.
+
+        Return the first matching protocol in our list of acceptable values.
+        """
+        for p in self._acceptableProtocols:
+            if p in protocols:
+                return p
+        else:
+            return b""
+
+    def __init__(
+        self,
+        certfile: str,
+        keyfile: typing.Optional[str] = None,
+        cafile: typing.Optional[str] = None,
+        capath: typing.Optional[str] = None,
+        **kwargs,
+    ):
+        self.certfile = certfile
+        self.keyfile = keyfile
+        self.cafile = cafile
+        self.capath = capath
+        super().__init__(**kwargs)
+
+    def _makeContext(self):
+        """
+        Most of this code is copied directly from the parent class method.
+
+        I switched to using the OpenSSL methods that read keys/certs from files
+        instead of manually loading the objects into memory. I also added
+        configurable verify & ALPN callbacks.
+        """
+        ctx = self._contextFactory(self.method)
+        ctx.set_options(self._options)
+        ctx.set_mode(self._mode)
+
+        ctx.use_certificate_file(self.certfile)
+        ctx.use_privatekey_file(self.keyfile or self.certfile)
+        for extraCert in self.extraCertChain:
+            ctx.add_extra_chain_cert(extraCert)
+        # Sanity check
+        ctx.check_privatekey()
+
+        if self.cafile or self.capath:
+            ctx.load_verify_locations(self.cafile, self.capath)
+
+        verify_flags = SSL.VERIFY_PEER
+        if self.requireCertificate:
+            verify_flags |= SSL.VERIFY_FAIL_IF_NO_PEER_CERT
+        if self.verifyOnce:
+            verify_flags |= SSL.VERIFY_CLIENT_ONCE
+
+        ctx.set_verify(verify_flags, self.verify_callback)
+        if self.verifyDepth is not None:
+            ctx.set_verify_depth(self.verifyDepth)
+
+        if self.enableSessions:
+            session_name = secureRandom(32)
+            ctx.set_session_id(session_name)
+
+        ctx.set_cipher_list(self._cipherString.encode("ascii"))
+
+        self._ecChooser.configureECDHCurve(ctx)
+
+        if self._acceptableProtocols:
+            ctx.set_alpn_select_callback(self.proto_select_callback)
+            ctx.set_alpn_protos(self._acceptableProtocols)
+
+        return ctx
+
+
 class GeminiServer(Factory):
     """
     This class acts as a wrapper around most of the plumbing for twisted.
@@ -771,10 +829,6 @@ class GeminiServer(Factory):
     as possible to import and run a server without needing to understand the
     complicated class hierarchy and conventions defined by twisted.
     """
-
-    # Initializes the pyOpenSSL context object, you may want to override this
-    # to customize your server's TLS configuration.
-    tls_context_factory_class = GeminiTLSContextFactory
 
     # Request handler class, you probably don't want to override this.
     protocol_class = GeminiProtocol
@@ -796,6 +850,9 @@ class GeminiServer(Factory):
         capath: typing.Optional[str] = None,
         **_,
     ):
+        if certfile is None:
+            certfile, keyfile = generate_ad_hoc_certificate(hostname)
+
         self.app = app
         self.reactor = reactor
         self.host = host
@@ -837,12 +894,19 @@ class GeminiServer(Factory):
         """
         self.log_message(ABOUT)
         self.log_message(f"Server hostname is {self.hostname}")
-        tls_context_factory = self.tls_context_factory_class(
-            hostname=self.hostname,
+        self.log_message(f"TLS Certificate File: {self.certfile}")
+        self.log_message(f"TLS Private Key File: {self.keyfile}")
+
+        certificate_options = GeminiOpenSSLCertificateOptions(
             certfile=self.certfile,
             keyfile=self.keyfile,
             cafile=self.cafile,
             capath=self.capath,
+            raiseMinimumTo=TLSVersion.TLSv1_3,
+            requireCertificate=False,
+            fixBrokenPeers=True,
+            # ALPN, I may look into supporting this later
+            acceptableProtocols=None,
         )
 
         interfaces = [self.host] if self.host else ["0.0.0.0", "::"]
@@ -850,7 +914,7 @@ class GeminiServer(Factory):
             endpoint = self.endpoint_class(
                 reactor=self.reactor,
                 port=self.port,
-                sslContextFactory=tls_context_factory,
+                sslContextFactory=certificate_options,
                 interface=interface,
             )
             endpoint.listen(self).addCallback(self.on_bind_interface)
@@ -930,18 +994,13 @@ class GeminiServer(Factory):
         parser = cls.build_argument_parser()
         app_class.add_arguments(parser)
 
-        server_keys = [
-            "host",
-            "port",
-            "hostname",
-            "certfile",
-            "keyfile",
-            "cafile",
-            "capath",
-        ]
         args = vars(parser.parse_args())
-        server_args = {k: v for k, v in args.items() if k in server_keys}
-        extra_args = {k: v for k, v in args.items() if k not in server_keys}
+
+        # Split command line arguments into the group that should be passed to
+        # the server class, and the group that should be passed to the app class.
+        keys = cls.__init__.__annotations__.keys()
+        server_args = {k: v for k, v in args.items() if k in keys}
+        extra_args = {k: v for k, v in args.items() if k not in keys}
 
         app = app_class(**extra_args)
         return cls(app, reactor, **server_args)
