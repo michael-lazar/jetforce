@@ -17,7 +17,7 @@ setuptools.setup(
     author_email="lazar.michael22@gmail.com",
     description="An Experimental Gemini Server",
     install_requires=[
-        "twisted",
+        "twisted>=20.3.0",
         "service_identity",  # Used by twisted
         "idna",  # Used by twisted
         "pyopenssl",  # Used by twisted

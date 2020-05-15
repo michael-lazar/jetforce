@@ -320,21 +320,22 @@ class StaticDirectoryApplication(JetforceApplication):
     @classmethod
     def add_arguments(cls, parser: argparse.ArgumentParser):
         # fmt: off
-        parser.add_argument(
+        group = parser.add_argument_group("static file configuration")
+        group.add_argument(
             "--dir",
             help="Root directory on the filesystem to serve",
             default="/var/gemini",
             metavar="DIR",
             dest="root_directory",
         )
-        parser.add_argument(
+        group.add_argument(
             "--cgi-dir",
             help="CGI script directory, relative to the server's root directory",
             default="cgi-bin",
             metavar="DIR",
             dest="cgi_directory",
         )
-        parser.add_argument(
+        group.add_argument(
             "--index-file",
             help="If a directory contains a file with this name, "
                  "that file will be served instead of auto-generating an index page",
@@ -400,7 +401,8 @@ class StaticDirectoryApplication(JetforceApplication):
         stream to the client.
         """
         script_name = str(filesystem_path)
-        cgi_env = environ.copy()
+
+        cgi_env = {k: v for k, v in environ.items() if k.isupper()}
         cgi_env["GATEWAY_INTERFACE"] = "GCI/1.1"
         cgi_env["SCRIPT_NAME"] = script_name
 
@@ -510,7 +512,6 @@ class GeminiProtocol(LineOnlyReceiver):
     TIMESTAMP_FORMAT = "%d/%b/%Y:%H:%M:%S %z"
 
     client_addr: typing.Union[IPv4Address, IPv6Address]
-    client_cert: typing.Optional[x509.Certificate]
     connected_timestamp: time.struct_time
     request: bytes
     url: str
@@ -531,11 +532,6 @@ class GeminiProtocol(LineOnlyReceiver):
         self.response_size = 0
         self.response_buffer = ""
         self.client_addr = self.transport.getPeer()
-        self.client_cert = None
-
-        peer_cert = self.transport.getPeerCertificate()
-        if peer_cert:
-            self.client_cert = peer_cert.to_cryptography()
 
     def lineReceived(self, line):
         """
@@ -576,7 +572,8 @@ class GeminiProtocol(LineOnlyReceiver):
         """
         Construct a dictionary that will be passed to the application handler.
 
-        Variable names conform to the CGI spec defined in RFC 3875.
+        Variable names (mostly) conform to the CGI spec defined in RFC 3875.
+        The TLS variable names borrow from the GLV-1.12556 server.
         """
         url_parts = urllib.parse.urlparse(self.url)
         environ = {
@@ -590,21 +587,39 @@ class GeminiProtocol(LineOnlyReceiver):
             "SERVER_PORT": str(self.client_addr.port),
             "SERVER_PROTOCOL": "GEMINI",
             "SERVER_SOFTWARE": f"jetforce/{__version__}",
+            "client_certificate": None,
         }
-        if self.client_cert:
-            # Extract useful information from the client certificate. These
-            # mostly follow the naming convention from GLV-1.12556
-            cert = self.client_cert
+
+        peer_certificate = self.transport.getPeerCertificate()
+        if peer_certificate:
+            cert = peer_certificate.to_cryptography()
+            environ["client_certificate"] = cert
+
+            # Extract useful information from the client certificate.
             name_attrs = cert.subject.get_attributes_for_oid(CN)
             common_name = name_attrs[0].value if name_attrs else ""
+
             fingerprint_bytes = cert.fingerprint(hashes.SHA256())
             fingerprint = base64.b64encode(fingerprint_bytes).decode()
+
             not_before = cert.not_valid_before.strftime("%Y-%m-%dT%H:%M:%SZ")
             not_after = cert.not_valid_after.strftime("%Y-%m-%dT%H:%M:%SZ")
+
+            conn = self.transport.getHandle()
+
+            tls_version = conn.get_protocol_version_name()
+            tls_cipher = conn.get_cipher_name()
+
+            # Grab the value that we stashed during the TLS handshake.
+            verified = getattr(conn, "preverify_ok", False)
+
             environ.update(
                 {
                     "AUTH_TYPE": "CERTIFICATE",
                     "REMOTE_USER": common_name,
+                    "TLS_CIPHER": tls_cipher,
+                    "TLS_VERSION": tls_version,
+                    "TLS_CLIENT_VERIFIED": verified,
                     "TLS_CLIENT_HASH": fingerprint,
                     "TLS_CLIENT_NOT_BEFORE": not_before,
                     "TLS_CLIENT_NOT_AFTER": not_after,
@@ -746,7 +761,8 @@ class GeminiOpenSSLCertificateOptions(CertificateOptions):
         library. Returning true will always allow client certificates, even if
         they are self-signed.
         """
-        return preverify_ok
+        conn.preverify_ok = preverify_ok
+        return True
 
     def proto_select_callback(self, conn, protocols):
         """
@@ -905,7 +921,7 @@ class GeminiServer(Factory):
             raiseMinimumTo=TLSVersion.TLSv1_3,
             requireCertificate=False,
             fixBrokenPeers=True,
-            # ALPN, I may look into supporting this later
+            # This is for ALPN, I may look into supporting this later.
             acceptableProtocols=None,
         )
 
@@ -938,41 +954,42 @@ class GeminiServer(Factory):
             action="version",
             version="jetforce " + __version__
         )
-        parser.add_argument(
+        group = parser.add_argument_group("server configuration")
+        group.add_argument(
             "--host",
             help="Server address to bind to",
             default="127.0.0.1"
         )
-        parser.add_argument(
+        group.add_argument(
             "--port",
             help="Server port to bind to",
             type=int,
             default=1965
         )
-        parser.add_argument(
+        group.add_argument(
             "--hostname",
             help="Server hostname",
             default="localhost"
         )
-        parser.add_argument(
+        group.add_argument(
             "--tls-certfile",
             dest="certfile",
             help="Server TLS certificate file",
             metavar="FILE",
         )
-        parser.add_argument(
+        group.add_argument(
             "--tls-keyfile",
             dest="keyfile",
             help="Server TLS private key file",
             metavar="FILE",
         )
-        parser.add_argument(
+        group.add_argument(
             "--tls-cafile",
             dest="cafile",
             help="A CA file to use for validating clients",
             metavar="FILE",
         )
-        parser.add_argument(
+        group.add_argument(
             "--tls-capath",
             dest="capath",
             help="A directory containing CA files for validating clients",
@@ -982,14 +999,12 @@ class GeminiServer(Factory):
         return parser
 
     @classmethod
-    def from_argparse(
+    def from_command_line(
         cls, app_class: typing.Type[JetforceApplication], reactor: ReactorBase = reactor
     ):
         """
-        Shortcut to parse command line arguments and build a server instance.
-
-        This only works with class-based Jetforce applications that subclass
-        from JetforceApplication.
+        Shortcut to parse command line arguments and build a server instance
+        for a class-based jetforce application.
         """
         parser = cls.build_argument_parser()
         app_class.add_arguments(parser)
@@ -1010,7 +1025,7 @@ def run_server() -> None:
     """
     Entry point for running the static directory server.
     """
-    server = GeminiServer.from_argparse(app_class=StaticDirectoryApplication)
+    server = GeminiServer.from_command_line(app_class=StaticDirectoryApplication)
     server.run()
 
 
