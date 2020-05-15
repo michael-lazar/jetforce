@@ -6,11 +6,12 @@ Overview
 --------
 
 GeminiServer:
-    An asynchronous TCP server built on top of python's asyncio stream
-    abstraction. This is a lightweight class that accepts incoming requests,
-    logs them, and sends them to a configurable request handler to be processed.
+    A TCP + TLS server build on top of the python twisted framework. This class
+    is responsible for binding to the TCP/IP interface, setting up the TLS
+    context, handling incoming connections, and sending connections to to a
+    request handler to be processed.
 
-GeminiRequestHandler:
+GeminiProtocol:
     The request handler manages the life of a single gemini request. It exposes
     a simplified interface to read the request URL and write the gemini response
     status line and body to the socket. The request URL and other server
@@ -27,10 +28,10 @@ JetforceApplication:
     how to accomplish this.
 
 StaticDirectoryApplication:
-    This is a pre-built application that serves files from a static directory.
-    It provides an "out-of-the-box" gemini server without needing to write any
-    lines of code. This is what is invoked when you launch jetforce from the
-    command line.
+    This is a batteries-included application that serves files from a static
+    directory. It provides a preconfigured gemini server without needing to
+    write any lines of code. This is what is invoked when you launch jetforce
+    from the command line.
 """
 from __future__ import annotations
 
@@ -290,10 +291,10 @@ class StaticDirectoryApplication(JetforceApplication):
     """
     Application for serving static files & CGI over gemini.
 
-    This is a pre-built application that serves files from a static directory.
-    It provides an "out-of-the-box" gemini server without needing to write any
-    lines of code. This is what is invoked when you launch jetforce from the
-    command line.
+    This is a batteries-included application that serves files from a static
+    directory. It provides a preconfigured gemini server without needing to
+    write any lines of code. This is what is invoked when you launch jetforce
+    from the command line.
 
     If a directory contains a file with the name "index.gmi", that file will
     be returned when the directory path is requested. Otherwise, a directory
