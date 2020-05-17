@@ -18,16 +18,18 @@ setuptools.setup(
     description="An Experimental Gemini Server",
     install_requires=[
         "twisted>=20.3.0",
-        "service_identity",  # Used by twisted
-        "idna",  # Used by twisted
-        "pyopenssl",  # Used by twisted
+        # Requirements below are used by twisted[security]
+        "service_identity",
+        "idna",
+        "pyopenssl",
     ],
     long_description=long_description(),
     long_description_content_type="text/markdown",
-    py_modules=["jetforce", "jetforce_client", "jetforce_diagnostics"],
+    packages=["jetforce", "jetforce.app"],
+    py_modules=["jetforce_client", "jetforce_diagnostics"],
     entry_points={
         "console_scripts": [
-            "jetforce=jetforce:run_server",
+            "jetforce=jetforce.__main__:main",
             "jetforce-client=jetforce_client:run_client",
             "jetforce-diagnostics=jetforce_diagnostics:run",
         ]
