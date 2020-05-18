@@ -5,7 +5,8 @@ import typing
 import urllib.parse
 
 from twisted.internet.address import IPv4Address, IPv6Address
-from twisted.internet.defer import inlineCallbacks
+from twisted.internet.defer import ensureDeferred
+from twisted.internet.threads import deferToThread
 from twisted.protocols.basic import LineOnlyReceiver
 
 from .__version__ import __version__
@@ -64,10 +65,10 @@ class GeminiProtocol(LineOnlyReceiver):
         connection without managing any state.
         """
         self.request = line
-        return self._handle_request_noblock()
+        return ensureDeferred(self._handle_request_noblock())
 
-    @inlineCallbacks
-    def _handle_request_noblock(self):
+    async def _handle_request_noblock(self):
+
         try:
             self.parse_header()
         except Exception:
@@ -79,9 +80,15 @@ class GeminiProtocol(LineOnlyReceiver):
 
         try:
             environ = self.build_environ()
-            for data in self.app(environ, self.write_status):
-                self.write_body(data)
-                yield  # Yield control to the event loop
+            response_generator = await deferToThread(
+                self.app, environ, self.write_status
+            )
+            while True:
+                try:
+                    data = await deferToThread(response_generator.__next__)
+                    self.write_body(data)
+                except StopIteration:
+                    break
         except Exception:
             self.write_status(Status.CGI_ERROR, "An unexpected error occurred")
         finally:
@@ -163,16 +170,14 @@ class GeminiProtocol(LineOnlyReceiver):
         self.meta = meta
         self.response_buffer = f"{status}\t{meta}\r\n"
 
-    def write_body(self, data: typing.Union[str, bytes, None]) -> None:
+    def write_body(self, data: typing.Union[str, bytes]) -> None:
         """
         Write bytes to the gemini response body.
         """
-        if data is None:
-            return
-
-        self.flush_status()
         if isinstance(data, str):
             data = data.encode()
+
+        self.flush_status()
         self.response_size += len(data)
         self.transport.write(data)
 

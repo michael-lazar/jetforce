@@ -7,6 +7,7 @@ A dead-simple gemini client intended to be used for server development and testi
 import argparse
 import socket
 import ssl
+import sys
 import urllib.parse
 
 context = ssl.create_default_context()
@@ -25,11 +26,11 @@ def fetch(url: str, host: str = None, port: str = None):
     with socket.create_connection((host, port)) as sock:
         with context.wrap_socket(sock) as ssock:
             ssock.sendall((url + "\r\n").encode())
-            fp = ssock.makefile("rb")
-            header = fp.readline().decode()
-            print(header)
-            body = fp.read().decode()
-            print(body)
+            fp = ssock.makefile("rb", buffering=0)
+            data = fp.read(1024)
+            while data:
+                sys.stdout.buffer.write(data)
+                data = fp.read(1024)
 
 
 def run_client():
