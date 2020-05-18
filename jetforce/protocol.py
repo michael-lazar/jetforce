@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import time
+import traceback
 import typing
 import urllib.parse
 
@@ -89,6 +90,7 @@ class GeminiProtocol(LineOnlyReceiver):
             self.parse_header()
         except Exception:
             # Malformed request, throw it away and exit immediately
+            self.server.log_message(traceback.format_exc())
             self.write_status(Status.BAD_REQUEST, "Malformed request")
             self.flush_status()
             self.transport.loseConnection()
@@ -106,6 +108,7 @@ class GeminiProtocol(LineOnlyReceiver):
                 except StopIteration:
                     break
         except Exception:
+            self.server.log_message(traceback.format_exc())
             self.write_status(Status.CGI_ERROR, "An unexpected error occurred")
         finally:
             self.flush_status()
