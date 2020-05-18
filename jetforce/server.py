@@ -14,13 +14,21 @@ from .__version__ import __version__
 from .protocol import GeminiProtocol
 from .tls import GeminiCertificateOptions, generate_ad_hoc_certificate
 
+if sys.stderr.isatty():
+    CYAN = "\033[36m\033[1m"
+    RESET = "\033[0m"
+else:
+    CYAN = ""
+    RESET = ""
+
+
 ABOUT = fr"""
-You are now riding on...
+{CYAN}You are now riding on...
 _________    _____________
 ______  /______  /___  __/_______________________
 ___ _  /_  _ \  __/_  /_ _  __ \_  ___/  ___/  _ \
 / /_/ / /  __/ /_ _  __/ / /_/ /  /   / /__ /  __/
-\____/  \___/\__/ /_/    \____//_/    \___/ \___/
+\____/  \___/\__/ /_/    \____//_/    \___/ \___/{RESET}
 
 An Experimental Gemini Server, v{__version__}
 https://github.com/michael-lazar/jetforce
