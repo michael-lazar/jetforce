@@ -59,16 +59,32 @@ class GeminiProtocol(LineOnlyReceiver):
     def lineReceived(self, line):
         """
         This method is invoked by LineOnlyReceiver for every incoming line.
-
-        Because Gemini requests are only ever a single line long, this will
-        only be called once and we can use it to handle the lifetime of the
-        connection without managing any state.
         """
         self.request = line
         return ensureDeferred(self._handle_request_noblock())
 
     async def _handle_request_noblock(self):
+        """
+        Handle the gemini request and write the raw response to the socket.
 
+        This method is implemented using an async coroutine, which has been
+        supported by twisted since python 3.5 by wrapping the method in
+        ensureDeferred(). Twisted + coroutines is a bitch to figure out, but
+        once it clicks it really does turn out to be an elegant solution.
+
+        Any time that we call into the application code, we wrap the call with
+        deferToThread() which will execute the code in a separate thread using
+        twisted's thread pool. deferToThread() will return a future object
+        that we can then `await` to get the result when the thread finishes.
+        This is important because we don't want application code to block the
+        twisted event loop from serving other requests at the same time.
+
+        In the future, I would like to add the capability for applications to
+        implement proper coroutines that can call `await` on directly without
+        needing to wrap them in threads. Conceptually, this shouldn't be too
+        difficult, but it will require implementing an alternate version of
+        the JetforceApplication that's async-compatible.
+        """
         try:
             self.parse_header()
         except Exception:

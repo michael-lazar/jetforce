@@ -124,7 +124,8 @@ class GeminiCertificateOptions(CertificateOptions):
         keyfile: typing.Optional[str] = None,
         cafile: typing.Optional[str] = None,
         capath: typing.Optional[str] = None,
-    ):
+    ) -> None:
+
         self.certfile = certfile
         self.keyfile = keyfile
         self.cafile = cafile
@@ -136,7 +137,7 @@ class GeminiCertificateOptions(CertificateOptions):
             fixBrokenPeers=True,
         )
 
-    def _makeContext(self):
+    def _makeContext(self) -> OpenSSL.SSL.Context:
         """
         Most of this code is copied directly from the parent class method.
         """
