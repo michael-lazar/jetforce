@@ -15,7 +15,6 @@ requests. Try requesting this endpoint over two connections simultaneously.
 > jetforce-client gemini://localhost
 > jetforce-client gemini://localhost
 """
-
 import time
 
 from jetforce import GeminiServer, JetforceApplication, Response, Status

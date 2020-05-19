@@ -2,10 +2,15 @@
 A simple guestbook application that accepts and displays text messages.
 
 This is an example of how to return a 10 INPUT request to the client and
-retrieve their response by parsing the URL query string. This example stores
-the guestbook inside of a persistent sqlite database.
-"""
+retrieve their response by parsing the URL query string.
 
+This example stores the guestbook inside of a persistent sqlite database.
+Because each request will run inside of a separate thread, we must create a new
+connection object inside of the request handler instead of re-using a global
+database connection. This thread-safety can be disabled in sqlite3 by using the
+check_same_thread=False argument, but then it's up to you to ensure that only
+connection request is writing to the database at any given time.
+"""
 import sqlite3
 from datetime import datetime
 
