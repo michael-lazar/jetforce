@@ -7,13 +7,10 @@ Learn more about Gemini [here](https://gopher.commons.host/gopher://zaibatsu.cir
 
 ## Features
 
-- A built-in static file server with support for gemini directories and
-  CGI scripts.
-- Lightweight, single-file framework with zero external dependencies.  
-- Modern python codebase with type hinting and black style formatting.
-- Supports concurrent connections using an asynchronous event loop.
-- Extendable components that loosely implement the [WSGI](https://en.wikipedia.org/wiki/Web_Server_Gateway_Interface)
-  server/application pattern.
+- A built-in static file server with support for gemini directories and CGI scripts.
+- An extendable application framework that loosely mimics the [WSGI](https://en.wikipedia.org/wiki/Web_Server_Gateway_Interface) interface.
+- A lean, modern python codebase with type hints and black formatting.
+- A solid networking foundation based on the [twisted](https://twistedmatrix.com/trac/) engine.
 
 ## Installation
 
