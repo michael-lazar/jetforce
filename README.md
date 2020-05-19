@@ -10,7 +10,7 @@ Learn more about Gemini [here](https://portal.mozz.us/).
 - A built-in static file server with support for gemini directories and CGI scripts.
 - An extendable application framework that loosely mimics the [WSGI](https://en.wikipedia.org/wiki/Web_Server_Gateway_Interface) interface.
 - A lean, modern python codebase with type hints and black formatting.
-- A solid networking foundation based on the [twisted](https://twistedmatrix.com/trac/) engine.
+- A solid networking foundation built on top of the [twisted](https://twistedmatrix.com/trac/) engine.
 
 ## Installation
 
