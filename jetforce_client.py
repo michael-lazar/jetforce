@@ -15,7 +15,7 @@ context.check_hostname = False
 context.verify_mode = ssl.CERT_NONE
 
 
-def fetch(url: str, host: str = None, port: str = None):
+def fetch(url, host=None, port=None, use_sni=False):
     parsed_url = urllib.parse.urlparse(url)
     if not parsed_url.scheme:
         parsed_url = urllib.parse.urlparse(f"gemini://{url}")
@@ -23,8 +23,10 @@ def fetch(url: str, host: str = None, port: str = None):
     host = host or parsed_url.hostname
     port = port or parsed_url.port or 1965
 
+    server_hostname = host if use_sni else None
+
     with socket.create_connection((host, port)) as sock:
-        with context.wrap_socket(sock) as ssock:
+        with context.wrap_socket(sock, server_hostname=server_hostname) as ssock:
             ssock.sendall((url + "\r\n").encode())
             fp = ssock.makefile("rb", buffering=0)
             data = fp.read(1024)
@@ -44,12 +46,18 @@ def run_client():
     )
     parser.add_argument("--certfile", help="Optional client certificate")
     parser.add_argument("--keyfile", help="Optional client key")
-    args = parser.parse_args()
+    parser.add_argument("--alpn-protocol", help="Indicate the protocol using ALPN")
+    parser.add_argument(
+        "--use-sni", action="store_true", help="Specify the server hostname via SNI"
+    )
 
+    args = parser.parse_args()
     if args.certfile:
         context.load_cert_chain(args.certfile, args.keyfile)
+    if args.alpn_protocol:
+        context.set_alpn_protocols([args.alpn_protocol])
 
-    fetch(args.url, args.host, args.port)
+    fetch(args.url, args.host, args.port, args.use_sni)
 
 
 if __name__ == "__main__":

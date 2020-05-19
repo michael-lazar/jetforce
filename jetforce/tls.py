@@ -94,7 +94,14 @@ class GeminiCertificateOptions(CertificateOptions):
         https://github.com/twisted/twisted/blob/trunk/src/twisted/internet/_sslverify.py
     """
 
-    def verify_callback(self, conn, cert, errno, depth, preverify_ok):
+    def verify_callback(
+        self,
+        conn: OpenSSL.SSL.Connection,
+        cert: OpenSSL.crypto.X509,
+        errno: int,
+        depth: int,
+        preverify_ok: int,
+    ) -> bool:
         """
         Callback used by OpenSSL for client certificate verification.
 
@@ -106,7 +113,9 @@ class GeminiCertificateOptions(CertificateOptions):
         conn.verified = preverify_ok
         return True
 
-    def proto_select_callback(self, conn, protocols):
+    def proto_select_callback(
+        self, conn: OpenSSL.SSL.Connection, protocols: typing.List[bytes]
+    ) -> bytes:
         """
         Callback used by OpenSSL for ALPN support.
 
@@ -117,6 +126,16 @@ class GeminiCertificateOptions(CertificateOptions):
                 return p
         else:
             return b""
+
+    def sni_callback(self, conn: OpenSSL.SSL.Connection) -> None:
+        """
+        Callback used by OpenSSL for SNI support.
+
+        We can inspect the servername requested by the client using
+        conn.get_servername(), and attach an appropriate context using
+        conn.set_context(new_context).
+        """
+        pass
 
     def __init__(
         self,
@@ -176,5 +195,7 @@ class GeminiCertificateOptions(CertificateOptions):
         if self._acceptableProtocols:
             ctx.set_alpn_select_callback(self.proto_select_callback)
             ctx.set_alpn_protos(self._acceptableProtocols)
+
+        ctx.set_tlsext_servername_callback(self.sni_callback)
 
         return ctx
