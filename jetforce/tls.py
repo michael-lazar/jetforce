@@ -120,6 +120,7 @@ class GeminiCertificateOptions(CertificateOptions):
         Callback used by OpenSSL for ALPN support.
 
         Return the first matching protocol in our list of acceptable values.
+        This is not currently being used but I may want to add support later.
         """
         for p in self._acceptableProtocols:
             if p in protocols:
@@ -133,7 +134,8 @@ class GeminiCertificateOptions(CertificateOptions):
 
         We can inspect the servername requested by the client using
         conn.get_servername(), and attach an appropriate context using
-        conn.set_context(new_context).
+        conn.set_context(new_context). This is not currently being used but
+        I want to add support in the future.
         """
         pass
 
