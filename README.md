@@ -46,6 +46,8 @@ An Experimental Gemini Protocol Server
 optional arguments:
   -h, --help           show this help message and exit
   -V, --version        show program's version number and exit
+
+server configuration:
   --host HOST          Server address to bind to (default: 127.0.0.1)
   --port PORT          Server port to bind to (default: 1965)
   --hostname HOSTNAME  Server hostname (default: localhost)
@@ -54,6 +56,8 @@ optional arguments:
   --tls-cafile FILE    A CA file to use for validating clients (default: None)
   --tls-capath DIR     A directory containing CA files for validating clients
                        (default: None)
+
+fileserver configuration:
   --dir DIR            Root directory on the filesystem to serve (default:
                        /var/gemini)
   --cgi-dir DIR        CGI script directory, relative to the server's root
