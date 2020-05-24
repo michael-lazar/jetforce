@@ -104,9 +104,8 @@ $ openssl req -newkey rsa:2048 -nodes -keyout {hostname}.key \
 ```
 
 Jetforce also supports TLS client certificates (both self-signed and CA verified).
-Connections made with a client certificate will have additional metadata included
-in the request environment. ``REMOTE_USER`` will contain the subject common name,
-and ``TLS_CLIENT_HASH`` will contain a fingerprint that can be used for TOFU pinning.
+Requests that are made with client certificates will include additional
+CGI/environment variables with information about the TLS connection.
 
 You can specify a CA for client validation with the ``--tls-cafile`` or ``--tls-capath``
 flags. Connections validated by the CA will have the ``TLS_CLIENT_VERIFIED`` environment
@@ -116,13 +115,11 @@ this readme, but you can find many helpful tutorials
 
 ### Static Files
 
-Jetforce will serve static files in the ``/var/gemini/`` directory:
-
-- Files ending with **.gmi** will be interpreted as the *text/gemini* type
-- If a directory is requested, jetforce will look for a file in that directory
-  with the name of **index.gmi**
-  - If it exists, the index file will be returned
-  - Otherwise, jetforce will generate a directory listing
+Jetforce will, by default, serve static files in the ``/var/gemini/`` directory.
+Files ending with **.gmi** will be interpreted as the *text/gemini* mime type. If
+a directory is requested, jetforce will look for a file named **index.gmi** in that
+directory to return. Otherwise, a directory file listing will be automatically
+generated.
 
 ### CGI Scripts
 
@@ -212,10 +209,10 @@ journalctl -u jetforce -f
 
 *WARNING*
 
-The internet can be a scary place. You (yes you!) are responsible for securing your
-server and setting up appropriate access permissions. This likely means *not*
-running jetforce as the root user. Security best practices are outside of the scope
-of this document and largely depend on your individual threat model.
+You are exposing a server to the internet. You (yes you!) are responsible for
+securing your server and setting up appropriate access permissions. This likely means
+*not* running jetforce as the root user. Security best practices are outside of the
+scope of this document and largely depend on your individual threat model.
 
 
 ## License
