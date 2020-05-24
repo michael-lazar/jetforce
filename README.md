@@ -8,9 +8,9 @@ Learn more about Gemini [here](https://portal.mozz.us/).
 ## Features
 
 - A built-in static file server with support for gemini directories and CGI scripts.
-- An extendable application framework that loosely mimics the [WSGI](https://en.wikipedia.org/wiki/Web_Server_Gateway_Interface) interface.
+- A framework for python applications that loosely mimics the [WSGI](https://en.wikipedia.org/wiki/Web_Server_Gateway_Interface) interface design.
 - A lean, modern python codebase with type hints and black formatting.
-- A solid foundation built on top of the [twisted](https://twistedmatrix.com/trac/) networking engine.
+- A solid foundation built on top of the [twisted](https://twistedmatrix.com/trac/) asynchronous networking engine.
 
 ## Installation
 
@@ -105,9 +105,9 @@ in the request environment. ``REMOTE_USER`` will contain the subject common name
 and ``TLS_CLIENT_HASH`` will contain a fingerprint that can be used for TOFU pinning.
 
 You can specify a CA for client validation with the ``--tls-cafile`` or ``--tls-capath``
-flags. Connections validated by the CA will have the ``TLS_CLIENT_VERIFIED`` flag set to
-True. Instructions on how to generate CA's are outside of the scope of this readme, but
-you can find many helpful tutorials
+flags. Connections validated by the CA will have the ``TLS_CLIENT_VERIFIED`` environment
+variable set to True. Instructions on how to generate CA's are outside of the scope of
+this readme, but you can find many helpful tutorials
 [online](https://www.makethenmakeinstall.com/2014/05/ssl-client-authentication-step-by-step/).
 
 ### Static Files
