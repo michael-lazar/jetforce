@@ -26,12 +26,11 @@ setuptools.setup(
     long_description=long_description(),
     long_description_content_type="text/markdown",
     packages=["jetforce", "jetforce.app"],
-    py_modules=["jetforce_client", "jetforce_diagnostics"],
+    py_modules=["jetforce_client"],
     entry_points={
         "console_scripts": [
             "jetforce=jetforce.__main__:main",
             "jetforce-client=jetforce_client:run_client",
-            "jetforce-diagnostics=jetforce_diagnostics:run",
         ]
     },
     python_requires=">=3.7",
