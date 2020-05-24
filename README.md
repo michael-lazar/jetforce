@@ -141,10 +141,10 @@ the request using environment variables:
 | SCRIPT_NAME | The part of the URL's path that corresponds to the CGI script location. | ``/cgi-bin/example.cgi`` |
 | PATH_INFO | The remainder of the URL's path after the CGI script location. | ``/hello`` |
 | QUERY_STRING | The query string portion of the request URL. | ``world`` |
-| HOSTNAME | The server's hostname. | ``mozz.us`` |
-| SERVER_NAME | The server hostname, alias for HOSTNAME. | ``mozz.us`` |
+| HOSTNAME | The server hostname. | ``mozz.us`` |
+| SERVER_NAME | The server hostname (alias for HOSTNAME). | ``mozz.us`` |
 | REMOTE_ADDR | The client IP address. | ``10.10.0.2`` |
-| REMOTE_HOST | The client IP address, alias for REMOTE_ADDR. | ``10.10.0.2`` |
+| REMOTE_HOST | The client IP address (alias for REMOTE_ADDR). | ``10.10.0.2`` |
 | SERVER_PORT | The server port number. | ``1965`` |
 
 Additional CGI variables will also be included when the connection uses a TLS client certificate:
@@ -160,23 +160,6 @@ Additional CGI variables will also be included when the connection uses a TLS cl
 | TLS_CLIENT_VERIFIED | Whether the certificate verified by local CA | ``0``/``1`` |
 | TLS_CIPHER | The TLS cipher that was used. | ``TLS_AES_256_GCM_SHA384``|
 | TLS_VERSION | The TLS version that was used. | ``TLSv1.3`` |
-
-
-
-| GATEWAY_INTERFACE | The CGI version (for compatability with other CGI scripts). | ``GCI/1.1`` |
-| SERVER_PROTOCOL | The server protocol. | ``GEMINI`` |
-| SERVER_SOFTWARE | The server version string. | ``jetforce/0.0.7`` |
-| GEMINI_URL | The raw URL string that was requested. | ``gemini://mozz.us/cgi-bin/example.cgi/hello?world``
-| SCRIPT_NAME | The part of the URL's path that corresponds to the CGI script location. | ``/cgi-bin/example.cgi`` |
-| PATH_INFO | The remainder of the URL's path after the CGI script location. | ``/hello`` |
-| QUERY_STRING | The query string portion of the request URL. | ``world`` |
-| HOSTNAME | The server's hostname. | ``mozz.us`` |
-| SERVER_NAME | The server hostname, alias for HOSTNAME. | ``mozz.us`` |
-| REMOTE_ADDR | The client IP address. | ``10.10.0.2`` |
-| REMOTE_HOST | The client IP address, alias for REMOTE_ADDR. | ``10.10.0.2`` |
-| SERVER_PORT | The server port number. | ``1965`` |
-
-
 
 The CGI script must then write the gemini response to the *stdout* stream.
 This includes the status code and meta string on the first line, and the
