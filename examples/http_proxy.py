@@ -1,15 +1,22 @@
 """
-This is an example of setting up a Gemini server to proxy requests to other
-protocols. This application will accept HTTP URLs, download and render them
-locally using the `w3m` tool, and render the output to the client as plain text.
+A server that proxies HTTP websites over gemini.
+
+This example demonstrates how your application routes aren't just limited to
+gemini URLs. The server will accept any HTTP URL, download the page and
+render it using the external `w3m` tool, and then render the output to the
+client as plain-text.
+
+Most gemini clients won't be able to make this request, because the hostname
+in the URL doesn't match the hostname of the server. You can test this out
+using jetforce-client like this:
+
+> jetforce-client https://mozz.us --host localhost
 """
-import asyncio
 import subprocess
 
-import jetforce
-from jetforce import Response, Status
+from jetforce import GeminiServer, JetforceApplication, Response, Status
 
-app = jetforce.JetforceApplication()
+app = JetforceApplication()
 
 
 @app.route(scheme="https", strict_hostname=False)
@@ -26,15 +33,5 @@ def proxy_request(request):
 
 
 if __name__ == "__main__":
-    args = jetforce.command_line_parser().parse_args()
-    ssl_context = jetforce.make_ssl_context(
-        args.hostname, args.certfile, args.keyfile, args.cafile, args.capath
-    )
-    server = jetforce.GeminiServer(
-        host=args.host,
-        port=args.port,
-        ssl_context=ssl_context,
-        hostname=args.hostname,
-        app=app,
-    )
-    asyncio.run(server.run())
+    server = GeminiServer(app)
+    server.run()

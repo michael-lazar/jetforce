@@ -1,8 +1,10 @@
 # Jetforce Changelog
 
-### Unreleased
+### v0.3.0 (pre-release)
 
 - Allow a client certificate subject's CN to be blank.
+- The ``jetforce-diagnostics`` script has been split off into a separate
+  repository at [gemini-diagnostics](https://github.com/michael-lazar/gemini-diagnostics).
 
 ### v0.2.2 (2012-03-31)
 
