@@ -105,9 +105,9 @@ in the request environment. ``REMOTE_USER`` will contain the subject common name
 and ``TLS_CLIENT_HASH`` will contain a fingerprint that can be used for TOFU pinning.
 
 You can specify a CA for client validation with the ``--tls-cafile`` or ``--tls-capath``
-flags. Connections validated by the CA will have the ``TLS_CLIENT_VERIFIED`` flag set to
-True. Instructions on how to generate CA's are outside of the scope of this readme, but
-you can find many helpful tutorials
+flags. Connections validated by the CA will have the ``TLS_CLIENT_VERIFIED`` environment
+variable set to True. Instructions on how to generate CA's are outside of the scope of
+this readme, but you can find many helpful tutorials
 [online](https://www.makethenmakeinstall.com/2014/05/ssl-client-authentication-step-by-step/).
 
 ### Static Files
