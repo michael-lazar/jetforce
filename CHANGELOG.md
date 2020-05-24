@@ -2,9 +2,75 @@
 
 ### v0.3.0 (pre-release)
 
-- Allow a client certificate subject's CN to be blank.
-- The ``jetforce-diagnostics`` script has been split off into a separate
-  repository at [gemini-diagnostics](https://github.com/michael-lazar/gemini-diagnostics).
+This release brings some major improvements and necessary refactoring of the
+jetforce package. Please read the release notes carefully and exercise caution
+when upgrading from previous versions of jetforce.
+
+#### For users of the static file server
+
+If you are running jetforce only as a static file & CGI server (i.e. you
+are using the command-line and haven't written any custom python applications),
+you should not need to make any changes.
+
+There have been some minor updates to the CGI variables, and new CGI variables
+have been added with additional TLS information. Check out the README for the
+new list.
+
+This package now has third-party python dependencies. If you installed jetforce
+through pip, you should be already fine. If you were running the ``jetforce.py``
+script directly from the git repository, you will likely either want to switch
+to installing from pip (recommended), or setup a virtual environment and run
+``python setup.py install``. This will install the dependencies and stick a
+``jetforce`` executable into your system path.
+
+#### jetforce-diagnostics
+
+The ``jetforce-diagnostics`` script is no longer included as part of jetforce.
+It has been moved to its own repository at
+[gemini-diagnostics](https://github.com/michael-lazar/gemini-diagnostics).
+
+#### Code Structure
+
+The underlying TCP server framework has been switched from asyncio+ssl to
+twisted+PyOpenSSL. This change was necessary to allow support for self-signed
+client certificates. The new framework provides more access to hook into the
+OpenSSL library and implement non-standard TLS behavior.
+
+I tried to isolate the framework changes to the ``GeminiServer`` layer. This
+means that if you subclassed from the ``JetforceApplication``, you will likely
+not need to change anything in your application code. Launching a jetforce
+server from inside of python code has been simplified (no more setting up the
+asyncio event loop!).
+
+```
+server = GeminiServer(app)
+server.run()
+```
+
+Check out the updated examples in the examples/ directory for more details.
+
+#### TLS Client Certificates
+
+Jetforce will now accept self-signed and unvalidated client certificates. The
+``capath`` and ``cafile`` arguments can still be provided, and will attempt to
+validate the certificate using of the underlying OpenSSL library. The result
+of this validation will be saved in the ``TLS_CLIENT_VERIFIED`` environment
+variable so that each application can decide how it wants to accept/reject the
+connection.
+
+In order to facilitate TOFU verification schemes, a fingerprint of the client
+certificate is now computed and saved in the ``TLS_CLIENT_HASH`` environment
+variable.
+
+#### Other Changes
+
+- A client certificate can now have an empty ``commonName`` field.
+- ``JetforceApplication``: Named capture groups in a route's regex pattern
+  will now be passed as keyword arguments to the wrapped function. See
+  examples/pagination.py for an example of how to use this feature.
+- A new ``CompositeApplication`` class is included to support virtual hosting
+  by combining multiple applications behind the same jetforce server. See
+  examples/vhost.py for an example of how to use this class.
 
 ### v0.2.2 (2012-03-31)
 

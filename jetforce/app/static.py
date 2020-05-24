@@ -162,7 +162,7 @@ class StaticDirectoryApplication(JetforceApplication):
         else:
             return mime or "text/plain"
 
-    def default_callback(self, request: Request) -> Response:
+    def default_callback(self, request: Request, **_) -> Response:
         """
         Since the StaticDirectoryApplication only serves gemini URLs, return
         a proxy request refused for suspicious URLs.

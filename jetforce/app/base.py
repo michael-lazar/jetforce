@@ -132,7 +132,7 @@ class JetforceApplication:
 
     def __init__(self):
         self.routes: typing.List[
-            typing.Tuple[RoutePattern, typing.Callable[[Request], Response]]
+            typing.Tuple[RoutePattern, typing.Callable[[Request, ...], Response]]
         ] = []
 
     def __call__(
@@ -145,12 +145,15 @@ class JetforceApplication:
             return
 
         for route_pattern, callback in self.routes[::-1]:
+            match = route_pattern.match(request)
             if route_pattern.match(request):
+                callback_kwargs = match.groupdict()
                 break
         else:
             callback = self.default_callback
+            callback_kwargs = {}
 
-        response = callback(request)
+        response = callback(request, **callback_kwargs)
         send_status(response.status, response.meta)
 
         if isinstance(response.body, (bytes, str)):
@@ -185,7 +188,7 @@ class JetforceApplication:
 
         return wrap
 
-    def default_callback(self, request: Request) -> Response:
+    def default_callback(self, request: Request, **_) -> Response:
         """
         Set the error response based on the URL type.
         """
