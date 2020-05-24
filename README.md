@@ -14,9 +14,9 @@ Learn more about Gemini [here](https://portal.mozz.us/).
 
 ## Installation
 
-Requires Python 3.7+
+Requires Python 3.7 or newer.
 
-The latest release can be installed from [PyPI](https://pypi.org/project/Jetforce/):
+The latest stable release can be installed from [PyPI](https://pypi.org/project/Jetforce/):
 
 ```bash
 $ pip install jetforce
