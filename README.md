@@ -134,6 +134,35 @@ the request using environment variables:
 
 | Variable Name | Description | Example |
 | --- | --- | --- |
+| GATEWAY_INTERFACE | The CGI version (for compatability). | ``GCI/1.1`` |
+| SERVER_PROTOCOL | The server protocol. | ``GEMINI`` |
+| SERVER_SOFTWARE | The server version string. | ``jetforce/0.0.7`` |
+| GEMINI_URL | The raw URL string that was requested. | ``gemini://mozz.us/cgi-bin/example.cgi/hello?world``
+| SCRIPT_NAME | The part of the URL's path that corresponds to the CGI script location. | ``/cgi-bin/example.cgi`` |
+| PATH_INFO | The remainder of the URL's path after the CGI script location. | ``/hello`` |
+| QUERY_STRING | The query string portion of the request URL. | ``world`` |
+| HOSTNAME | The server's hostname. | ``mozz.us`` |
+| SERVER_NAME | The server hostname, alias for HOSTNAME. | ``mozz.us`` |
+| REMOTE_ADDR | The client IP address. | ``10.10.0.2`` |
+| REMOTE_HOST | The client IP address, alias for REMOTE_ADDR. | ``10.10.0.2`` |
+| SERVER_PORT | The server port number. | ``1965`` |
+
+Additional CGI variables will also be included when the connection uses a TLS client certificate:
+
+| Variable Name | Description | Example |
+| --- | --- | --- |
+| AUTH_TYPE | The authentication type (for compatability). | ``CERTIFICATE`` |
+| REMOTE_USER | The subject CommonName attribute, if provided. | ``michael123`` |
+| TLS_CLIENT_HASH | A base64-encoded certificate fingerprint | ``hjQftIC/4zPDQ1MNdav5nRQ39pM482xoTIgxtjyZOpY=`` |
+| TLS_CLIENT_NOT_BEFORE | The certificate activation date | ``2020-04-05T04:18:22Z`` |
+| TLS_CLIENT_NOT_AFTER | The certificate expiration date | ``2021-04-05T04:18:22Z`` |
+| TLS_CLIENT_SERIAL_NUMBER | The certificate serial number | ``73629018972631`` |
+| TLS_CLIENT_VERIFIED | Whether the certificate verified by local CA | ``0``/``1`` |
+| TLS_CIPHER | The TLS cipher that was used. | ``TLS_AES_256_GCM_SHA384``|
+| TLS_VERSION | The TLS version that was used. | ``TLSv1.3`` |
+
+
+
 | GATEWAY_INTERFACE | The CGI version (for compatability with other CGI scripts). | ``GCI/1.1`` |
 | SERVER_PROTOCOL | The server protocol. | ``GEMINI`` |
 | SERVER_SOFTWARE | The server version string. | ``jetforce/0.0.7`` |
@@ -142,10 +171,11 @@ the request using environment variables:
 | PATH_INFO | The remainder of the URL's path after the CGI script location. | ``/hello`` |
 | QUERY_STRING | The query string portion of the request URL. | ``world`` |
 | HOSTNAME | The server's hostname. | ``mozz.us`` |
+| SERVER_NAME | The server hostname, alias for HOSTNAME. | ``mozz.us`` |
 | REMOTE_ADDR | The client IP address. | ``10.10.0.2`` |
 | REMOTE_HOST | The client IP address, alias for REMOTE_ADDR. | ``10.10.0.2`` |
-| SERVER_NAME | The server hostname, alias for HOSTNAME. | ``mozz.us`` |
 | SERVER_PORT | The server port number. | ``1965`` |
+
 
 
 The CGI script must then write the gemini response to the *stdout* stream.
