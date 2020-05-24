@@ -115,8 +115,8 @@ this readme, but you can find many helpful tutorials
 
 ### Static Files
 
-Jetforce will, by default, serve static files in the ``/var/gemini/`` directory.
-Files ending with **.gmi** will be interpreted as the *text/gemini* mime type. If
+Jetforce will serve static files in the ``/var/gemini/`` directory by default.
+Files ending with ***.gmi** will be interpreted as the *text/gemini* type. If
 a directory is requested, jetforce will look for a file named **index.gmi** in that
 directory to return. Otherwise, a directory file listing will be automatically
 generated.
