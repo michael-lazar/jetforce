@@ -134,18 +134,19 @@ the request using environment variables:
 
 | Variable Name | Description | Example |
 | --- | --- | --- |
-| GATEWAY_INTERFACE | CGI version, for compatability with CGI scripts | ``GCI/1.1`` |
-| GEMINI_URL | The raw URL string that was requested | ``gemini://mozz.us/cgi-bin/example.cgi/hello?world``
-| SCRIPT_NAME | The part of the URL's path that corresponds to the CGI script location | ``/cgi-bin/example.cgi`` |
-| PATH_INFO | The remainder of the URL's path after the CGI script location | ``/hello`` |
-| QUERY_STRING | The query string portion of the request URL | ``world`` |
-| HOSTNAME | The server's hostname | ``mozz.us`` |
-| REMOTE_ADDR | The client IP address | ``10.10.0.2`` |
-| REMOTE_HOST | The client IP address, alias for REMOTE_ADDR | ``10.10.0.2`` |
-| SERVER_NAME | The server hostname, alias for HOSTNAME | ``mozz.us`` |
-| SERVER_PORT | The server port number | ``1965`` |
-| SERVER_PROTOCOL | The server protocol, for compatability with CGI scripts | ``GEMINI`` |
-| SERVER_SOFTWARE | The server version string | ``jetforce/0.0.7`` |
+| GATEWAY_INTERFACE | The CGI version (for compatability with other CGI scripts). | ``GCI/1.1`` |
+| SERVER_PROTOCOL | The server protocol. | ``GEMINI`` |
+| SERVER_SOFTWARE | The server version string. | ``jetforce/0.0.7`` |
+| GEMINI_URL | The raw URL string that was requested. | ``gemini://mozz.us/cgi-bin/example.cgi/hello?world``
+| SCRIPT_NAME | The part of the URL's path that corresponds to the CGI script location. | ``/cgi-bin/example.cgi`` |
+| PATH_INFO | The remainder of the URL's path after the CGI script location. | ``/hello`` |
+| QUERY_STRING | The query string portion of the request URL. | ``world`` |
+| HOSTNAME | The server's hostname. | ``mozz.us`` |
+| REMOTE_ADDR | The client IP address. | ``10.10.0.2`` |
+| REMOTE_HOST | The client IP address, alias for REMOTE_ADDR. | ``10.10.0.2`` |
+| SERVER_NAME | The server hostname, alias for HOSTNAME. | ``mozz.us`` |
+| SERVER_PORT | The server port number. | ``1965`` |
+
 
 The CGI script must then write the gemini response to the *stdout* stream.
 This includes the status code and meta string on the first line, and the
