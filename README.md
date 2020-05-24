@@ -136,10 +136,10 @@ the request using environment variables:
 | --- | --- | --- |
 | GATEWAY_INTERFACE | CGI version, for compatability with CGI scripts | ``GCI/1.1`` |
 | GEMINI_URL | The raw URL string that was requested | ``gemini://mozz.us/cgi-bin/example.cgi/hello?world``
-| HOSTNAME | The server's hostname | ``mozz.us`` |
 | SCRIPT_NAME | The part of the URL's path that corresponds to the CGI script location | ``/cgi-bin/example.cgi`` |
-| PATH_INFO | The remainder of the URL's path after the script name | ``/hello`` |
+| PATH_INFO | The remainder of the URL's path after the CGI script location | ``/hello`` |
 | QUERY_STRING | The query string portion of the request URL | ``world`` |
+| HOSTNAME | The server's hostname | ``mozz.us`` |
 | REMOTE_ADDR | The client IP address | ``10.10.0.2`` |
 | REMOTE_HOST | The client IP address, alias for REMOTE_ADDR | ``10.10.0.2`` |
 | SERVER_NAME | The server hostname, alias for HOSTNAME | ``mozz.us`` |
