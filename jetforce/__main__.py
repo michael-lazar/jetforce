@@ -68,7 +68,7 @@ group.add_argument(
     help="A directory containing CA files for validating clients",
     metavar="DIR",
 )
-group = parser.add_argument_group("static file configuration")
+group = parser.add_argument_group("fileserver configuration")
 group.add_argument(
     "--dir",
     help="Root directory on the filesystem to serve",
