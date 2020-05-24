@@ -132,20 +132,20 @@ considered a CGI script. When a CGI script is requested by a gemini client,
 the jetforce server will execute the script and pass along information about
 the request using environment variables:
 
-| Variable Name | Example |
-| --- | --- |
-| GATEWAY_INTERFACE | GCI/1.1 |
-| GEMINI_URL | gemini://mozz.us/cgi-bin/debug.cgi?foobar
-| HOSTNAME | mozz.us |
-| PATH_INFO | /cgi-bin/debug.cgi |
-| QUERY_STRING | foobar |
-| REMOTE_ADDR | 10.10.0.2 |
-| REMOTE_HOST | 10.10.0.2 |
-| SCRIPT_NAME | /usr/local/www/mozz/gemini/cgi-bin/debug.cgi |
-| SERVER_NAME | mozz.us |
-| SERVER_PORT | 1965 |
-| SERVER_PROTOCOL | GEMINI |
-| SERVER_SOFTWARE | jetforce/0.0.7 |
+| Variable Name | Description | Example |
+| --- | --- | --- |
+| GATEWAY_INTERFACE | CGI version, for compatability with CGI scripts | ``GCI/1.1`` |
+| GEMINI_URL | The whole URL that was requested | ``gemini://mozz.us/cgi-bin/example.cgi/hello?world``
+| HOSTNAME | The server's hostname | ``mozz.us`` |
+| SCRIPT_NAME | The part of the URL's path that corresponds to the CGI script location | ``/cgi-bin/example.cgi`` |
+| PATH_INFO | The remainder of the URL's path after the script name | ``/hello`` |
+| QUERY_STRING | The query string portion of the request URL | ``world`` |
+| REMOTE_ADDR | The client IP address | ``10.10.0.2`` |
+| REMOTE_HOST | The client IP address, alias for REMOTE_ADDR | ``10.10.0.2`` |
+| SERVER_NAME | The server hostname, alias for HOSTNAME | ``mozz.us`` |
+| SERVER_PORT | The server port number | ``1965`` |
+| SERVER_PROTOCOL | The server protocol, for compatability with CGI scripts | ``GEMINI`` |
+| SERVER_SOFTWARE | The server version string | ``jetforce/0.0.7`` |
 
 The CGI script must then write the gemini response to the *stdout* stream.
 This includes the status code and meta string on the first line, and the
