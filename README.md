@@ -135,7 +135,7 @@ the request using environment variables:
 | Variable Name | Description | Example |
 | --- | --- | --- |
 | GATEWAY_INTERFACE | CGI version, for compatability with CGI scripts | ``GCI/1.1`` |
-| GEMINI_URL | The whole URL that was requested | ``gemini://mozz.us/cgi-bin/example.cgi/hello?world``
+| GEMINI_URL | The raw URL string that was requested | ``gemini://mozz.us/cgi-bin/example.cgi/hello?world``
 | HOSTNAME | The server's hostname | ``mozz.us`` |
 | SCRIPT_NAME | The part of the URL's path that corresponds to the CGI script location | ``/cgi-bin/example.cgi`` |
 | PATH_INFO | The remainder of the URL's path after the script name | ``/hello`` |
