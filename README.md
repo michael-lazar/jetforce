@@ -10,7 +10,7 @@ Learn more about Gemini [here](https://portal.mozz.us/).
 - A built-in static file server with support for gemini directories and CGI scripts.
 - An extendable application framework that loosely mimics the [WSGI](https://en.wikipedia.org/wiki/Web_Server_Gateway_Interface) interface.
 - A lean, modern python codebase with type hints and black formatting.
-- A solid networking foundation built on top of the [twisted](https://twistedmatrix.com/trac/) engine.
+- A solid foundation built on top of the [twisted](https://twistedmatrix.com/trac/) networking engine.
 
 ## Installation
 
@@ -22,12 +22,12 @@ The latest release can be installed from [PyPI](https://pypi.org/project/Jetforc
 $ pip install jetforce
 ```
 
-Or, clone the repository and run the script directly:
+Or, install from source:
 
 ```bash
 $ git clone https://github.com/michael-lazar/jetforce
 $ cd jetforce
-$ python3 jetforce.py
+$ python setup.py install
 ```
 
 ## Usage
@@ -88,29 +88,27 @@ The gemini specification *requires* that all connections be sent over TLS.
 If you do not provide a TLS certificate file using the ``--tls-certfile`` flag,
 jetforce will automatically generate a temporary cert for you to use. This is
 great for making development easier, but before you expose your server to the
-public internet you should configure something more permanent. You can generate
+public internet you should setup something more permanent. You can generate
 your own self-signed server certificate, or obtain one from a Certificate
 Authority like [Let's Encrypt](https://letsencrypt.org).
 
-Here's the OpenSSL command that jetforce uses to generate a self-signed cert:
+Here's an example `openssl` command that you can use to generate a self-signed certificate:
 
 ```
 $ openssl req -newkey rsa:2048 -nodes -keyout {hostname}.key \
     -nodes -x509 -out {hostname}.crt -subj "/CN={hostname}"
 ```
 
-Jetforce also supports verified client TLS certificates. You can specify your
-client CA with the ``--tls-cafile`` or ``--tls-capath`` flags. Verified
-connections will have the ``REMOTE_USER`` variable added to their environment,
-which contains the client certificate's CN attribute. Instructions on how to
-generate TLS client certificates are outside of the scope of this readme, but
+Jetforce also supports TLS client certificates (both self-signed and CA verified).
+Connections made with a client certificate will have additional metadata included
+in the request environment. ``REMOTE_USER`` will contain the subject common name,
+and ``TLS_CLIENT_HASH`` will contain a fingerprint that can be used for TOFU pinning.
+
+You can specify a CA for client validation with the ``--tls-cafile`` or ``--tls-capath``
+flags. Connections validated by the CA will have the ``TLS_CLIENT_VERIFIED`` flag set to
+True. Instructions on how to generate CA's are outside of the scope of this readme, but
 you can find many helpful tutorials
 [online](https://www.makethenmakeinstall.com/2014/05/ssl-client-authentication-step-by-step/).
-
-There are currently no plans to support unverified (transient) client
-certificates. This is due to a technical limitation of the python standard
-library's ``ssl`` module, which is described in detail 
-[here](https://portal.mozz.us/gemini/mozz.us/journal/2019-08-21_transient_tls_certs.gmi).
 
 ### Static Files
 
