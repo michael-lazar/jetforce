@@ -137,7 +137,7 @@ the request using environment variables:
 | GATEWAY_INTERFACE | The CGI version (for compatability). | ``GCI/1.1`` |
 | SERVER_PROTOCOL | The server protocol. | ``GEMINI`` |
 | SERVER_SOFTWARE | The server version string. | ``jetforce/0.0.7`` |
-| GEMINI_URL | The raw URL string that was requested. | ``gemini://mozz.us/cgi-bin/example.cgi/hello?world``
+| GEMINI_URL | The raw URL string from the request. | ``gemini://mozz.us/cgi-bin/example.cgi/hello?world``
 | SCRIPT_NAME | The part of the URL's path that corresponds to the CGI script location. | ``/cgi-bin/example.cgi`` |
 | PATH_INFO | The remainder of the URL's path after the CGI script location. | ``/hello`` |
 | QUERY_STRING | The query string portion of the request URL. | ``world`` |
