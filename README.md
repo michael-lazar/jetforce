@@ -46,6 +46,8 @@ An Experimental Gemini Protocol Server
 optional arguments:
   -h, --help           show this help message and exit
   -V, --version        show program's version number and exit
+
+server configuration:
   --host HOST          Server address to bind to (default: 127.0.0.1)
   --port PORT          Server port to bind to (default: 1965)
   --hostname HOSTNAME  Server hostname (default: localhost)
@@ -54,6 +56,8 @@ optional arguments:
   --tls-cafile FILE    A CA file to use for validating clients (default: None)
   --tls-capath DIR     A directory containing CA files for validating clients
                        (default: None)
+
+fileserver configuration:
   --dir DIR            Root directory on the filesystem to serve (default:
                        /var/gemini)
   --cgi-dir DIR        CGI script directory, relative to the server's root
@@ -100,9 +104,8 @@ $ openssl req -newkey rsa:2048 -nodes -keyout {hostname}.key \
 ```
 
 Jetforce also supports TLS client certificates (both self-signed and CA verified).
-Connections made with a client certificate will have additional metadata included
-in the request environment. ``REMOTE_USER`` will contain the subject common name,
-and ``TLS_CLIENT_HASH`` will contain a fingerprint that can be used for TOFU pinning.
+Requests that are made with client certificates will include additional
+CGI/environment variables with information about the TLS connection.
 
 You can specify a CA for client validation with the ``--tls-cafile`` or ``--tls-capath``
 flags. Connections validated by the CA will have the ``TLS_CLIENT_VERIFIED`` environment
@@ -112,13 +115,11 @@ this readme, but you can find many helpful tutorials
 
 ### Static Files
 
-Jetforce will serve static files in the ``/var/gemini/`` directory:
-
-- Files ending with **.gmi** will be interpreted as the *text/gemini* type
-- If a directory is requested, jetforce will look for a file in that directory
-  with the name of **index.gmi**
-  - If it exists, the index file will be returned
-  - Otherwise, jetforce will generate a directory listing
+Jetforce will serve static files in the ``/var/gemini/`` directory by default.
+Files ending with ***.gmi** will be interpreted as the *text/gemini* type. If
+a directory is requested, jetforce will look for a file named **index.gmi** in that
+directory to return. Otherwise, a directory file listing will be automatically
+generated.
 
 ### CGI Scripts
 
@@ -131,20 +132,34 @@ considered a CGI script. When a CGI script is requested by a gemini client,
 the jetforce server will execute the script and pass along information about
 the request using environment variables:
 
-| Variable Name | Example |
-| --- | --- |
-| GATEWAY_INTERFACE | GCI/1.1 |
-| GEMINI_URL | gemini://mozz.us/cgi-bin/debug.cgi?foobar
-| HOSTNAME | mozz.us |
-| PATH_INFO | /cgi-bin/debug.cgi |
-| QUERY_STRING | foobar |
-| REMOTE_ADDR | 10.10.0.2 |
-| REMOTE_HOST | 10.10.0.2 |
-| SCRIPT_NAME | /usr/local/www/mozz/gemini/cgi-bin/debug.cgi |
-| SERVER_NAME | mozz.us |
-| SERVER_PORT | 1965 |
-| SERVER_PROTOCOL | GEMINI |
-| SERVER_SOFTWARE | jetforce/0.0.7 |
+| Variable Name | Description | Example |
+| --- | --- | --- |
+| GATEWAY_INTERFACE | CGI version (for compatability). | ``GCI/1.1`` |
+| SERVER_PROTOCOL | The server protocol. | ``GEMINI`` |
+| SERVER_SOFTWARE | The server version string. | ``jetforce/0.0.7`` |
+| GEMINI_URL | Raw URL string from the request. | ``gemini://mozz.us/cgi-bin/example.cgi/hello?world``
+| SCRIPT_NAME | The part of the URL's path that corresponds to the CGI script location. | ``/cgi-bin/example.cgi`` |
+| PATH_INFO | The remainder of the URL's path after the CGI script location. | ``/hello`` |
+| QUERY_STRING | The query string portion of the request URL. | ``world`` |
+| HOSTNAME | Server hostname. | ``mozz.us`` |
+| SERVER_NAME | Server hostname (alias for HOSTNAME). | ``mozz.us`` |
+| REMOTE_ADDR | Client IP address. | ``10.10.0.2`` |
+| REMOTE_HOST | Client IP address (alias for REMOTE_ADDR). | ``10.10.0.2`` |
+| SERVER_PORT | Server port number. | ``1965`` |
+
+Additional CGI variables will also be included when the connection uses a TLS client certificate:
+
+| Variable Name | Description | Example |
+| --- | --- | --- |
+| AUTH_TYPE | Authentication type (for compatability). | ``CERTIFICATE`` |
+| REMOTE_USER | The subject CommonName attribute, if provided. | ``michael123`` |
+| TLS_CLIENT_HASH | A base64-encoded certificate fingerprint. | ``hjQftIC/4zPDQ1MNdav5nRQ39pM482xoTIgxtjyZOpY=`` |
+| TLS_CLIENT_NOT_BEFORE | Certificate activation date. | ``2020-04-05T04:18:22Z`` |
+| TLS_CLIENT_NOT_AFTER | Certificate expiration date. | ``2021-04-05T04:18:22Z`` |
+| TLS_CLIENT_SERIAL_NUMBER | Certificate serial number. | ``73629018972631`` |
+| TLS_CLIENT_VERIFIED | Was the certificate verified by OpenSSL? | ``0`` (verified) / ``1`` (not verified) |
+| TLS_CIPHER | TLS cipher that was negotiated. | ``TLS_AES_256_GCM_SHA384``|
+| TLS_VERSION | TLS version that was negotiated. | ``TLSv1.3`` |
 
 The CGI script must then write the gemini response to the *stdout* stream.
 This includes the status code and meta string on the first line, and the
@@ -208,10 +223,10 @@ journalctl -u jetforce -f
 
 *WARNING*
 
-The internet can be a scary place. You (yes you!) are responsible for securing your
-server and setting up appropriate access permissions. This likely means *not*
-running jetforce as the root user. Security best practices are outside of the scope
-of this document and largely depend on your individual threat model.
+You are exposing a server to the internet. You (yes you!) are responsible for
+securing your server and setting up appropriate access permissions. This likely means
+*not* running jetforce as the root user. Security best practices are outside of the
+scope of this document and largely depend on your individual threat model.
 
 
 ## License
