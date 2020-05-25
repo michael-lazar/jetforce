@@ -72,11 +72,16 @@ variable.
   by combining multiple applications behind the same jetforce server. See
   examples/vhost.py for an example of how to use this class.
 
-### v0.2.2 (2012-03-31)
+### v0.2.3 (2020-05-24)
+
+- Fix a security vulnerability that allowed maliciously crafted URLs to break
+  out of the root server directory.
+
+### v0.2.2 (2020-03-31)
 
 - Fix a regression in path matching for the static directory application.
   
-### v0.2.1 (2012-03-31)
+### v0.2.1 (2020-03-31)
 
 - A hostname can now be specified in the route pattern, to facilitate running
   multiple vhosts on a single jetforce server.
@@ -87,7 +92,7 @@ variable.
 - Added the following CGI variables for client certificates:
   TLS_CLIENT_NOT_BEFORE, TLS_CLIENT_NOT_AFTER, TLS_CLIENT_SERIAL_NUMBER
 
-### v0.2.0 (2012-01-21)
+### v0.2.0 (2020-01-21)
 
 #### Features
 
