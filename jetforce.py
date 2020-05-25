@@ -298,7 +298,7 @@ class StaticDirectoryApplication(JetforceApplication):
         url_path = pathlib.Path(request.path.strip("/"))
 
         filename = pathlib.Path(os.path.normpath(str(url_path)))
-        if filename.is_absolute() or str(filename.name).startswith(".."):
+        if filename.is_absolute() or str(filename).startswith(".."):
             # Guard against breaking out of the directory
             return Response(Status.NOT_FOUND, "Not Found")
 
