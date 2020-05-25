@@ -52,6 +52,41 @@ class StaticDirectoryApplication(JetforceApplication):
             # Guard against breaking out of the directory
             return Response(Status.NOT_FOUND, "Not Found")
 
+        if str(filename).startswith(self.cgi_directory):
+            # CGI needs special treatment to account for extra-path
+            # PATH_INFO component (RFC 3875 section 4.1.5)
+
+            # Identify the shortest path that is not a directory
+            for i in range(2, len(filename.parts) + 1):
+                # Split the path into SCRIPT_NAME and PATH_INFO
+                script_name = pathlib.Path(*filename.parts[:i])
+                path_info = pathlib.Path(*filename.parts[i:])
+
+                filesystem_path = self.root / script_name
+                try:
+                    if not filesystem_path.is_file():
+                        continue
+                    elif not os.access(filesystem_path, os.R_OK):
+                        continue
+                    elif not os.access(filesystem_path, os.X_OK):
+                        continue
+                    else:
+                        if str(script_name) == ".":
+                            request.environ["SCRIPT_NAME"] = ""
+                        else:
+                            request.environ["SCRIPT_NAME"] = f"/{script_name}"
+
+                        if str(path_info) == ".":
+                            request.environ["PATH_INFO"] = ""
+                        else:
+                            request.environ["PATH_INFO"] = f"/{path_info}"
+
+                        return self.run_cgi_script(filesystem_path, request.environ)
+
+                except OSError:
+                    # Filename too large, etc.
+                    return Response(Status.NOT_FOUND, "Not Found")
+
         filesystem_path = self.root / filename
 
         try:
@@ -63,11 +98,6 @@ class StaticDirectoryApplication(JetforceApplication):
             return Response(Status.NOT_FOUND, "Not Found")
 
         if filesystem_path.is_file():
-            is_cgi = str(filename).startswith(self.cgi_directory)
-            is_exe = os.access(filesystem_path, os.X_OK)
-            if is_cgi and is_exe:
-                return self.run_cgi_script(filesystem_path, request.environ)
-
             mimetype = self.guess_mimetype(filesystem_path.name)
             generator = self.load_file(filesystem_path)
             return Response(Status.SUCCESS, mimetype, generator)
@@ -95,16 +125,13 @@ class StaticDirectoryApplication(JetforceApplication):
         Execute the given file as a CGI script and return the script's stdout
         stream to the client.
         """
-        script_name = str(filesystem_path)
-
         cgi_env = {k: v for k, v in environ.items() if k.isupper()}
         cgi_env["GATEWAY_INTERFACE"] = "GCI/1.1"
-        cgi_env["SCRIPT_NAME"] = script_name
 
         # Decode the stream as unicode so we can parse the status line
         # Use surrogateescape to preserve any non-UTF8 byte sequences.
         out = subprocess.Popen(
-            [script_name],
+            [str(filesystem_path)],
             stdout=subprocess.PIPE,
             env=cgi_env,
             bufsize=1,

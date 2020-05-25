@@ -126,7 +126,6 @@ class GeminiProtocol(LineOnlyReceiver):
         environ = {
             "GEMINI_URL": self.url,
             "HOSTNAME": self.server.hostname,
-            "PATH_INFO": url_parts.path,
             "QUERY_STRING": url_parts.query,
             "REMOTE_ADDR": self.client_addr.host,
             "REMOTE_HOST": self.client_addr.host,
