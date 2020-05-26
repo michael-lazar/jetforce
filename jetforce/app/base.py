@@ -4,6 +4,10 @@ import re
 import typing
 import urllib.parse
 
+from twisted.internet.defer import Deferred
+
+ResponseType = typing.Union[str, bytes, Deferred]
+
 
 class Status:
     """
@@ -73,9 +77,7 @@ class Response:
 
     status: int
     meta: str
-    body: typing.Union[
-        None, bytes, str, typing.Iterable[typing.Union[bytes, str]]
-    ] = None
+    body: typing.Union[None, ResponseType, typing.Iterable[ResponseType]] = None
 
 
 @dataclasses.dataclass
@@ -137,7 +139,7 @@ class JetforceApplication:
 
     def __call__(
         self, environ: dict, send_status: typing.Callable
-    ) -> typing.Iterator[bytes]:
+    ) -> typing.Iterator[ResponseType]:
         try:
             request = Request(environ)
         except Exception:
@@ -156,7 +158,7 @@ class JetforceApplication:
         response = callback(request, **callback_kwargs)
         send_status(response.status, response.meta)
 
-        if isinstance(response.body, (bytes, str)):
+        if isinstance(response.body, (bytes, str, Deferred)):
             yield response.body
         elif response.body:
             yield from response.body

@@ -1,6 +1,6 @@
 import typing
 
-from .base import Request, Status
+from .base import Request, ResponseType, Status
 
 
 class CompositeApplication:
@@ -30,7 +30,7 @@ class CompositeApplication:
 
     def __call__(
         self, environ: dict, send_status: typing.Callable
-    ) -> typing.Iterator[bytes]:
+    ) -> typing.Iterator[ResponseType]:
         try:
             request = Request(environ)
         except Exception:

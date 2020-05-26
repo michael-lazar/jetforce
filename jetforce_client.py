@@ -29,6 +29,7 @@ def fetch(url, host=None, port=None, use_sni=False):
             data = fp.read(1024)
             while data:
                 sys.stdout.buffer.write(data)
+                sys.stdout.buffer.flush()
                 data = fp.read(1024)
 
 

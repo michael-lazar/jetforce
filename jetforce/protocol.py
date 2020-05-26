@@ -6,13 +6,16 @@ import typing
 import urllib.parse
 
 from twisted.internet.address import IPv4Address, IPv6Address
-from twisted.internet.defer import ensureDeferred
-from twisted.internet.threads import deferToThread
+from twisted.internet.defer import ensureDeferred, maybeDeferred
+from twisted.internet.task import deferLater
 from twisted.protocols.basic import LineOnlyReceiver
 
 from .__version__ import __version__
 from .app.base import JetforceApplication, Status
 from .tls import inspect_certificate
+
+if typing.TYPE_CHECKING:
+    from .server import GeminiServer
 
 
 class GeminiProtocol(LineOnlyReceiver):
@@ -44,7 +47,7 @@ class GeminiProtocol(LineOnlyReceiver):
     response_buffer: str
     response_size: int
 
-    def __init__(self, server: "GeminiServer", app: JetforceApplication):
+    def __init__(self, server: GeminiServer, app: JetforceApplication):
         self.server = server
         self.app = app
 
@@ -70,21 +73,20 @@ class GeminiProtocol(LineOnlyReceiver):
 
         This method is implemented using an async coroutine, which has been
         supported by twisted since python 3.5 by wrapping the method in
-        ensureDeferred(). Twisted + coroutines is a bitch to figure out, but
-        once it clicks it really does turn out to be an elegant solution.
+        ensureDeferred().
 
-        Any time that we call into the application code, we wrap the call with
-        deferToThread() which will execute the code in a separate thread using
-        twisted's thread pool. deferToThread() will return a future object
-        that we can then `await` to get the result when the thread finishes.
-        This is important because we don't want application code to block the
-        twisted event loop from serving other requests at the same time.
+        There are two places that we call into the "application" code:
 
-        In the future, I would like to add the capability for applications to
-        implement proper coroutines that can call `await` on directly without
-        needing to wrap them in threads. Conceptually, this shouldn't be too
-        difficult, but it will require implementing an alternate version of
-        the JetforceApplication that's async-compatible.
+        1. The initial invoking of app(environ, write_callback) which will
+           return an iterable.
+        2. Every time that we call next() on the iterable to retrieve bytes to
+           write to the response body.
+
+        In both of these places, the app can either return the result directly,
+        or it can return a "deferred" object, which is twisted's version of an
+        asyncio future. The server will await on the result of this deferred,
+        which yields control of the event loop for other requests to be handled
+        concurrently.
         """
         try:
             self.parse_header()
@@ -98,13 +100,17 @@ class GeminiProtocol(LineOnlyReceiver):
 
         try:
             environ = self.build_environ()
-            response_generator = await deferToThread(
+            response_generator = await maybeDeferred(
                 self.app, environ, self.write_status
             )
+            # Yield control of the event loop
+            await deferLater(self.server.reactor, 0)
             while True:
                 try:
-                    data = await deferToThread(response_generator.__next__)
+                    data = await maybeDeferred(response_generator.__next__)
                     self.write_body(data)
+                    # Yield control of the event loop
+                    await deferLater(self.server.reactor, 0)
                 except StopIteration:
                     break
         except Exception:

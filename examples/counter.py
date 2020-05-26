@@ -6,37 +6,87 @@ function instead of plain text/bytes. The server will iterate over the
 generator and write the data to the socket in-between each iteration. This can
 be useful if you want to serve a large response, like a binary file, without
 loading the entire response into memory at once.
-
-The server will schedule your application code to be run inside of a separate
-thread, using twisted's built-in thread pool. So even though the counter
-function contains a sleep(), it will not block the server from handling other
-requests. Try requesting this endpoint over two connections simultaneously.
-
-> jetforce-client gemini://localhost
-> jetforce-client gemini://localhost
 """
 import time
 
 from jetforce import GeminiServer, JetforceApplication, Response, Status
+from twisted.internet import reactor
+from twisted.internet.task import deferLater
+from twisted.internet.threads import deferToThread
 
 
-def counter():
+def blocking_counter():
     """
-    Generator function that counts to ∞.
+    This is the simplest implementation of a blocking, synchronous generator.
+
+    The calls to time.sleep(1) will run in the main twisted event loop and
+    block all other requests from processing.
     """
     x = 0
     while True:
-        time.sleep(1)
         x += 1
+        time.sleep(1)
         yield f"{x}\r\n"
+
+
+def threaded_counter():
+    """
+    This counter uses the twisted ThreadPool to invoke sleep() inside of a
+    separate thread.
+
+    This avoids blocking the twisted event loop during the sleep() call.
+    It adds an overhead of setting up a thread for each iteration. It also
+    requires that your code be thread-safe, because more than one thread may
+    be running simultaneously in order to process separate requests.
+    """
+
+    def delayed_callback(x):
+        time.sleep(1)
+        return f"{x}\r\n"
+
+    x = 0
+    while True:
+        x += 1
+        yield deferToThread(delayed_callback, x)
+
+
+def deferred_counter():
+    """
+    This counter uses twisted's deferLater() to schedule calling the function
+    after a delay of one second.
+
+    This is equivalent to using asyncio.sleep(1). It tells the twisted event
+    loop to "go do something else, and come back to run this callback after at
+    least one second has elapsed". The advantage is that it's non-blocking and
+    you don't need to worry about thread-safety because your callback will
+    eventually run in the main event loop.
+    """
+
+    def delayed_callback(x):
+        return f"{x}\r\n"
+
+    x = 0
+    while True:
+        x += 1
+        yield deferLater(reactor, 1, delayed_callback, x)
 
 
 app = JetforceApplication()
 
 
-@app.route()
-def index(request):
-    return Response(Status.SUCCESS, "text/plain", counter())
+@app.route("/blocking")
+def blocking(request):
+    return Response(Status.SUCCESS, "text/plain", blocking_counter())
+
+
+@app.route("/threaded")
+def threaded(request):
+    return Response(Status.SUCCESS, "text/plain", threaded_counter())
+
+
+@app.route("/deferred")
+def deferred(request):
+    return Response(Status.SUCCESS, "text/plain", deferred_counter())
 
 
 if __name__ == "__main__":
