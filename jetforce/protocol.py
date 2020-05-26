@@ -129,6 +129,7 @@ class GeminiProtocol(LineOnlyReceiver):
         The TLS variable names borrow from the GLV-1.12556 server.
         """
         url_parts = urllib.parse.urlparse(self.url)
+        conn = self.transport.getHandle()
         environ = {
             "GEMINI_URL": self.url,
             "HOSTNAME": self.server.hostname,
@@ -139,6 +140,8 @@ class GeminiProtocol(LineOnlyReceiver):
             "SERVER_PORT": str(self.client_addr.port),
             "SERVER_PROTOCOL": "GEMINI",
             "SERVER_SOFTWARE": f"jetforce/{__version__}",
+            "TLS_CIPHER": conn.get_cipher_name(),
+            "TLS_VERSION": conn.get_protocol_version_name(),
             "client_certificate": None,
         }
 
@@ -146,7 +149,6 @@ class GeminiProtocol(LineOnlyReceiver):
         if cert:
             x509_cert = cert.to_cryptography()
             cert_data = inspect_certificate(x509_cert)
-            conn = self.transport.getHandle()
             environ.update(
                 {
                     "client_certificate": x509_cert,
@@ -158,8 +160,6 @@ class GeminiProtocol(LineOnlyReceiver):
                     "TLS_CLIENT_SERIAL_NUMBER": cert_data["serial_number"],
                     # Grab the value that was stashed during the TLS handshake
                     "TLS_CLIENT_VERIFIED": getattr(conn, "verified", False),
-                    "TLS_CIPHER": conn.get_cipher_name(),
-                    "TLS_VERSION": conn.get_protocol_version_name(),
                 }
             )
         return environ

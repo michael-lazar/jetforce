@@ -47,7 +47,7 @@ server = GeminiServer(app)
 server.run()
 ```
 
-Check out the updated examples in the examples/ directory for more details.
+Check out the updated examples in the *examples/* directory for more details.
 
 #### TLS Client Certificates
 
@@ -65,12 +65,16 @@ variable.
 #### Other Changes
 
 - A client certificate can now have an empty ``commonName`` field.
-- ``JetforceApplication``: Named capture groups in a route's regex pattern
-  will now be passed as keyword arguments to the wrapped function. See
+- For the ``JetforceApplication``, named capture groups in a route's regex
+  pattern will now be passed as keyword arguments to the wrapped function. See
   examples/pagination.py for an example of how to use this feature.
-- A new ``CompositeApplication`` class is included to support virtual hosting
-  by combining multiple applications behind the same jetforce server. See
-  examples/vhost.py for an example of how to use this class.
+- A ``CompositeApplication`` class is now included to support virtual hosting
+  by composing multiple applications behind the same jetforce server. See
+  examples/vhost.py for an example of how to use this feature.
+- CGI variables - ``SCRIPT_NAME`` and ``PATH_INfO`` have been changed to match
+  their intended usage as defined in RFC 3875.
+- CGI variables - ``TLS_CIPHER`` and ``TLS_VERSION`` have been added and
+  contain information about the established TLS connection.
 
 ### v0.2.3 (2020-05-24)
 

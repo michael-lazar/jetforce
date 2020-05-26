@@ -146,6 +146,8 @@ the request using environment variables:
 | REMOTE_ADDR | Client IP address. | ``10.10.0.2`` |
 | REMOTE_HOST | Client IP address (alias for REMOTE_ADDR). | ``10.10.0.2`` |
 | SERVER_PORT | Server port number. | ``1965`` |
+| TLS_CIPHER | TLS cipher that was negotiated. | ``TLS_AES_256_GCM_SHA384``|
+| TLS_VERSION | TLS version that was negotiated. | ``TLSv1.3`` |
 
 Additional CGI variables will also be included when the connection uses a TLS client certificate:
 
@@ -158,8 +160,6 @@ Additional CGI variables will also be included when the connection uses a TLS cl
 | TLS_CLIENT_NOT_AFTER | Certificate expiration date. | ``2021-04-05T04:18:22Z`` |
 | TLS_CLIENT_SERIAL_NUMBER | Certificate serial number. | ``73629018972631`` |
 | TLS_CLIENT_VERIFIED | Was the certificate verified by OpenSSL? | ``0`` (verified) / ``1`` (not verified) |
-| TLS_CIPHER | TLS cipher that was negotiated. | ``TLS_AES_256_GCM_SHA384``|
-| TLS_VERSION | TLS version that was negotiated. | ``TLSv1.3`` |
 
 The CGI script must then write the gemini response to the *stdout* stream.
 This includes the status code and meta string on the first line, and the
