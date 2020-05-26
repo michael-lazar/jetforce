@@ -159,7 +159,7 @@ Additional CGI variables will also be included when the connection uses a TLS cl
 | TLS_CLIENT_NOT_BEFORE | Certificate activation date. | ``2020-04-05T04:18:22Z`` |
 | TLS_CLIENT_NOT_AFTER | Certificate expiration date. | ``2021-04-05T04:18:22Z`` |
 | TLS_CLIENT_SERIAL_NUMBER | Certificate serial number. | ``73629018972631`` |
-| TLS_CLIENT_VERIFIED | Was the certificate verified by OpenSSL? | ``0`` (verified) / ``1`` (not verified) |
+| TLS_CLIENT_VERIFIED | Was the certificate verified by OpenSSL? | ``0`` (not verified) / ``1`` (verified) |
 
 The CGI script must then write the gemini response to the *stdout* stream.
 This includes the status code and meta string on the first line, and the
