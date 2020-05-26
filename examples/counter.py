@@ -1,5 +1,5 @@
 """
-An endpoint that streams incrementing numbers forever.
+An endpoint that streams numbers counting to 10.
 
 This is an example of how a jetforce application can respond with a generator
 function instead of plain text/bytes. The server will iterate over the
@@ -22,9 +22,7 @@ def blocking_counter():
     The calls to time.sleep(1) will run in the main twisted event loop and
     block all other requests from processing.
     """
-    x = 0
-    while True:
-        x += 1
+    for x in range(10):
         time.sleep(1)
         yield f"{x}\r\n"
 
@@ -44,9 +42,7 @@ def threaded_counter():
         time.sleep(1)
         return f"{x}\r\n"
 
-    x = 0
-    while True:
-        x += 1
+    for x in range(10):
         yield deferToThread(delayed_callback, x)
 
 
@@ -65,9 +61,7 @@ def deferred_counter():
     def delayed_callback(x):
         return f"{x}\r\n"
 
-    x = 0
-    while True:
-        x += 1
+    for x in range(10):
         yield deferLater(reactor, 1, delayed_callback, x)
 
 

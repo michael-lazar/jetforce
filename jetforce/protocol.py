@@ -6,7 +6,7 @@ import typing
 import urllib.parse
 
 from twisted.internet.address import IPv4Address, IPv6Address
-from twisted.internet.defer import ensureDeferred, maybeDeferred
+from twisted.internet.defer import Deferred, ensureDeferred
 from twisted.internet.task import deferLater
 from twisted.protocols.basic import LineOnlyReceiver
 
@@ -100,18 +100,22 @@ class GeminiProtocol(LineOnlyReceiver):
 
         try:
             environ = self.build_environ()
-            response_generator = await maybeDeferred(
-                self.app, environ, self.write_status
-            )
-            # Yield control of the event loop
-            await deferLater(self.server.reactor, 0)
-            while True:
-                data = await maybeDeferred(response_generator.__next__)
-                if data is None:
-                    break
-                self.write_body(data)
+            response_generator = self.app(environ, self.write_status)
+            if isinstance(response_generator, Deferred):
+                response_generator = await response_generator
+            else:
                 # Yield control of the event loop
                 await deferLater(self.server.reactor, 0)
+
+            for data in response_generator:
+                if isinstance(data, Deferred):
+                    data = await data
+                    self.write_body(data)
+                else:
+                    self.write_body(data)
+                    # Yield control of the event loop
+                    await deferLater(self.server.reactor, 0)
+
         except Exception:
             self.server.log_message(traceback.format_exc())
             self.write_status(Status.CGI_ERROR, "An unexpected error occurred")
