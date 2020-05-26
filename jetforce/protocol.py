@@ -106,13 +106,12 @@ class GeminiProtocol(LineOnlyReceiver):
             # Yield control of the event loop
             await deferLater(self.server.reactor, 0)
             while True:
-                try:
-                    data = await maybeDeferred(response_generator.__next__)
-                    self.write_body(data)
-                    # Yield control of the event loop
-                    await deferLater(self.server.reactor, 0)
-                except StopIteration:
+                data = await maybeDeferred(response_generator.__next__)
+                if data is None:
                     break
+                self.write_body(data)
+                # Yield control of the event loop
+                await deferLater(self.server.reactor, 0)
         except Exception:
             self.server.log_message(traceback.format_exc())
             self.write_status(Status.CGI_ERROR, "An unexpected error occurred")

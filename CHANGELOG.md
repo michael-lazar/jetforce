@@ -65,16 +65,18 @@ variable.
 #### Other Changes
 
 - A client certificate can now have an empty ``commonName`` field.
-- For the ``JetforceApplication``, named capture groups in a route's regex
-  pattern will now be passed as keyword arguments to the wrapped function. See
+- ``JetforceApplication.route()`` - named capture groups in regex patterns will
+  now be passed as keyword arguments to the wrapped function. See
   examples/pagination.py for an example of how to use this feature.
-- A ``CompositeApplication`` class is now included to support virtual hosting
-  by composing multiple applications behind the same jetforce server. See
+- ``CompositeApplication`` - A class is now included to support composing
+  composing multiple applications behind the same jetforce server. See
   examples/vhost.py for an example of how to use this feature.
-- CGI variables - ``SCRIPT_NAME`` and ``PATH_INfO`` have been changed to match
+- CGI variables - ``SCRIPT_NAME`` and ``PATH_INFO`` have been changed to match
   their intended usage as defined in RFC 3875.
 - CGI variables - ``TLS_CIPHER`` and ``TLS_VERSION`` have been added and
   contain information about the established TLS connection.
+- Applications can now optionally return ``Deferred`` objects instead of bytes,
+  in order to support full-blown asynchronous coroutines.
 
 ### v0.2.3 (2020-05-24)
 
