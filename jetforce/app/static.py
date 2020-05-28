@@ -125,7 +125,7 @@ class StaticDirectoryApplication(JetforceApplication):
         Execute the given file as a CGI script and return the script's stdout
         stream to the client.
         """
-        cgi_env = {k: v for k, v in environ.items() if k.isupper()}
+        cgi_env = {k: str(v) for k, v in environ.items() if k.isupper()}
         cgi_env["GATEWAY_INTERFACE"] = "GCI/1.1"
 
         # Decode the stream as unicode so we can parse the status line
