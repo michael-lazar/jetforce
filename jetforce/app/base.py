@@ -102,7 +102,7 @@ class RoutePattern:
             server_hostname = request.environ["HOSTNAME"]
         else:
             server_hostname = self.hostname
-        server_port = int(request.environ["SERVER_PORT"])
+        server_port = request.environ["SERVER_PORT"]
 
         if self.strict_hostname and request.hostname != server_hostname:
             return

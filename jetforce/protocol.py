@@ -140,7 +140,7 @@ class GeminiProtocol(LineOnlyReceiver):
             "REMOTE_ADDR": self.client_addr.host,
             "REMOTE_HOST": self.client_addr.host,
             "SERVER_NAME": self.server.hostname,
-            "SERVER_PORT": str(self.client_addr.port),
+            "SERVER_PORT": self.server.port,
             "SERVER_PROTOCOL": "GEMINI",
             "SERVER_SOFTWARE": f"jetforce/{__version__}",
             "TLS_CIPHER": conn.get_cipher_name(),
