@@ -183,15 +183,9 @@ additional modification by the server.
   <em>Example: "world"</em>
 </dd>
 
-<dt>HOSTNAME</dt>
+<dt>SERVER_NAME / HOSTNAME</dt>
 <dd>
   The server hostname.<br>
-  <em>Example: "mozz.us"</em>
-</dd>
-
-<dt>SERVER_NAME</dt>
-<dd>
-  The server hostname (alias for HOSTNAME).<br>
   <em>Example: "mozz.us"</em>
 </dd>
 
@@ -201,21 +195,9 @@ additional modification by the server.
   <em>Example: "1965"</em>
 </dd>
 
-<dt>REMOTE_HOST</dt>
-<dd>
-  The client's IP address (alias for REMOTE_ADDR).<br>
-  <em>Example: "10.10.0.2"</em>
-</dd>
-
-<dt>REMOTE_ADDR</dt>
+<dt>REMOTE_HOST / REMOTE_ADDR</dt>
 <dd>
   The client's IP address.<br>
-  <em>Example: "10.10.0.2"</em>
-</dd>
-
-<dt>REMOTE_HOST</dt>
-<dd>
-  The client's IP address (alias for REMOTE_ADDR).<br>
   <em>Example: "10.10.0.2"</em>
 </dd>
 
