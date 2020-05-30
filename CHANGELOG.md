@@ -54,7 +54,7 @@ Check out the updated examples in the *examples/* directory for more details.
 Jetforce will now accept self-signed and unvalidated client certificates. The
 ``capath`` and ``cafile`` arguments can still be provided, and will attempt to
 validate the certificate using of the underlying OpenSSL library. The result
-of this validation will be saved in the ``TLS_CLIENT_VERIFIED`` environment
+of this validation will be saved in the ``TLS_CLIENT_AUTHORISED`` environment
 variable so that each application can decide how it wants to accept/reject the
 connection.
 

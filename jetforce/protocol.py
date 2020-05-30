@@ -162,7 +162,7 @@ class GeminiProtocol(LineOnlyReceiver):
                     "TLS_CLIENT_NOT_AFTER": cert_data["not_after"],
                     "TLS_CLIENT_SERIAL_NUMBER": cert_data["serial_number"],
                     # Grab the value that was stashed during the TLS handshake
-                    "TLS_CLIENT_VERIFIED": getattr(conn, "verified", False),
+                    "TLS_CLIENT_AUTHORISED": getattr(conn, "authorised", False),
                 }
             )
         return environ

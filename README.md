@@ -103,12 +103,12 @@ $ openssl req -newkey rsa:2048 -nodes -keyout {hostname}.key \
     -nodes -x509 -out {hostname}.crt -subj "/CN={hostname}"
 ```
 
-Jetforce also supports TLS client certificates (both self-signed and CA verified).
+Jetforce also supports TLS client certificates (both self-signed and CA authorised).
 Requests that are made with client certificates will include additional
 CGI/environment variables with information about the TLS connection.
 
 You can specify a CA for client validation with the ``--tls-cafile`` or ``--tls-capath``
-flags. Connections validated by the CA will have the ``TLS_CLIENT_VERIFIED`` environment
+flags. Connections validated by the CA will have the ``TLS_CLIENT_AUTHORISED`` environment
 variable set to True. Instructions on how to generate CA's are outside of the scope of
 this readme, but you can find many helpful tutorials
 [online](https://www.makethenmakeinstall.com/2014/05/ssl-client-authentication-step-by-step/).
@@ -159,7 +159,7 @@ Additional CGI variables will also be included when the connection uses a TLS cl
 | TLS_CLIENT_NOT_BEFORE | Certificate activation date. | ``2020-04-05T04:18:22Z`` |
 | TLS_CLIENT_NOT_AFTER | Certificate expiration date. | ``2021-04-05T04:18:22Z`` |
 | TLS_CLIENT_SERIAL_NUMBER | Certificate serial number. | ``73629018972631`` |
-| TLS_CLIENT_VERIFIED | Was the certificate verified by OpenSSL? | ``0`` (not verified) / ``1`` (verified) |
+| TLS_CLIENT_AUTHORISED | Was the certificate verified by the server's CA? | ``0`` (not authorised) / ``1`` (authorised) |
 
 The CGI script must then write the gemini response to the *stdout* stream.
 This includes the status code and meta string on the first line, and the

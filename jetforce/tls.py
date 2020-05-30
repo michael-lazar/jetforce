@@ -105,12 +105,21 @@ class GeminiCertificateOptions(CertificateOptions):
         """
         Callback used by OpenSSL for client certificate verification.
 
-        preverify_ok returns the verification result that OpenSSL has already
-        obtained, so return this value to cede control to the underlying
-        library. Returning true will always allow client certificates, even if
-        they are self-signed.
+        preverify_ok will contain the verification result that OpenSSL has
+        determined based on the server's CA trust store.
+
+        Return preverify_ok to cede control to the underlying library.
+        Return True to allow unverified, self-signed client certificates.
+
+        This callback may be invoked multiple times during the TLS handshake.
+        If at any point OpenSSL returns a preverify_ok value of zero, we should
+        mark the certificate as not trusted.
         """
-        conn.verified = preverify_ok
+        if not hasattr(conn, "authorised"):
+            conn.authorised = preverify_ok
+        else:
+            conn.authorised *= preverify_ok
+
         return True
 
     def proto_select_callback(
