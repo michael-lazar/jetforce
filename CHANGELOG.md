@@ -13,11 +13,11 @@ are using the command-line and haven't written any custom python applications),
 you should not need to make any changes.
 
 There have been some minor updates to the CGI variables, and new CGI variables
-have been added with additional TLS information. Check out the README for the
-new list.
+have been added with additional TLS information. Check out the README for more
+information on CGI variables.
 
 This package now has third-party python dependencies. If you installed jetforce
-through pip, you should be already fine. If you were running the ``jetforce.py``
+through pip, you should already be fine. If you were running the ``jetforce.py``
 script directly from the git repository, you will likely either want to switch
 to installing from pip (recommended), or setup a virtual environment and run
 ``python setup.py install``. This will install the dependencies and stick a
@@ -69,14 +69,14 @@ variable.
   now be passed as keyword arguments to the wrapped function. See
   examples/pagination.py for an example of how to use this feature.
 - ``CompositeApplication`` - A class is now included to support composing
-  composing multiple applications behind the same jetforce server. See
-  examples/vhost.py for an example of how to use this feature.
+  multiple applications behind the same jetforce server. See examples/vhost.py
+  for an example of how to use this feature.
 - CGI variables - ``SCRIPT_NAME`` and ``PATH_INFO`` have been changed to match
   their intended usage as defined in RFC 3875.
 - CGI variables - ``TLS_CIPHER`` and ``TLS_VERSION`` have been added and
   contain information about the established TLS connection.
 - Applications can now optionally return ``Deferred`` objects instead of bytes,
-  in order to support full-blown asynchronous coroutines.
+  in order to support applications built on top of asynchronous coroutines.
 
 ### v0.2.3 (2020-05-24)
 
