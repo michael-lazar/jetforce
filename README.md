@@ -5,6 +5,14 @@ Learn more about Gemini [here](https://portal.mozz.us/).
 
 ![Rocket Launch](logo.jpg)
 
+## Table of Contents
+
+* [Features](#features)
+* [Installation](#installation)  
+* [Usage](#usage)  
+* [Deployment](#deployment)
+* [License](#license)  
+
 ## Features
 
 - A built-in static file server with support for gemini directories and CGI scripts.
