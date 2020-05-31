@@ -1,6 +1,6 @@
 # Jetforce Changelog
 
-### v0.3.0 (pre-release)
+### v0.3.0
 
 This release brings some major improvements and necessary refactoring of the
 jetforce package. Please read the release notes carefully and exercise caution
