@@ -23,7 +23,7 @@ def inspect_certificate(cert: x509) -> dict:
     common_name = name_attrs[0].value if name_attrs else ""
 
     fingerprint_bytes = cert.fingerprint(hashes.SHA256())
-    fingerprint = base64.b64encode(fingerprint_bytes).decode()
+    fingerprint = base64.urlsafe_b64encode(fingerprint_bytes).decode()
 
     not_before = cert.not_valid_before.strftime("%Y-%m-%dT%H:%M:%SZ")
     not_after = cert.not_valid_after.strftime("%Y-%m-%dT%H:%M:%SZ")

@@ -1,5 +1,14 @@
 # Jetforce Changelog
 
+### v0.3.1
+
+#### Bugfixes
+
+- The client certificate fingerprint hash is now encoded using a URL-safe
+  version of the base64 algorithm (urlsafe_b64encode)[https://docs.python.org/3/library/base64.html#base64.urlsafe_b64encode].
+  This is intended to make it simpler for applications and CGI scripts to
+  use the certificate fingerprint in URL paths.
+
 ### v0.3.0
 
 This release brings some major improvements and necessary refactoring of the
