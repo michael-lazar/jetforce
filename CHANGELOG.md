@@ -5,7 +5,7 @@
 #### Bugfixes
 
 - The client certificate fingerprint hash is now encoded using a URL-safe
-  version of the base64 algorithm (urlsafe_b64encode)[https://docs.python.org/3/library/base64.html#base64.urlsafe_b64encode].
+  version of the base64 algorithm [urlsafe_b64encode()](https://docs.python.org/3/library/base64.html#base64.urlsafe_b64encode).
   This is intended to make it simpler for applications and CGI scripts to
   use the certificate fingerprint in URL paths.
 
