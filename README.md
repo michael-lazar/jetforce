@@ -5,6 +5,15 @@ Learn more about Gemini [here](https://portal.mozz.us/).
 
 ![Rocket Launch](logo.jpg)
 
+## Table of Contents
+
+* [Features](#features)
+* [Installation](#installation)  
+* [Usage](#usage)  
+* [Deployment](#deployment)
+* [Releases](#releases)
+* [License](#license)  
+
 ## Features
 
 - A built-in static file server with support for gemini directories and CGI scripts.
@@ -326,6 +335,9 @@ securing your server and setting up appropriate access permissions. This likely 
 *not* running jetforce as the root user. Security best practices are outside of the
 scope of this document and largely depend on your individual threat model.
 
+## Releases
+
+To view the project's release history, see the [CHANGELOG](CHANGELOG.md) file.
 
 ## License
 
