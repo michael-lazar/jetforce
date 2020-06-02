@@ -1,5 +1,17 @@
 # Jetforce Changelog
 
+### v0.3.2
+
+#### Bugfixes
+
+- The static file server will now URL-encode spaces (%20) and other reserved
+  characters in filenames.
+- The ``Request`` class will now apply URL decoding to the following components
+  of the request, in addition to the query params:
+  - ``request.path``
+  - ``request.params``
+  - ``request.fragment``
+
 ### v0.3.1
 
 #### Bugfixes

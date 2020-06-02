@@ -174,10 +174,12 @@ class StaticDirectoryApplication(JetforceApplication):
             if file.name.startswith("."):
                 # Skip hidden directories/files that may contain sensitive info
                 continue
-            elif file.is_dir():
-                yield f"=>/{url_path / file.name}/\t{file.name}/\r\n".encode()
+
+            encoded_path = urllib.parse.quote(str(url_path / file.name))
+            if file.is_dir():
+                yield f"=>/{encoded_path}/\t{file.name}/\r\n".encode()
             else:
-                yield f"=>/{url_path / file.name}\t{file.name}\r\n".encode()
+                yield f"=>/{encoded_path}\t{file.name}\r\n".encode()
 
     def guess_mimetype(self, filename: str) -> str:
         """

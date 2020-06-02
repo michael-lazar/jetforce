@@ -2,7 +2,7 @@ import argparse
 import dataclasses
 import re
 import typing
-import urllib.parse
+from urllib.parse import unquote, urlparse
 
 from twisted.internet.defer import Deferred
 
@@ -51,7 +51,7 @@ class Request:
         self.environ = environ
         self.url = environ["GEMINI_URL"]
 
-        url_parts = urllib.parse.urlparse(self.url)
+        url_parts = urlparse(self.url)
         if not url_parts.hostname:
             raise ValueError("URL must contain a `hostname` part")
 
@@ -63,10 +63,11 @@ class Request:
 
         self.hostname = url_parts.hostname
         self.port = url_parts.port
-        self.path = url_parts.path
-        self.params = url_parts.params
-        self.query = urllib.parse.unquote(url_parts.query)
-        self.fragment = url_parts.fragment
+
+        self.path = unquote(url_parts.path)
+        self.params = unquote(url_parts.params)
+        self.query = unquote(url_parts.query)
+        self.fragment = unquote(url_parts.fragment)
 
 
 @dataclasses.dataclass
