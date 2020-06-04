@@ -130,6 +130,22 @@ a directory is requested, jetforce will look for a file named **index.gmi** in t
 directory to return. Otherwise, a directory file listing will be automatically
 generated.
 
+### Virtual Hosting
+
+For the sake of keeping the command line arguments straightforward and easy
+to understand, configuring virtual hosting is not supported via the command
+line. However, it is readily available using only a few lines of python and a
+custom launch script. Check out [examples/vhost.py](examples/vhost.py) for more
+information.
+
+Jetforce does not (yet) support virtual hosting at the TLS-layer using SNI.
+This means that you cannot return different server TLS certificates for
+different domains. The suggested workaround is to use a single certificate with
+multiple ``subjectAltName`` attributes. There is also an
+[sni_callback()](https://github.com/michael-lazar/jetforce/blob/9ac80a986c6ed8a62951c857315ca04b6d127c32/jetforce/tls.py#L140)
+hook in the server codebase that can be subclassed to implement custom TLS
+behavior.
+
 ### CGI
 
 Jetforce supports a simplified version of CGI scripting. It doesn't

@@ -1,36 +1,41 @@
 """
-A server that implements virtual hosting for multiple subdomains.
+A server that implements virtual hosting for subdomains.
 
-This is a basic example of you how can run multiple apps from the same server
-by creating a composite application.
+This is a basic example of you how can run multiple apps from the same server.
+You can use different static directories for different domains, or even combine
+static applications with your own custom JetforceApplication classes.
 
-> jetforce-client gemini://apple.localhost --host localhost
-> jetforce-client gemini://banana.localhost --host localhost
+> jetforce-client gemini://app-a.example.com --host localhost
+> jetforce-client gemini://app-b.example.com --host localhost
+
+This is how gemini://astrobotany.mozz.us is served alongside gemini://mozz.us:
+
+```
+app = jetforce.CompositeApplication(
+    {
+        "astrobotany.mozz.us": astrobotany_application,
+        None: StaticDirectoryApplication(),
+    }
+)
+```
 """
-from jetforce import GeminiServer, JetforceApplication, Response, Status
+from jetforce import GeminiServer, StaticDirectoryApplication
 from jetforce.app.composite import CompositeApplication
 
-apple = JetforceApplication()
+app_a = StaticDirectoryApplication(root_directory="/var/custom_directory_a/")
+app_b = StaticDirectoryApplication(root_directory="/var/custom_directory_b/")
+app_default = StaticDirectoryApplication(root_directory="/var/gemini/")
 
-
-@apple.route()
-def index(request):
-    return Response(Status.SUCCESS, "text/plain", "apple!")
-
-
-banana = JetforceApplication()
-
-
-@banana.route()
-def index(request):
-    return Response(Status.SUCCESS, "text/plain", "banana!")
-
-
-composite_app = CompositeApplication(
-    {"apple.localhost": apple, "banana.localhost": banana}
+app = CompositeApplication(
+    {
+        "app-a.example.com": app_a,
+        "app-b.example.com": app_b,
+        # Use a default static file server for all other domains
+        None: app_default,
+    }
 )
 
 
 if __name__ == "__main__":
-    server = GeminiServer(composite_app)
+    server = GeminiServer(app)
     server.run()
