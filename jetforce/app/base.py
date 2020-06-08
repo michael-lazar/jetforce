@@ -15,6 +15,7 @@ class Status:
     """
 
     INPUT = 10
+    SENSITIVE_INPUT = 11
 
     SUCCESS = 20
     SUCCESS_END_OF_SESSION = 21

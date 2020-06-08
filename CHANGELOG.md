@@ -8,6 +8,7 @@
   This setting will define a language parameter that will be attached to the
   meta for all text/gemini responses. For example, ``--default-lang=en`` will
   set the response meta to ``"text/gemini; lang=en"``.
+- Added definition for the "11 SENSITIVE INPUT" status code.
 
 ### v0.3.2
 
