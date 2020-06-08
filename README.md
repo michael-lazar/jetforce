@@ -39,12 +39,13 @@ $ cd jetforce
 $ python setup.py install
 ```
 
-Or, install into a virtual environment:
+Or, install into a python virtual environment:
 
 ```bash
 # Create a project directory somewhere
 $ mkdir /opt/jetforce
 
+# Activate a virtual environment and install jetforce
 $ python3 -m virtualenv /opt/jetforce/venv
 $ source /opt/jetforce/venv/bin/activate
 $ pip install jetforce
