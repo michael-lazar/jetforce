@@ -92,6 +92,13 @@ group.add_argument(
     dest="index_file",
 )
 
+group.add_argument(
+    "--default-lang",
+    help="A lang parameter that will be indicated in the response meta",
+    default=None,
+    dest="default_lang",
+)
+
 
 def main():
     args = parser.parse_args()
@@ -99,6 +106,7 @@ def main():
         root_directory=args.root_directory,
         index_file=args.index_file,
         cgi_directory=args.cgi_directory,
+        default_lang=args.default_lang,
     )
     server = GeminiServer(
         app=app,

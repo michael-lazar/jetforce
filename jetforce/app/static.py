@@ -28,12 +28,14 @@ class StaticDirectoryApplication(JetforceApplication):
         root_directory: str = "/var/gemini",
         index_file: str = "index.gmi",
         cgi_directory: str = "cgi-bin",
+        default_lang: typing.Optional[str] = None,
     ):
         super().__init__()
         self.routes.append((RoutePattern(), self.serve_static_file))
 
         self.root = pathlib.Path(root_directory).resolve(strict=True)
         self.cgi_directory = cgi_directory.strip("/") + "/"
+        self.default_lang = default_lang
 
         self.index_file = index_file
         self.mimetypes = mimetypes.MimeTypes()
@@ -99,6 +101,7 @@ class StaticDirectoryApplication(JetforceApplication):
 
         if filesystem_path.is_file():
             mimetype = self.guess_mimetype(filesystem_path.name)
+            mimetype = self.add_extra_parameters(mimetype)
             generator = self.load_file(filesystem_path)
             return Response(Status.SUCCESS, mimetype, generator)
 
@@ -111,11 +114,13 @@ class StaticDirectoryApplication(JetforceApplication):
 
             index_file = filesystem_path / self.index_file
             if index_file.exists():
+                mimetype = self.add_extra_parameters("text/gemini")
                 generator = self.load_file(index_file)
-                return Response(Status.SUCCESS, "text/gemini", generator)
+                return Response(Status.SUCCESS, mimetype, generator)
 
+            mimetype = self.add_extra_parameters("text/gemini")
             generator = self.list_directory(url_path, filesystem_path)
-            return Response(Status.SUCCESS, "text/gemini", generator)
+            return Response(Status.SUCCESS, mimetype, generator)
 
         else:
             return Response(Status.NOT_FOUND, "Not Found")
@@ -190,6 +195,15 @@ class StaticDirectoryApplication(JetforceApplication):
             return f"{mime}; charset={encoding}"
         else:
             return mime or "text/plain"
+
+    def add_extra_parameters(self, meta: str) -> str:
+        """
+        Attach extra parameters to the response meta string.
+        """
+        if self.default_lang is not None:
+            if meta.startswith("text/gemini"):
+                meta += f"; lang={self.default_lang}"
+        return meta
 
     def default_callback(self, request: Request, **_) -> Response:
         """

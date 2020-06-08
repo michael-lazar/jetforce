@@ -1,5 +1,14 @@
 # Jetforce Changelog
 
+### Unreleased
+
+#### Features
+
+- Added a ``--default-lang`` command line argument to the static file server.
+  This setting will define a language parameter that will be attached to the
+  meta for all text/gemini responses. For example, ``--default-lang=en`` will
+  set the response meta to ``"text/gemini; lang=en"``.
+
 ### v0.3.2
 
 #### Bugfixes
