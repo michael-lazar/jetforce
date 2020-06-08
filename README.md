@@ -50,7 +50,7 @@ $ python3 -m virtualenv /opt/jetforce/venv
 $ source /opt/jetforce/venv/bin/activate
 $ pip install jetforce
 
-# The jetforce launch script will be placed here
+# The launch script will be installed here
 $ /opt/jetforce/venv/bin/jetforce
 ```
 
