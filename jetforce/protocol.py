@@ -183,7 +183,7 @@ class GeminiProtocol(LineOnlyReceiver):
         Write the gemini status line to an internal buffer.
 
         The status line is a single UTF-8 line formatted as:
-            <code>\t<meta>\r\n
+            <STATUS><SPACE><META><CR><LF>
 
         If the response status is 2, the meta field will contain the mimetype
         of the response data sent. If the status is something else, the meta
@@ -195,7 +195,7 @@ class GeminiProtocol(LineOnlyReceiver):
         """
         self.status = status
         self.meta = meta
-        self.response_buffer = f"{status}\t{meta}\r\n"
+        self.response_buffer = f"{status} {meta}\r\n"
 
     def write_body(self, data: typing.Union[str, bytes]) -> None:
         """
