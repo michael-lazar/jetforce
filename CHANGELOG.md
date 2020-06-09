@@ -1,6 +1,6 @@
 # Jetforce Changelog
 
-### v0.4.0
+### v0.4.0 (2020-06-09)
 
 #### Features
 
@@ -12,7 +12,7 @@
 - The response header now uses a <space> instead of a <tab> to separate the
   status code from the meta text.
 
-### v0.3.2
+### v0.3.2 (2020-06-02)
 
 #### Bugfixes
 
@@ -24,7 +24,7 @@
   - ``request.params``
   - ``request.fragment``
 
-### v0.3.1
+### v0.3.1 (2020-06-01)
 
 #### Bugfixes
 
@@ -33,7 +33,7 @@
   This is intended to make it simpler for applications and CGI scripts to
   use the certificate fingerprint in URL paths.
 
-### v0.3.0
+### v0.3.0 (2020-05-21)
 
 This release brings some major improvements and necessary refactoring of the
 jetforce package. Please read the release notes carefully and exercise caution
