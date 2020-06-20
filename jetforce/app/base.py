@@ -1,4 +1,3 @@
-import argparse
 import dataclasses
 import re
 import typing
@@ -126,7 +125,7 @@ class JetforceApplication:
     """
     Base Jetforce application class with primitive URL routing.
 
-    This is a base class for writing jetforce server applications. It doesn't
+    This is a base class for writing jetforce server applications. It doesn't do
     anything on its own, but it does provide a convenient interface to define
     custom server endpoints using route decorators. If you want to utilize
     jetforce as a library and write your own server in python, this is the class
@@ -197,13 +196,3 @@ class JetforceApplication:
         Set the error response based on the URL type.
         """
         return Response(Status.PERMANENT_FAILURE, "Not Found")
-
-    @classmethod
-    def add_arguments(cls, parser: argparse.ArgumentParser) -> None:
-        """
-        Add any application-specific arguments to the GeminiServer parser.
-
-        The destination variables for these arguments should match the method
-        signature for this class's __init__ method.
-        """
-        return
