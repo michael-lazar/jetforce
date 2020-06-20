@@ -11,7 +11,9 @@
 
 - If a gemini response returns a twisted.Deferred object, the errback will
   now be invoked when the TCP connection is closed.
-
+- Added a new example that demonstrates streaming data to client connections
+  (examples/chatroom.py).
+  
 ### v0.4.0 (2020-06-09)
 
 #### Features
