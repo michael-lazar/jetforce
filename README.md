@@ -297,7 +297,7 @@ Additional CGI variables will be included only when the client connection uses a
   <em>Example: "73629018972631"</em>
 </dd>
 
-<dt>TLS_CLIENT_VERIFIED</dt>
+<dt>TLS_CLIENT_AUTHORISED</dt>
 <dd>
   Was the certificate deemed trusted by the server's CA certificate store.<br>
   <em>0 (not authorised) / 1 (authorised)</em>
