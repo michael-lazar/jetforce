@@ -9,11 +9,19 @@
   
 #### Internal Framework  
 
+- The status code definitions have been updated to match the recent changes
+  to the gemini spec:
+  - 21 ``SUCCESS_END_OF_SESSION`` -> (removed)
+  - 61 ``TRANSIENT_CERTIFICATE_REQUESTED`` -> ``CERTIFICATE_NOT_AUTHORISED``
+  - 62 ``AUTHORISED_CERTIFICATE_REQUIRED`` -> ``CERTIFICATE_NOT_VALID``
+  - 63 ``CERTIFICATE_NOT_ACCEPTED`` -> (removed)
+  - 64 ``FUTURE_CERTIFICATE_REJECTED`` -> (removed)
+  - 65 ``EXPIRED_CERTIFICATE_REJECTED`` -> (removed)
 - If a gemini response returns a twisted.Deferred object, the errback will
   now be invoked when the TCP connection is closed.
 - Added a new example that demonstrates streaming data to client connections
   (examples/chatroom.py).
-  
+
 ### v0.4.0 (2020-06-09)
 
 #### Features
