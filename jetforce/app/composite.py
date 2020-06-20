@@ -34,7 +34,7 @@ class CompositeApplication:
         try:
             request = Request(environ)
         except Exception:
-            send_status(Status.BAD_REQUEST, "Unrecognized URL format")
+            send_status(Status.BAD_REQUEST, "Invalid URL")
             return
 
         if request.hostname in self.application_map:

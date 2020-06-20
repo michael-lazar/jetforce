@@ -49,13 +49,17 @@ class Request:
 
         url_parts = urlparse(self.url)
         if not url_parts.hostname:
-            raise ValueError("URL must contain a `hostname` part")
+            raise ValueError("Missing hostname component")
 
         if not url_parts.scheme:
             # If scheme is missing, infer it to be gemini://
             self.scheme = "gemini"
         else:
             self.scheme = url_parts.scheme
+
+        # gemini://username@host/... is forbidden by the specification
+        if self.scheme == "gemini" and url_parts.username:
+            raise ValueError("Invalid userinfo component")
 
         self.hostname = url_parts.hostname
         self.port = url_parts.port
@@ -140,7 +144,7 @@ class JetforceApplication:
         try:
             request = Request(environ)
         except Exception:
-            send_status(Status.BAD_REQUEST, "Unrecognized URL format")
+            send_status(Status.BAD_REQUEST, "Invalid URL")
             return
 
         for route_pattern, callback in self.routes[::-1]:

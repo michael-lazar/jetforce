@@ -2,13 +2,9 @@
 
 ### Unreleased
 
-#### Static Fileserver
-
+- URLs with a userinfo component will now be rejected with a status of 59.
 - Error stack traces are no longer shown when the client prematurely closes
   the connection.
-  
-#### Internal Framework  
-
 - The status code definitions have been updated to match the recent changes
   to the gemini spec:
   - 21 ``SUCCESS_END_OF_SESSION`` -> (removed)
@@ -17,8 +13,8 @@
   - 63 ``CERTIFICATE_NOT_ACCEPTED`` -> (removed)
   - 64 ``FUTURE_CERTIFICATE_REJECTED`` -> (removed)
   - 65 ``EXPIRED_CERTIFICATE_REJECTED`` -> (removed)
-- If a gemini response returns a twisted.Deferred object, the errback will
-  now be invoked when the TCP connection is closed.
+- If an application response handler returns a twisted.Deferred object, the
+  errback will now be invoked when the TCP connection is closed.
 - Added a new example that demonstrates streaming data to client connections
   (examples/chatroom.py).
 
