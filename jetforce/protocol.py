@@ -7,6 +7,8 @@ import urllib.parse
 
 from twisted.internet.address import IPv4Address, IPv6Address
 from twisted.internet.defer import Deferred, ensureDeferred
+from twisted.internet.error import ConnectionClosed
+from twisted.internet.protocol import connectionDone
 from twisted.internet.task import deferLater
 from twisted.protocols.basic import LineOnlyReceiver
 
@@ -50,6 +52,7 @@ class GeminiProtocol(LineOnlyReceiver):
     def __init__(self, server: GeminiServer, app: JetforceApplication):
         self.server = server
         self.app = app
+        self._currently_deferred: typing.Optional[Deferred] = None
 
     def connectionMade(self):
         """
@@ -59,6 +62,14 @@ class GeminiProtocol(LineOnlyReceiver):
         self.response_size = 0
         self.response_buffer = ""
         self.client_addr = self.transport.getPeer()
+
+    def connectionLost(self, reason=connectionDone):
+        """
+        This is invoked by twisted after the connection has been closed.
+        """
+        if self._currently_deferred:
+            self._currently_deferred.errback(reason)
+            self._currently_deferred = None
 
     def lineReceived(self, line):
         """
@@ -102,20 +113,22 @@ class GeminiProtocol(LineOnlyReceiver):
             environ = self.build_environ()
             response_generator = self.app(environ, self.write_status)
             if isinstance(response_generator, Deferred):
-                response_generator = await response_generator
+                response_generator = await self.track_deferred(response_generator)
             else:
                 # Yield control of the event loop
                 await deferLater(self.server.reactor, 0)
 
             for data in response_generator:
                 if isinstance(data, Deferred):
-                    data = await data
+                    data = await self.track_deferred(data)
                     self.write_body(data)
                 else:
                     self.write_body(data)
                     # Yield control of the event loop
                     await deferLater(self.server.reactor, 0)
 
+        except ConnectionClosed:
+            pass
         except Exception:
             self.server.log_message(traceback.format_exc())
             self.write_status(Status.CGI_ERROR, "An unexpected error occurred")
@@ -123,6 +136,13 @@ class GeminiProtocol(LineOnlyReceiver):
             self.flush_status()
             self.log_request()
             self.transport.loseConnection()
+
+    async def track_deferred(self, deferred: Deferred):
+        self._currently_deferred = deferred
+        try:
+            return await deferred
+        finally:
+            self._currently_deferred = None
 
     def build_environ(self) -> typing.Dict[str, typing.Any]:
         """

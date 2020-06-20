@@ -1,5 +1,17 @@
 # Jetforce Changelog
 
+### Unreleased
+
+#### Static Fileserver
+
+- Error stack traces are no longer shown when the client prematurely closes
+  the connection.
+  
+#### Internal Framework  
+
+- If a gemini response returns a twisted.Deferred object, the errback will
+  now be invoked when the TCP connection is closed.
+
 ### v0.4.0 (2020-06-09)
 
 #### Features
