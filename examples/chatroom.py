@@ -88,16 +88,16 @@ A live, unmoderated chat room over gemini://
 ```
                 
 You can set a username by connecting with a client certificate.
-Anonymous users will be identified by their IP addresses.
+Anonymous users will be identified by their IP address.
 
 => /history
 (view the last 100 messages)
 
 => /stream
-(open a long-running TCP connection that will stream in real-time)
+(open a long-running TCP connection that will stream messages in real-time)
 
 => /submit
-(submit a message to the room)
+(open an input loop to submit messages to the room)
 """.strip()
 
 
