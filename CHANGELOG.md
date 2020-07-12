@@ -21,7 +21,9 @@
   facilitate debugging TLS connections using tools like Wireshark.
 - Added ``examples/redirect.py`` to show demonstrate extending the static file
   server with common patterns like redirects and authenticated directories.
-
+- Jetforce will now always terminate the TCP connection without waiting for a
+  TLS close_notify alert response from the client. This fixes a bug where some
+  clients would appear to hang after receiving the content from the server.
 
 ### v0.4.0 (2020-06-09)
 

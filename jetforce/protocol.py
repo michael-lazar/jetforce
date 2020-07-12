@@ -78,6 +78,39 @@ class GeminiProtocol(LineOnlyReceiver):
         self.request = line
         return ensureDeferred(self._handle_request_noblock())
 
+    def lineLengthExceeded(self, line):
+        """
+        Called when the maximum line length has been reached.
+        """
+        return self.finish_connection()
+
+    def finish_connection(self):
+        """
+        Send the TLS "close_notify" alert and then immediately close the TCP
+        connection without waiting for the client to respond with it's own
+        "close_notify" alert.
+
+        > It is acceptable for an application to only send its shutdown alert
+        > and then close the underlying connection without waiting for the
+        > peer's response. This way resources can be saved, as the process can
+        > already terminate or serve another connection. This should only be
+        > done when it is known that the other side will not send more data,
+        > otherwise there is a risk of a truncation attack.
+
+        References:
+            https://github.com/michael-lazar/jetforce/issues/32
+            https://www.openssl.org/docs/man1.1.1/man3/SSL_shutdown.html
+        """
+        # Send the TLS close_notify alert and flush the write buffer. If the
+        # client has already closed their end of the stream, this will also
+        # close the underlying TCP connection.
+        self.transport.loseConnection()
+
+        # Ensure that the underlying connection will always be closed. There is
+        # no harm in calling this method twice if it was already invoked as
+        # part of the above TLS shutdown.
+        self.transport.transport.loseConnection()
+
     async def _handle_request_noblock(self):
         """
         Handle the gemini request and write the raw response to the socket.
@@ -106,7 +139,7 @@ class GeminiProtocol(LineOnlyReceiver):
             self.server.log_message(traceback.format_exc())
             self.write_status(Status.BAD_REQUEST, "Malformed request")
             self.flush_status()
-            self.transport.loseConnection()
+            self.finish_connection()
             raise
 
         try:
@@ -135,7 +168,7 @@ class GeminiProtocol(LineOnlyReceiver):
         finally:
             self.flush_status()
             self.log_request()
-            self.transport.loseConnection()
+            self.finish_connection()
 
     async def track_deferred(self, deferred: Deferred):
         self._currently_deferred = deferred
