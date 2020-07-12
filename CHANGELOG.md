@@ -17,6 +17,9 @@
   errback will now be invoked when the TCP connection is closed.
 - Added a new example that demonstrates streaming data to client connections
   (examples/chatroom.py).
+- The jetforce-client tool now supports writing TLS keys to a logfile to
+  facilitate debugging TLS connections using tools like Wireshark.
+
 
 ### v0.4.0 (2020-06-09)
 

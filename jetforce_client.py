@@ -25,6 +25,7 @@ def fetch(url, host=None, port=None, use_sni=False):
     with socket.create_connection((host, port)) as sock:
         with context.wrap_socket(sock, server_hostname=sni) as ssock:
             ssock.sendall((url + "\r\n").encode())
+
             fp = ssock.makefile("rb", buffering=0)
             data = fp.read(1024)
             while data:
@@ -32,8 +33,13 @@ def fetch(url, host=None, port=None, use_sni=False):
                 sys.stdout.buffer.flush()
                 data = fp.read(1024)
 
+            # Send a close_notify alert
+            # ssock.setblocking(False)
+            # ssock.unwrap()
+
 
 def run_client():
+    # fmt: off
     parser = argparse.ArgumentParser(description="A simple gemini client")
     parser.add_argument("url")
     parser.add_argument("--host", help="Server host")
@@ -41,9 +47,9 @@ def run_client():
     parser.add_argument("--tls-certfile", help="Client certificate")
     parser.add_argument("--tls-keyfile", help="Client private key")
     parser.add_argument("--tls-alpn-protocol", help="Protocol for ALPN negotiation")
-    parser.add_argument(
-        "--tls-enable-sni", action="store_true", help="Specify the hostname using SNI"
-    )
+    parser.add_argument("--tls-enable-sni", action="store_true", help="Specify the hostname using SNI")
+    parser.add_argument("--tls-keylog", help="Keylog file for TLS debugging (requires python 3.8+)")
+    # fmt: on
 
     args = parser.parse_args()
     if args.tls_certfile:
@@ -51,6 +57,9 @@ def run_client():
 
     if args.tls_alpn_protocol:
         context.set_alpn_protocols([args.tls_alpn_protocol])
+
+    if args.tls_keylog:
+        context.keylog_filename = args.tls_keylog
 
     fetch(args.url, args.host, args.port, args.tls_enable_sni)
 
