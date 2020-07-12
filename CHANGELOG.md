@@ -19,6 +19,8 @@
   (examples/chatroom.py).
 - The jetforce-client tool now supports writing TLS keys to a logfile to
   facilitate debugging TLS connections using tools like Wireshark.
+- Added ``examples/redirect.py`` to show demonstrate extending the static file
+  server with common patterns like redirects and authenticated directories.
 
 
 ### v0.4.0 (2020-06-09)
