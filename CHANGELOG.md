@@ -1,5 +1,9 @@
 # Jetforce Changelog
 
+### Unreleased
+
+- Optimized chunking for streaming large files.
+
 ### v0.5.0 (2020-07-14)
 
 #### Spec Changes

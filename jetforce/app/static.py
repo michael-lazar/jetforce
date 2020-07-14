@@ -6,6 +6,8 @@ import subprocess
 import typing
 import urllib.parse
 
+from twisted.protocols.basic import FileSender
+
 from .base import JetforceApplication, Request, Response, RoutePattern, Status
 
 
@@ -22,6 +24,9 @@ class StaticDirectoryApplication(JetforceApplication):
     be returned when the directory path is requested. Otherwise, a directory
     listing will be auto-generated.
     """
+
+    # Chunk size for streaming files, taken from the twisted FileSender class
+    CHUNK_SIZE = 2 ** 14
 
     def __init__(
         self,
@@ -160,10 +165,11 @@ class StaticDirectoryApplication(JetforceApplication):
         Load a file in chunks to allow streaming to the TCP socket.
         """
         with filesystem_path.open("rb") as fp:
-            data = fp.read(1024)
-            while data:
+            while True:
+                data = fp.read(self.CHUNK_SIZE)
+                if not data:
+                    break
                 yield data
-                data = fp.read(1024)
 
     def list_directory(
         self, url_path: pathlib.Path, filesystem_path: pathlib.Path
