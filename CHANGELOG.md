@@ -1,10 +1,10 @@
 # Jetforce Changelog
 
-### Unreleased
+### v0.5.0 (2020-07-14)
+
+#### Spec Changes
 
 - URLs with a userinfo component will now be rejected with a status of 59.
-- Error stack traces are no longer shown when the client prematurely closes
-  the connection.
 - The status code definitions have been updated to match the recent changes
   to the gemini spec:
   - 21 ``SUCCESS_END_OF_SESSION`` -> (removed)
@@ -13,18 +13,30 @@
   - 63 ``CERTIFICATE_NOT_ACCEPTED`` -> (removed)
   - 64 ``FUTURE_CERTIFICATE_REJECTED`` -> (removed)
   - 65 ``EXPIRED_CERTIFICATE_REJECTED`` -> (removed)
-- If an application response handler returns a twisted.Deferred object, the
-  errback will now be invoked when the TCP connection is closed.
-- Added a new example that demonstrates streaming data to client connections
-  (examples/chatroom.py).
-- The jetforce-client tool now supports writing TLS keys to a logfile to
-  facilitate debugging TLS connections using tools like Wireshark.
-- Added ``examples/redirect.py`` to show demonstrate extending the static file
-  server with common patterns like redirects and authenticated directories.
+
+#### Bugfixes
+
 - Jetforce will now always terminate the TCP connection without waiting for a
   TLS close_notify alert response from the client. This fixes a bug where some
   clients would appear to hang after receiving the content from the server.
 
+#### Features
+
+- The jetforce-client tool now supports writing TLS keys to a logfile to
+  facilitate debugging TLS connections using tools like Wireshark.
+- If an application response handler returns a twisted.Deferred object, the
+  errback will now be invoked when the TCP connection is closed.
+- Error stack traces are no longer shown when the client prematurely closes
+  the connection.
+
+#### Examples
+
+- Added a new example that demonstrates streaming data to client connections
+  (examples/chatroom.py).
+- Added a new example that demonstrates extending the static file server with
+  common patterns like redirects and authenticated directories
+  (examples/redirect.py).
+  
 ### v0.4.0 (2020-06-09)
 
 #### Features
