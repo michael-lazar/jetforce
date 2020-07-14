@@ -73,9 +73,15 @@ class GeminiServer(Factory):
         self.cafile = cafile
         self.capath = capath
 
+    def log_access(self, message: str) -> None:
+        """
+        Log standard "access log"-type information.
+        """
+        print(message, file=sys.stdout)
+
     def log_message(self, message: str) -> None:
         """
-        Log a diagnostic server message to stderr.
+        Log special messages like startup info or a traceback error.
         """
         print(message, file=sys.stderr)
 

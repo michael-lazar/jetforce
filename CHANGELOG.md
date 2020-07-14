@@ -2,7 +2,10 @@
 
 ### Unreleased
 
-- Optimized chunking for streaming large files.
+- File chunking has been optimized for streaming large static files.
+- Server access logs are now redirected to ``stdout`` instead of ``stderr``.
+  This is intended to make it easier to use a log manager tool to split them
+  out from other server messages like startup information and error tracebacks.
 
 ### v0.5.0 (2020-07-14)
 

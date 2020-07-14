@@ -6,8 +6,6 @@ import subprocess
 import typing
 import urllib.parse
 
-from twisted.protocols.basic import FileSender
-
 from .base import JetforceApplication, Request, Response, RoutePattern, Status
 
 

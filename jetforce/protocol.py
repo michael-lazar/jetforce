@@ -288,4 +288,4 @@ class GeminiProtocol(LineOnlyReceiver):
             # The connection ended before we got far enough to log anything
             pass
         else:
-            self.server.log_message(message)
+            self.server.log_access(message)
