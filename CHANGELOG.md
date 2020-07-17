@@ -6,6 +6,10 @@
 - Server access logs are now redirected to ``stdout`` instead of ``stderr``.
   This is intended to make it easier to use a log manager tool to split them
   out from other server messages like startup information and error tracebacks.
+- The default mimetype for unknown file extensions will now be sent as
+  "application/octet-stream" instead of "text/plain". The expectation is that
+  it would be safer for a client to download an unknown file rather than
+  attempting to display it inline as text.
 
 ### v0.5.0 (2020-07-14)
 

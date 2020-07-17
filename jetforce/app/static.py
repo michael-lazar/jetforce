@@ -198,7 +198,7 @@ class StaticDirectoryApplication(JetforceApplication):
         if encoding:
             return f"{mime}; charset={encoding}"
         else:
-            return mime or "text/plain"
+            return mime or "application/octet-stream"
 
     def add_extra_parameters(self, meta: str) -> str:
         """
