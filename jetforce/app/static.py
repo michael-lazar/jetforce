@@ -42,6 +42,12 @@ class StaticDirectoryApplication(JetforceApplication):
 
         self.index_file = index_file
         self.mimetypes = mimetypes.MimeTypes()
+        # We need to manually load all of the operating system mimetype files
+        # https://bugs.python.org/issue38656
+        for fn in mimetypes.knownfiles:
+            if os.path.isfile(fn):
+                self.mimetypes.read(fn)
+
         self.mimetypes.add_type("text/gemini", ".gmi")
         self.mimetypes.add_type("text/gemini", ".gemini")
 
