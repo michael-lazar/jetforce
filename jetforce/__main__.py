@@ -91,12 +91,17 @@ group.add_argument(
     metavar="FILE",
     dest="index_file",
 )
-
 group.add_argument(
     "--default-lang",
     help="A lang parameter that will be indicated in the response meta",
     default=None,
     dest="default_lang",
+)
+group.add_argument(
+    "--rate-limit",
+    help="An IP rate limit string, e.g. '60/5m' (60 requests per 5 minutes)",
+    default=None,
+    dest="rate_limit",
 )
 
 
@@ -107,6 +112,7 @@ def main():
         index_file=args.index_file,
         cgi_directory=args.cgi_directory,
         default_lang=args.default_lang,
+        rate_limit=args.rate_limit,
     )
     server = GeminiServer(
         app=app,

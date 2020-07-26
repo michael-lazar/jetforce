@@ -1,6 +1,8 @@
 import dataclasses
 import re
+import time
 import typing
+from collections import defaultdict
 from urllib.parse import unquote, urlparse
 
 from twisted.internet.defer import Deferred
@@ -196,3 +198,50 @@ class JetforceApplication:
         Set the error response based on the URL type.
         """
         return Response(Status.PERMANENT_FAILURE, "Not Found")
+
+
+class RateLimiter:
+
+    RE = re.compile("(?P<number>[0-9]+)/(?P<period>[0-9]+)?(?P<unit>[smhd])")
+
+    def __init__(self, rate: str) -> None:
+        match = self.RE.fullmatch(rate)
+        if not match:
+            raise ValueError(f"Invalid rate format: {rate}")
+
+        rate_data = match.groupdict()
+
+        self.number = int(rate_data["number"])
+        self.period = int(rate_data["period"] or 1)
+        if rate_data["unit"] == "m":
+            self.period *= 60
+        elif rate_data["unit"] == "h":
+            self.period += 60 * 60
+        elif rate_data["unit"] == "d":
+            self.period *= 60 * 60 * 24
+
+        self.reset()
+
+    def reset(self) -> None:
+        self.timestamp = time.time() + self.period
+        self.counter = defaultdict(int)
+
+    def get_key(self, request: Request) -> typing.Optional[str]:
+        return request.environ["REMOTE_ADDR"]
+
+    def __call__(self, func: typing.Callable) -> typing.Callable:
+        def handler(request, **kwargs) -> Response:
+            time_left = self.timestamp - time.time()
+            if time_left < 0:
+                self.reset()
+
+            rate_key = self.get_key(request)
+            if rate_key is not None:
+                self.counter[rate_key] += 1
+                if self.counter[rate_key] > self.number:
+                    msg = f"Rate limit exceeded, wait {time_left:.0f} seconds."
+                    return Response(Status.SLOW_DOWN, msg)
+
+            return func(request, **kwargs)
+
+        return handler
