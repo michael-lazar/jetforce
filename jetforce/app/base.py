@@ -1,6 +1,8 @@
 import dataclasses
 import re
+import time
 import typing
+from collections import defaultdict
 from urllib.parse import unquote, urlparse
 
 from twisted.internet.defer import Deferred
@@ -121,6 +123,91 @@ class RoutePattern:
         return re.fullmatch(self.path, request_path)
 
 
+RouteHandler = typing.Callable[..., Response]
+
+
+class RateLimiter:
+    """
+    A class that can be used to apply rate-limiting to endpoints.
+
+    Rates are defined as human-readable strings, e.g.
+
+        "5/s (5 requests per-second)
+        "10/5m" (10 requests per-5 minutes)
+        "100/2h" (100 requests per-2 hours)
+        "1000/d" (1k requests per-day)
+    """
+
+    RE = re.compile("(?P<number>[0-9]+)/(?P<period>[0-9]+)?(?P<unit>[smhd])")
+
+    def __init__(self, rate: str) -> None:
+        match = self.RE.fullmatch(rate)
+        if not match:
+            raise ValueError(f"Invalid rate format: {rate}")
+
+        rate_data = match.groupdict()
+
+        self.number = int(rate_data["number"])
+        self.period = int(rate_data["period"] or 1)
+        if rate_data["unit"] == "m":
+            self.period *= 60
+        elif rate_data["unit"] == "h":
+            self.period += 60 * 60
+        elif rate_data["unit"] == "d":
+            self.period *= 60 * 60 * 24
+
+        self.reset()
+
+    def reset(self) -> None:
+        self.next_timestamp = time.time() + self.period
+        self.rate_counter = defaultdict(int)
+
+    def get_key(self, request: Request) -> typing.Optional[str]:
+        """
+        Rate limit based on the client's IP-address.
+        """
+        return request.environ["REMOTE_ADDR"]
+
+    def check(self, request: Request) -> typing.Optional[Response]:
+        """
+        Check if the given request should be rate limited.
+
+        This method will return a failure response if the request should be
+        rate limited.
+        """
+        time_left = self.next_timestamp - time.time()
+        if time_left < 0:
+            self.reset()
+
+        key = self.get_key(request)
+        if key is not None:
+            self.rate_counter[key] += 1
+            if self.rate_counter[key] > self.number:
+                msg = f"Rate limit exceeded, wait {time_left:.0f} seconds."
+                return Response(Status.SLOW_DOWN, msg)
+
+    def apply(self, wrapped_func: RouteHandler) -> RouteHandler:
+        """
+        Decorator to apply rate limiting to an individual application route.
+
+        Usage:
+            rate_limiter = RateLimiter("10/m")
+
+            @app.route("/endpoint")
+            @rate_limiter.apply
+            def my_endpoint(request):
+                return Response(Status.SUCCESS, "text/gemini", "hello world!")
+        """
+
+        def wrapper(request: Request, **kwargs) -> Response:
+            response = self.check(request)
+            if response:
+                return response
+            return wrapped_func(request, **kwargs)
+
+        return wrapper
+
+
 class JetforceApplication:
     """
     Base Jetforce application class with primitive URL routing.
@@ -133,10 +220,9 @@ class JetforceApplication:
     how to accomplish this.
     """
 
-    def __init__(self):
-        self.routes: typing.List[
-            typing.Tuple[RoutePattern, typing.Callable[[Request, ...], Response]]
-        ] = []
+    def __init__(self, rate_limiter: typing.Optional[RateLimiter] = None):
+        self.rate_limiter = rate_limiter
+        self.routes: typing.List[typing.Tuple[RoutePattern, RouteHandler]] = []
 
     def __call__(
         self, environ: dict, send_status: typing.Callable
@@ -146,6 +232,12 @@ class JetforceApplication:
         except Exception:
             send_status(Status.BAD_REQUEST, "Invalid URL")
             return
+
+        if self.rate_limiter:
+            response = self.rate_limiter.check(request)
+            if response:
+                send_status(response.status, response.meta)
+                return
 
         for route_pattern, callback in self.routes[::-1]:
             match = route_pattern.match(request)
@@ -185,7 +277,7 @@ class JetforceApplication:
             path, scheme, hostname, strict_hostname, strict_trailing_slash
         )
 
-        def wrap(func: typing.Callable) -> typing.Callable:
+        def wrap(func: RouteHandler) -> RouteHandler:
             self.routes.append((route_pattern, func))
             return func
 

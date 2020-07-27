@@ -9,10 +9,11 @@ loading the entire response into memory at once.
 """
 import time
 
-from jetforce import GeminiServer, JetforceApplication, Response, Status
 from twisted.internet import reactor
 from twisted.internet.task import deferLater
 from twisted.internet.threads import deferToThread
+
+from jetforce import GeminiServer, JetforceApplication, Response, Status
 
 
 def blocking_counter():

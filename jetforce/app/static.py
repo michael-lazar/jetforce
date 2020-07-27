@@ -6,7 +6,14 @@ import subprocess
 import typing
 import urllib.parse
 
-from .base import JetforceApplication, Request, Response, RoutePattern, Status
+from .base import (
+    JetforceApplication,
+    RateLimiter,
+    Request,
+    Response,
+    RoutePattern,
+    Status,
+)
 
 
 class StaticDirectoryApplication(JetforceApplication):
@@ -32,8 +39,10 @@ class StaticDirectoryApplication(JetforceApplication):
         index_file: str = "index.gmi",
         cgi_directory: str = "cgi-bin",
         default_lang: typing.Optional[str] = None,
+        rate_limiter: typing.Optional[RateLimiter] = None,
     ):
-        super().__init__()
+        super().__init__(rate_limiter=rate_limiter)
+
         self.routes.append((RoutePattern(), self.serve_static_file))
 
         self.root = pathlib.Path(root_directory).resolve(strict=True)

@@ -17,8 +17,9 @@ streaming.
 from collections import deque
 from datetime import datetime
 
-from jetforce import GeminiServer, JetforceApplication, Response, Status
 from twisted.internet.defer import AlreadyCalledError, Deferred
+
+from jetforce import GeminiServer, JetforceApplication, Response, Status
 
 
 class MessageQueue:
