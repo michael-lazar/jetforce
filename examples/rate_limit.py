@@ -1,10 +1,17 @@
 #!/usr/local/env python3
 """
-This example shows how you can implement advanced rate limiting schemes.
+This example shows how you can implement rate limiting on a per-endpoint basis.
 """
 from jetforce import GeminiServer, JetforceApplication, RateLimiter, Response, Status
 
-app = JetforceApplication()
+# Apply a global rate limiter that will be applied to all requests
+global_rate_limiter = RateLimiter("100/m")
+app = JetforceApplication(rate_limiter=global_rate_limiter)
+
+# Setup some custom rate limiting for specific endpoints
+short_rate_limiter = RateLimiter("5/30s")
+long_rate_limiter = RateLimiter("60/5m")
+
 
 INDEX_PAGE = """\
 # Rate Limiting Demo
@@ -20,16 +27,14 @@ def index(request):
 
 
 @app.route("/short")
-@RateLimiter("5/30s")
+@short_rate_limiter.apply
 def short(request):
-    # Maximum of 5 requests per 30 seconds
     return Response(Status.SUCCESS, "text/gemini", "Request was successful")
 
 
 @app.route("/long")
-@RateLimiter("60/5m")
+@long_rate_limiter.apply
 def long(request):
-    # Maximum of 60 requests per 5 minutes
     return Response(Status.SUCCESS, "text/gemini", "Request was successful")
 
 

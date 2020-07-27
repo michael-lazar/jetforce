@@ -1,15 +1,28 @@
 # Jetforce Changelog
 
-### Unreleased
+### v0.6.0 (Unreleased)
 
-- File chunking has been optimized for streaming large static files.
-- Server access logs are now redirected to ``stdout`` instead of ``stderr``.
-  This is intended to make it easier to use a log manager tool to split them
-  out from other server messages like startup information and error tracebacks.
+#### Bugfixes
+
 - The default mimetype for unknown file extensions will now be sent as
   "application/octet-stream" instead of "text/plain". The expectation is that
   it would be safer for a client to download an unknown file rather than
   attempting to display it inline as text.
+
+#### Features
+
+- The static file server now has a ``--rate-limit`` flag that can be used
+  to define per-IP address rate limiting for requests. Requests that exceed
+  the specified rate will receive a 44 SLOW DOWN error response.
+- Server access logs are now redirected to ``stdout`` instead of ``stderr``.
+  This is intended to make it easier to use a log manager tool to split them
+  out from other server messages like startup information and error tracebacks.
+- File chunking has been optimized for streaming large static files.
+
+#### Examples
+  
+- Added a new example that demonstrates how to use the new ``RateLimiter``
+  class (examples/rate_limit.py).
 
 ### v0.5.0 (2020-07-14)
 

@@ -9,6 +9,7 @@ import argparse
 import sys
 
 from .__version__ import __version__
+from .app.base import RateLimiter
 from .app.static import StaticDirectoryApplication
 from .server import GeminiServer
 
@@ -99,7 +100,7 @@ group.add_argument(
 )
 group.add_argument(
     "--rate-limit",
-    help="An IP rate limit string, e.g. '60/5m' (60 requests per 5 minutes)",
+    help="Enable IP rate limiting, e.g. '60/5m' (60 requests per 5 minutes)",
     default=None,
     dest="rate_limit",
 )
@@ -107,12 +108,13 @@ group.add_argument(
 
 def main():
     args = parser.parse_args()
+    rate_limiter = RateLimiter(args.rate_limit) if args.rate_limit else None
     app = StaticDirectoryApplication(
         root_directory=args.root_directory,
         index_file=args.index_file,
         cgi_directory=args.cgi_directory,
         default_lang=args.default_lang,
-        rate_limit=args.rate_limit,
+        rate_limiter=rate_limiter,
     )
     server = GeminiServer(
         app=app,

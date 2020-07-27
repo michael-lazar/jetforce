@@ -59,36 +59,39 @@ $ /opt/jetforce/venv/bin/jetforce
 Use the ``--help`` flag to view command-line options:
 
 ```bash
-$ jetforce --help
 usage: jetforce [-h] [-V] [--host HOST] [--port PORT] [--hostname HOSTNAME]
                 [--tls-certfile FILE] [--tls-keyfile FILE] [--tls-cafile FILE]
-                [--tls-capath DIR] [--dir DIR] [--cgi-dir DIR]
-                [--index-file FILE]
+                [--tls-capath DIR] [--dir DIR] [--cgi-dir DIR] [--index-file FILE]
+                [--default-lang DEFAULT_LANG] [--rate-limit RATE_LIMIT]
 
 An Experimental Gemini Protocol Server
 
 optional arguments:
-  -h, --help           show this help message and exit
-  -V, --version        show program's version number and exit
+  -h, --help            show this help message and exit
+  -V, --version         show program's version number and exit
 
 server configuration:
-  --host HOST          Server address to bind to (default: 127.0.0.1)
-  --port PORT          Server port to bind to (default: 1965)
-  --hostname HOSTNAME  Server hostname (default: localhost)
-  --tls-certfile FILE  Server TLS certificate file (default: None)
-  --tls-keyfile FILE   Server TLS private key file (default: None)
-  --tls-cafile FILE    A CA file to use for validating clients (default: None)
-  --tls-capath DIR     A directory containing CA files for validating clients
-                       (default: None)
+  --host HOST           Server address to bind to (default: 127.0.0.1)
+  --port PORT           Server port to bind to (default: 1965)
+  --hostname HOSTNAME   Server hostname (default: localhost)
+  --tls-certfile FILE   Server TLS certificate file (default: None)
+  --tls-keyfile FILE    Server TLS private key file (default: None)
+  --tls-cafile FILE     A CA file to use for validating clients (default: None)
+  --tls-capath DIR      A directory containing CA files for validating clients (default:
+                        None)
 
 fileserver configuration:
-  --dir DIR            Root directory on the filesystem to serve (default:
-                       /var/gemini)
-  --cgi-dir DIR        CGI script directory, relative to the server's root
-                       directory (default: cgi-bin)
-  --index-file FILE    If a directory contains a file with this name, that
-                       file will be served instead of auto-generating an index
-                       page (default: index.gmi)
+  --dir DIR             Root directory on the filesystem to serve (default: /var/gemini)
+  --cgi-dir DIR         CGI script directory, relative to the server's root directory
+                        (default: cgi-bin)
+  --index-file FILE     If a directory contains a file with this name, that file will be
+                        served instead of auto-generating an index page (default: index.gmi)
+  --default-lang DEFAULT_LANG
+                        A lang parameter that will be indicated in the response meta
+                        (default: None)
+  --rate-limit RATE_LIMIT
+                        Enable IP rate limiting, e.g. '60/5m' (60 requests per 5 minutes)
+                        (default: None)
 ```
 
 ### Setting the ``hostname``

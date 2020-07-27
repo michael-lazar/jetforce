@@ -39,15 +39,11 @@ class StaticDirectoryApplication(JetforceApplication):
         index_file: str = "index.gmi",
         cgi_directory: str = "cgi-bin",
         default_lang: typing.Optional[str] = None,
-        rate_limit: typing.Optional[str] = None,
+        rate_limiter: typing.Optional[RateLimiter] = None,
     ):
-        super().__init__()
+        super().__init__(rate_limiter=rate_limiter)
 
-        request_method = self.serve_static_file
-        if rate_limit is not None:
-            request_method = RateLimiter(rate_limit)(request_method)
-
-        self.routes.append((RoutePattern(), request_method))
+        self.routes.append((RoutePattern(), self.serve_static_file))
 
         self.root = pathlib.Path(root_directory).resolve(strict=True)
         self.cgi_directory = cgi_directory.strip("/") + "/"
