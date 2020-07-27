@@ -21,8 +21,8 @@
 
 #### Examples
   
-- Added a new example that demonstrates how to use the new ``RateLimiter``
-  class (examples/rate_limit.py).
+- Added an example that demonstrates how to use the new ``RateLimiter`` class
+  (examples/rate_limit.py).
 
 ### v0.5.0 (2020-07-14)
 

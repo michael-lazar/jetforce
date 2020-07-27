@@ -4,7 +4,7 @@ This example shows how you can implement rate limiting on a per-endpoint basis.
 """
 from jetforce import GeminiServer, JetforceApplication, RateLimiter, Response, Status
 
-# Apply a global rate limiter that will be applied to all requests
+# Setup a global rate limiter that will be applied to all requests
 global_rate_limiter = RateLimiter("100/m")
 app = JetforceApplication(rate_limiter=global_rate_limiter)
 

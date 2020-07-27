@@ -87,7 +87,7 @@ fileserver configuration:
   --index-file FILE     If a directory contains a file with this name, that file will be
                         served instead of auto-generating an index page (default: index.gmi)
   --default-lang DEFAULT_LANG
-                        A lang parameter that will be indicated in the response meta
+                        A lang parameter that will be used for all text/gemini responses
                         (default: None)
   --rate-limit RATE_LIMIT
                         Enable IP rate limiting, e.g. '60/5m' (60 requests per 5 minutes)

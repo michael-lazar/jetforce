@@ -94,7 +94,7 @@ group.add_argument(
 )
 group.add_argument(
     "--default-lang",
-    help="A lang parameter that will be indicated in the response meta",
+    help="A lang parameter that will be used for all text/gemini responses",
     default=None,
     dest="default_lang",
 )
