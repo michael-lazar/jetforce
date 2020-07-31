@@ -1,6 +1,6 @@
 # Jetforce Changelog
 
-### v0.6.0 (Unreleased)
+### v0.6.0 (2020-07-30)
 
 #### Bugfixes
 
@@ -8,16 +8,17 @@
   "application/octet-stream" instead of "text/plain". The expectation is that
   it would be safer for a client to download an unknown file rather than
   attempting to display it inline as text.
+- Fixed a bug that prevented loading the default mimetype definitions from
+  /etc/mime.types and other system-level files.
 
 #### Features
 
 - The static file server now has a ``--rate-limit`` flag that can be used
   to define per-IP address rate limiting for requests. Requests that exceed
   the specified rate will receive a 44 SLOW DOWN error response.
-- Server access logs are now redirected to ``stdout`` instead of ``stderr``.
-  This is intended to make it easier to use a log manager tool to split them
-  out from other server messages like startup information and error tracebacks.
-- File chunking has been optimized for streaming large static files.
+- Server access logs are now directed to ``stdout`` instead of ``stderr``.
+  Error traceback and other messages will still be directed to ``stderr``.
+- File chunking size has been optimized for streaming large static files.
 
 #### Examples
   
