@@ -187,7 +187,7 @@ additional modification by the server.
 <dt>GATEWAY_INTERFACE</dt>
 <dd>
   CGI version (for compatability with RFC 3785).<br>
-  <em>Example: "GCI/1.1"</em>
+  <em>Example: "CGI/1.1"</em>
 </dd>
   
 <dt>SERVER_PROTOCOL</dt>
