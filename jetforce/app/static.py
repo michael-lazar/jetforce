@@ -149,7 +149,7 @@ class StaticDirectoryApplication(JetforceApplication):
         stream to the client.
         """
         cgi_env = {k: str(v) for k, v in environ.items() if k.isupper()}
-        cgi_env["GATEWAY_INTERFACE"] = "GCI/1.1"
+        cgi_env["GATEWAY_INTERFACE"] = "CGI/1.1"
 
         # Decode the stream as unicode so we can parse the status line
         # Use surrogateescape to preserve any non-UTF8 byte sequences.
