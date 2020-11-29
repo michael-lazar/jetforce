@@ -54,10 +54,9 @@ class Request:
             raise ValueError("Missing hostname component")
 
         if not url_parts.scheme:
-            # If scheme is missing, infer it to be gemini://
-            self.scheme = "gemini"
-        else:
-            self.scheme = url_parts.scheme
+            raise ValueError("Missing scheme component")
+
+        self.scheme = url_parts.scheme
 
         # gemini://username@host/... is forbidden by the specification
         if self.scheme == "gemini" and url_parts.username:

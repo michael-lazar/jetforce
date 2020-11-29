@@ -1,5 +1,11 @@
 # Jetforce Changelog
 
+### v0.7.0 (unreleased)
+
+#### Spec Changes
+
+- Requests containing URLs without a scheme are no longer accepted.
+
 ### v0.6.0 (2020-07-30)
 
 #### Bugfixes
