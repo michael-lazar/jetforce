@@ -5,6 +5,9 @@
 #### Spec Changes
 
 - Requests containing URLs without a scheme are no longer accepted.
+- The server will stop redirecting the root URL "gemini://example.com" to
+  "gemini://example.com/". These URLs are cannonically the same per the url RFC
+  definition and should both return successful responses.
 
 ### v0.6.0 (2020-07-30)
 

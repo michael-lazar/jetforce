@@ -124,7 +124,7 @@ class StaticDirectoryApplication(JetforceApplication):
             return Response(Status.SUCCESS, mimetype, generator)
 
         elif filesystem_path.is_dir():
-            if not request.path.endswith("/"):
+            if request.path and not request.path.endswith("/"):
                 url_parts = urllib.parse.urlparse(request.url)
                 # noinspection PyProtectedMember
                 url_parts = url_parts._replace(path=request.path + "/")
