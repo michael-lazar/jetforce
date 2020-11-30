@@ -211,6 +211,7 @@ class GeminiProtocol(LineOnlyReceiver):
                     "AUTH_TYPE": "CERTIFICATE",
                     "REMOTE_USER": cert_data["common_name"],
                     "TLS_CLIENT_HASH": cert_data["fingerprint"],
+                    "TLS_CLIENT_HASH_B64": cert_data["fingerprint_b64"],
                     "TLS_CLIENT_NOT_BEFORE": cert_data["not_before"],
                     "TLS_CLIENT_NOT_AFTER": cert_data["not_after"],
                     "TLS_CLIENT_SERIAL_NUMBER": cert_data["serial_number"],

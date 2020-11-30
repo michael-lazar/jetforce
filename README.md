@@ -278,8 +278,8 @@ Additional CGI variables will be included only when the client connection uses a
 
 <dt>TLS_CLIENT_HASH</dt>
 <dd>
-  A base64-encoded fingerprint that can be used to uniquely identify the certificate.<br>
-  <em>Example: "hjQftIC/4zPDQ1MNdav5nRQ39pM482xoTIgxtjyZOpY="</em>
+  A SHA fingerprint that can be used to uniquely identify the certificate.<br>
+  <em>Example: "SHA256:86341FB480BFE333C343530D75ABF99D1437F69338F36C684C8831B63C993A96"</em>
 </dd>
 
 <dt>TLS_CLIENT_NOT_BEFORE</dt>

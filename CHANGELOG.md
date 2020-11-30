@@ -8,7 +8,12 @@
 - The server will stop redirecting the root URL "gemini://example.com" to
   "gemini://example.com/". These URLs are cannonically the same per the url RFC
   definition and should both return successful responses.
-
+- The CGI variable TLS_CLIENT_HASH now formats the certificate hash as
+  "SHA256:\<HASH\>" where \<HASH\> is uppercase hexidecimal. The old base64
+  fingerprint will still be available as TLS_CLIENT_HASH_B64 to help migrate
+  existing CGI scripts, but it's recommended that you support the new hash
+  format moving forward.
+  
 ### v0.6.0 (2020-07-30)
 
 #### Bugfixes
