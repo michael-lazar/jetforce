@@ -1,6 +1,6 @@
 # Jetforce Changelog
 
-### v0.7.0 (unreleased)
+### v0.7.0 (2020-12-06)
 
 #### Spec Changes
 
