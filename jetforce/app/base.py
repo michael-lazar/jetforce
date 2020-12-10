@@ -62,7 +62,12 @@ class Request:
         if self.scheme == "gemini" and url_parts.username:
             raise ValueError("Invalid userinfo component")
 
-        self.hostname = url_parts.hostname
+        # Convert domain names to punycode for compatibility with URLs that
+        # contain encoded IDNs (follows RFC 3490).
+        hostname = url_parts.hostname
+        hostname = hostname.encode("idna").decode("ascii")
+
+        self.hostname = hostname
         self.port = url_parts.port
 
         self.path = unquote(url_parts.path)

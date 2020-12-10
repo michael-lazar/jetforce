@@ -102,6 +102,10 @@ receive traffic from. For example, if your jetforce server is running on
 that do not match this hostname will be refused by the server, including
 URLs that use a direct IP address such as "gemini://174.138.124.169".
 
+IDNs (domain names that contain unicode characters) should be defined using
+their ASCII punycode representation. For example, the domain name
+*café.mozz.us* should be represented as ``--hostname xn--caf-dma.mozz.us``.
+
 ### Setting the ``host``
 
 The server's host should be set to the local socket that you want to

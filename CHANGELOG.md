@@ -1,5 +1,11 @@
 # Jetforce Changelog
 
+### v0.8.0 (Unreleased)
+
+#### Spec Changes
+
+- Added support for international domain names using IDN encoding.
+
 ### v0.7.0 (2020-12-06)
 
 #### Spec Changes
