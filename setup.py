@@ -26,6 +26,7 @@ setuptools.setup(
     long_description=long_description(),
     long_description_content_type="text/markdown",
     packages=["jetforce", "jetforce.app"],
+    package_data={"jetforce": ["py.typed"]},
     py_modules=["jetforce_client"],
     entry_points={
         "console_scripts": [
@@ -44,4 +45,5 @@ setuptools.setup(
         "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
         "Topic :: Software Development :: Libraries :: Python Modules",
     ],
+    zip_safe=False,
 )

@@ -6,6 +6,11 @@
 
 - Added support for international domain names using IDN encoding.
 
+#### Features
+
+- Added py.typed file to indicate that the jetforce python library has support
+  for type hints.
+
 ### v0.7.0 (2020-12-06)
 
 #### Spec Changes
