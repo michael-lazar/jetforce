@@ -6,10 +6,12 @@
 
 - Added support for international domain names using IDN encoding.
 
-#### Features
+#### Bug Fixes
 
 - Added py.typed file to indicate that the jetforce python library has support
   for type hints.
+- Fixed a bug where TLS_CLIENT_AUTHORISED would sometimes be set to
+  ``True``/``False`` instead of ``1``/``0``.
 
 ### v0.7.0 (2020-12-06)
 
@@ -17,7 +19,7 @@
 
 - Requests containing URLs without a scheme are no longer accepted.
 - The server will stop redirecting the root URL "gemini://example.com" to
-  "gemini://example.com/". These URLs are cannonically the same per the url RFC
+  "gemini://example.com/". These URLs are canonically the same per the url RFC
   definition and should both return successful responses.
 - The CGI variable TLS_CLIENT_HASH now formats the certificate hash as
   "SHA256:\<HASH\>" where \<HASH\> is uppercase hexidecimal. The old base64
