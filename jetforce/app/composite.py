@@ -1,6 +1,15 @@
 import typing
 
-from .base import Request, ResponseType, Status
+from .base import (
+    ApplicationCallable,
+    ApplicationResponseIterable,
+    EnvironDict,
+    Request,
+    Status,
+    WriteStatusCallable,
+)
+
+ApplicationMap = typing.Dict[typing.Optional[str], ApplicationCallable]
 
 
 class CompositeApplication:
@@ -11,7 +20,7 @@ class CompositeApplication:
     two or more applications behind a single jetforce server.
     """
 
-    def __init__(self, application_map: typing.Dict[typing.Optional[str], typing.Any]):
+    def __init__(self, application_map: ApplicationMap):
         """
         Initialize the application by providing a mapping of hostname -> app
         key pairs. A hostname of `None` is a special key that can be used as
@@ -29,8 +38,8 @@ class CompositeApplication:
         self.application_map = application_map
 
     def __call__(
-        self, environ: dict, send_status: typing.Callable
-    ) -> typing.Iterator[ResponseType]:
+        self, environ: EnvironDict, send_status: WriteStatusCallable
+    ) -> ApplicationResponseIterable:
         try:
             request = Request(environ)
         except Exception:

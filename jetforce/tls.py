@@ -15,7 +15,7 @@ from twisted.python.randbytes import secureRandom
 COMMON_NAME = x509.NameOID.COMMON_NAME
 
 
-def inspect_certificate(cert: x509) -> dict:
+def inspect_certificate(cert: x509.Certificate) -> typing.Dict[str, object]:
     """
     Extract useful fields from a x509 client certificate object.
     """
@@ -66,7 +66,7 @@ def generate_ad_hoc_certificate(hostname: str) -> typing.Tuple[str, str]:
         subject_name = x509.Name([common_name])
         not_valid_before = datetime.datetime.utcnow()
         not_valid_after = not_valid_before + datetime.timedelta(days=365)
-        certificate = x509.CertificateBuilder(
+        cert_builder = x509.CertificateBuilder(
             subject_name=subject_name,
             issuer_name=subject_name,
             public_key=private_key.public_key(),
@@ -74,7 +74,7 @@ def generate_ad_hoc_certificate(hostname: str) -> typing.Tuple[str, str]:
             not_valid_before=not_valid_before,
             not_valid_after=not_valid_after,
         )
-        certificate = certificate.sign(private_key, hashes.SHA256(), backend)
+        certificate = cert_builder.sign(private_key, hashes.SHA256(), backend)
         with open(certfile, "wb") as fp:
             # noinspection PyTypeChecker
             cert_data = certificate.public_bytes(serialization.Encoding.PEM)
@@ -95,6 +95,8 @@ class GeminiCertificateOptions(CertificateOptions):
         https://github.com/urllib3/urllib3/blob/master/src/urllib3/util/ssl_.py
         https://github.com/twisted/twisted/blob/trunk/src/twisted/internet/_sslverify.py
     """
+
+    _acceptableProtocols: typing.List[bytes]
 
     def verify_callback(
         self,

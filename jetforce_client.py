@@ -6,6 +6,7 @@ import argparse
 import socket
 import ssl
 import sys
+import typing
 import urllib.parse
 
 context = ssl.create_default_context()
@@ -13,7 +14,12 @@ context.check_hostname = False
 context.verify_mode = ssl.CERT_NONE
 
 
-def fetch(url, host=None, port=None, use_sni=False):
+def fetch(
+    url: str,
+    host: typing.Optional[str] = None,
+    port: typing.Optional[int] = None,
+    use_sni: bool = False,
+) -> None:
     parsed_url = urllib.parse.urlparse(url)
     if not parsed_url.scheme:
         parsed_url = urllib.parse.urlparse(f"gemini://{url}")
@@ -38,7 +44,7 @@ def fetch(url, host=None, port=None, use_sni=False):
             # ssock.unwrap()
 
 
-def run_client():
+def run_client() -> None:
     # fmt: off
     parser = argparse.ArgumentParser(description="A simple gemini client")
     parser.add_argument("url")
@@ -59,6 +65,7 @@ def run_client():
         context.set_alpn_protocols([args.tls_alpn_protocol])
 
     if args.tls_keylog:
+        # This is a "private" variable that the stdlib exposes for debugging
         context.keylog_filename = args.tls_keylog
 
     fetch(args.url, args.host, args.port, args.tls_enable_sni)

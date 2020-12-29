@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import dataclasses
 import re
 import time
@@ -7,7 +9,13 @@ from urllib.parse import unquote, urlparse
 
 from twisted.internet.defer import Deferred
 
-ResponseType = typing.Union[str, bytes, Deferred]
+ApplicationResponse = typing.Union[str, bytes, Deferred]
+ApplicationResponseIterable = typing.Iterable[ApplicationResponse]
+EnvironDict = typing.Dict[str, object]
+WriteStatusCallable = typing.Callable[[int, str], None]
+ApplicationCallable = typing.Callable[
+    [EnvironDict, WriteStatusCallable], ApplicationResponseIterable
+]
 
 
 class Status:
@@ -45,9 +53,19 @@ class Request:
     Object that encapsulates information about a single gemini request.
     """
 
-    def __init__(self, environ: dict):
+    environ: EnvironDict
+    url: str
+    scheme: str
+    hostname: str
+    port: typing.Optional[int]
+    path: str
+    params: str
+    query: str
+    fragment: str
+
+    def __init__(self, environ: EnvironDict):
         self.environ = environ
-        self.url = environ["GEMINI_URL"]
+        self.url = typing.cast(str, environ["GEMINI_URL"])
 
         url_parts = urlparse(self.url)
         if not url_parts.hostname:
@@ -84,7 +102,10 @@ class Response:
 
     status: int
     meta: str
-    body: typing.Union[None, ResponseType, typing.Iterable[ResponseType]] = None
+    body: typing.Union[None, ApplicationResponse, ApplicationResponseIterable] = None
+
+
+RouteHandler = typing.Callable[..., Response]
 
 
 @dataclasses.dataclass
@@ -101,7 +122,7 @@ class RoutePattern:
     strict_port: bool = True
     strict_trailing_slash: bool = False
 
-    def match(self, request: Request) -> typing.Optional[re.Match]:
+    def match(self, request: Request) -> typing.Optional[re.Match[str]]:
         """
         Check if the given request URL matches this route pattern.
         """
@@ -112,12 +133,12 @@ class RoutePattern:
         server_port = request.environ["SERVER_PORT"]
 
         if self.strict_hostname and request.hostname != server_hostname:
-            return
+            return None
         if self.strict_port and request.port is not None:
             if request.port != server_port:
-                return
+                return None
         if self.scheme and self.scheme != request.scheme:
-            return
+            return None
 
         if self.strict_trailing_slash:
             request_path = request.path
@@ -125,9 +146,6 @@ class RoutePattern:
             request_path = request.path.rstrip("/")
 
         return re.fullmatch(self.path, request_path)
-
-
-RouteHandler = typing.Callable[..., Response]
 
 
 class RateLimiter:
@@ -143,6 +161,11 @@ class RateLimiter:
     """
 
     RE = re.compile("(?P<number>[0-9]+)/(?P<period>[0-9]+)?(?P<unit>[smhd])")
+
+    number: int
+    period: int
+    next_timestamp: float
+    rate_counter: typing.Dict[typing.Any, int]
 
     def __init__(self, rate: str) -> None:
         match = self.RE.fullmatch(rate)
@@ -166,7 +189,7 @@ class RateLimiter:
         self.next_timestamp = time.time() + self.period
         self.rate_counter = defaultdict(int)
 
-    def get_key(self, request: Request) -> typing.Optional[str]:
+    def get_key(self, request: Request) -> typing.Any:
         """
         Rate limit based on the client's IP-address.
         """
@@ -190,6 +213,8 @@ class RateLimiter:
                 msg = f"Rate limit exceeded, wait {time_left:.0f} seconds."
                 return Response(Status.SLOW_DOWN, msg)
 
+        return None
+
     def apply(self, wrapped_func: RouteHandler) -> RouteHandler:
         """
         Decorator to apply rate limiting to an individual application route.
@@ -203,7 +228,7 @@ class RateLimiter:
                 return Response(Status.SUCCESS, "text/gemini", "hello world!")
         """
 
-        def wrapper(request: Request, **kwargs) -> Response:
+        def wrapper(request: Request, **kwargs: typing.Any) -> Response:
             response = self.check(request)
             if response:
                 return response
@@ -224,13 +249,16 @@ class JetforceApplication:
     how to accomplish this.
     """
 
+    rate_limiter: typing.Optional[RateLimiter]
+    routes: typing.List[typing.Tuple[RoutePattern, RouteHandler]]
+
     def __init__(self, rate_limiter: typing.Optional[RateLimiter] = None):
         self.rate_limiter = rate_limiter
-        self.routes: typing.List[typing.Tuple[RoutePattern, RouteHandler]] = []
+        self.routes = []
 
     def __call__(
-        self, environ: dict, send_status: typing.Callable
-    ) -> typing.Iterator[ResponseType]:
+        self, environ: EnvironDict, send_status: WriteStatusCallable
+    ) -> ApplicationResponseIterable:
         try:
             request = Request(environ)
         except Exception:
@@ -245,7 +273,7 @@ class JetforceApplication:
 
         for route_pattern, callback in self.routes[::-1]:
             match = route_pattern.match(request)
-            if route_pattern.match(request):
+            if match:
                 callback_kwargs = match.groupdict()
                 break
         else:
@@ -267,7 +295,7 @@ class JetforceApplication:
         hostname: typing.Optional[str] = None,
         strict_hostname: bool = True,
         strict_trailing_slash: bool = False,
-    ) -> typing.Callable:
+    ) -> typing.Callable[[RouteHandler], RouteHandler]:
         """
         Decorator for binding a function to a route based on the URL path.
 
@@ -287,7 +315,7 @@ class JetforceApplication:
 
         return wrap
 
-    def default_callback(self, request: Request, **_) -> Response:
+    def default_callback(self, request: Request, **_: typing.Any) -> Response:
         """
         Set the error response based on the URL type.
         """
