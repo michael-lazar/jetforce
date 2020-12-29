@@ -167,7 +167,7 @@ class StaticDirectoryApplication(JetforceApplication):
             universal_newlines=True,
             errors="surrogateescape",
         )
-        assert out.stdout
+
         status_line = out.stdout.readline().strip()
         status_parts = status_line.split(maxsplit=1)
         if len(status_parts) != 2 or not status_parts[0].isdecimal():
