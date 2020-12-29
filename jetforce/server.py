@@ -4,13 +4,14 @@ import socket
 import sys
 import typing
 
-from twisted.internet import reactor
+from twisted.internet import reactor as _reactor
 from twisted.internet.base import ReactorBase
 from twisted.internet.endpoints import SSL4ServerEndpoint
 from twisted.internet.protocol import Factory
 from twisted.internet.tcp import Port
 
 from .__version__ import __version__
+from .app.base import ApplicationCallable
 from .protocol import GeminiProtocol
 from .tls import GeminiCertificateOptions, generate_ad_hoc_certificate
 
@@ -49,8 +50,8 @@ class GeminiServer(Factory):
 
     def __init__(
         self,
-        app: typing.Callable,
-        reactor: ReactorBase = reactor,
+        app: ApplicationCallable,
+        reactor: ReactorBase = _reactor,
         host: str = "127.0.0.1",
         port: int = 1965,
         hostname: str = "localhost",
@@ -95,7 +96,7 @@ class GeminiServer(Factory):
         else:
             self.log_message(f"Listening on [{sock_ip}]:{sock_port}")
 
-    def buildProtocol(self, addr) -> GeminiProtocol:
+    def buildProtocol(self, addr: typing.Any) -> GeminiProtocol:
         """
         This method is invoked by twisted once for every incoming connection.
 

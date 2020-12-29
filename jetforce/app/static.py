@@ -7,6 +7,7 @@ import typing
 import urllib.parse
 
 from .base import (
+    EnvironDict,
     JetforceApplication,
     RateLimiter,
     Request,
@@ -33,6 +34,8 @@ class StaticDirectoryApplication(JetforceApplication):
     # Chunk size for streaming files, taken from the twisted FileSender class
     CHUNK_SIZE = 2 ** 14
 
+    mimetypes: mimetypes.MimeTypes
+
     def __init__(
         self,
         root_directory: str = "/var/gemini",
@@ -57,8 +60,9 @@ class StaticDirectoryApplication(JetforceApplication):
             if os.path.isfile(fn):
                 self.mimetypes.read(fn)
 
-        self.mimetypes.add_type("text/gemini", ".gmi")
-        self.mimetypes.add_type("text/gemini", ".gemini")
+        # This is a valid method but the type stubs are incorrect
+        self.mimetypes.add_type("text/gemini", ".gmi")  # type: ignore
+        self.mimetypes.add_type("text/gemini", ".gemini")  # type: ignore
 
     def serve_static_file(self, request: Request) -> Response:
         """
@@ -143,7 +147,9 @@ class StaticDirectoryApplication(JetforceApplication):
         else:
             return Response(Status.NOT_FOUND, "Not Found")
 
-    def run_cgi_script(self, filesystem_path: pathlib.Path, environ: dict) -> Response:
+    def run_cgi_script(
+        self, filesystem_path: typing.Union[str, pathlib.Path], environ: EnvironDict
+    ) -> Response:
         """
         Execute the given file as a CGI script and return the script's stdout
         stream to the client.
@@ -224,7 +230,7 @@ class StaticDirectoryApplication(JetforceApplication):
                 meta += f"; lang={self.default_lang}"
         return meta
 
-    def default_callback(self, request: Request, **_) -> Response:
+    def default_callback(self, request: Request, **_: typing.Any) -> Response:
         """
         Since the StaticDirectoryApplication only serves gemini URLs, return
         a proxy request refused for suspicious URLs.

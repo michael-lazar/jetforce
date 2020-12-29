@@ -106,7 +106,7 @@ group.add_argument(
 )
 
 
-def main():
+def main() -> None:
     args = parser.parse_args()
     rate_limiter = RateLimiter(args.rate_limit) if args.rate_limit else None
     app = StaticDirectoryApplication(

@@ -11,9 +11,10 @@ from twisted.internet.error import ConnectionClosed
 from twisted.internet.protocol import connectionDone
 from twisted.internet.task import deferLater
 from twisted.protocols.basic import LineOnlyReceiver
+from twisted.python.failure import Failure
 
 from .__version__ import __version__
-from .app.base import JetforceApplication, Status
+from .app.base import ApplicationCallable, EnvironDict, Status
 from .tls import inspect_certificate
 
 if typing.TYPE_CHECKING:
@@ -49,12 +50,12 @@ class GeminiProtocol(LineOnlyReceiver):
     response_buffer: str
     response_size: int
 
-    def __init__(self, server: GeminiServer, app: JetforceApplication):
+    def __init__(self, server: GeminiServer, app: ApplicationCallable):
         self.server = server
         self.app = app
         self._currently_deferred: typing.Optional[Deferred] = None
 
-    def connectionMade(self):
+    def connectionMade(self) -> None:
         """
         This is invoked by twisted after the connection is first established.
         """
@@ -63,7 +64,7 @@ class GeminiProtocol(LineOnlyReceiver):
         self.response_buffer = ""
         self.client_addr = self.transport.getPeer()
 
-    def connectionLost(self, reason=connectionDone):
+    def connectionLost(self, reason: Failure = connectionDone) -> None:
         """
         This is invoked by twisted after the connection has been closed.
         """
@@ -71,20 +72,20 @@ class GeminiProtocol(LineOnlyReceiver):
             self._currently_deferred.errback(reason)
             self._currently_deferred = None
 
-    def lineReceived(self, line):
+    def lineReceived(self, line: bytes) -> Deferred:
         """
         This method is invoked by LineOnlyReceiver for every incoming line.
         """
         self.request = line
         return ensureDeferred(self._handle_request_noblock())
 
-    def lineLengthExceeded(self, line):
+    def lineLengthExceeded(self, line: bytes) -> None:
         """
         Called when the maximum line length has been reached.
         """
-        return self.finish_connection()
+        self.finish_connection()
 
-    def finish_connection(self):
+    def finish_connection(self) -> None:
         """
         Send the TLS "close_notify" alert and then immediately close the TCP
         connection without waiting for the client to respond with it's own
@@ -111,7 +112,7 @@ class GeminiProtocol(LineOnlyReceiver):
         # part of the above TLS shutdown.
         self.transport.transport.loseConnection()
 
-    async def _handle_request_noblock(self):
+    async def _handle_request_noblock(self) -> None:
         """
         Handle the gemini request and write the raw response to the socket.
 
@@ -170,14 +171,14 @@ class GeminiProtocol(LineOnlyReceiver):
             self.log_request()
             self.finish_connection()
 
-    async def track_deferred(self, deferred: Deferred):
+    async def track_deferred(self, deferred: Deferred) -> typing.Union[str, bytes]:
         self._currently_deferred = deferred
         try:
             return await deferred
         finally:
             self._currently_deferred = None
 
-    def build_environ(self) -> typing.Dict[str, typing.Any]:
+    def build_environ(self) -> EnvironDict:
         """
         Construct a dictionary that will be passed to the application handler.
 

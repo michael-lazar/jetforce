@@ -3,7 +3,7 @@ import codecs
 import setuptools
 
 
-def long_description():
+def long_description() -> str:
     with codecs.open("README.md", encoding="utf8") as f:
         return f.read()
 

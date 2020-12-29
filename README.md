@@ -190,7 +190,7 @@ additional modification by the server.
 <dl>
 <dt>GATEWAY_INTERFACE</dt>
 <dd>
-  CGI version (for compatability with RFC 3785).<br>
+  CGI version (for compatibility with RFC 3785).<br>
   <em>Example: "CGI/1.1"</em>
 </dd>
   
@@ -270,7 +270,7 @@ Additional CGI variables will be included only when the client connection uses a
   
 <dt>AUTH_TYPE</dt>
 <dd>
-  Authentication type (for compatability with RFC 3785).<br>
+  Authentication type (for compatibility with RFC 3785).<br>
   <em>Example: "CERTIFICATE"</em>
 </dd>
 

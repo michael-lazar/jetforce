@@ -6,10 +6,13 @@
 
 - Added support for international domain names using IDN encoding.
 
+#### New Features
+
+- Several fixes & improvements to python type hinting coverage.
+- Added a ``py.typed`` file to indicate project support for type hints.
+  
 #### Bug Fixes
 
-- Added py.typed file to indicate that the jetforce python library has support
-  for type hints.
 - Fixed a bug where TLS_CLIENT_AUTHORISED would sometimes be set to
   ``True``/``False`` instead of ``1``/``0``.
 
