@@ -1,5 +1,5 @@
 #!/usr/local/bin/python3.7
-"""
+r"""
 CGI script that requests user supplied text using the INPUT status, and
 pipes it into the `cowsay` program.
 

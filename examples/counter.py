@@ -59,8 +59,8 @@ def deferred_counter():
     eventually run in the main event loop.
     """
 
-    def delayed_callback(x):
-        return f"{x}\r\n"
+    def delayed_callback(var):
+        return f"{var}\r\n"
 
     for x in range(10):
         yield deferLater(reactor, 1, delayed_callback, x)
