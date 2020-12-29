@@ -9,12 +9,12 @@ from urllib.parse import unquote, urlparse
 
 from twisted.internet.defer import Deferred
 
-ApplicationResponse = typing.Union[str, bytes, Deferred]
-ApplicationResponseIterable = typing.Iterable[ApplicationResponse]
 EnvironDict = typing.Dict[str, object]
+ResponseType = typing.Union[str, bytes, Deferred]
+ApplicationResponse = typing.Iterable[ResponseType]
 WriteStatusCallable = typing.Callable[[int, str], None]
 ApplicationCallable = typing.Callable[
-    [EnvironDict, WriteStatusCallable], ApplicationResponseIterable
+    [EnvironDict, WriteStatusCallable], ApplicationResponse
 ]
 
 
@@ -102,7 +102,7 @@ class Response:
 
     status: int
     meta: str
-    body: typing.Union[None, ApplicationResponse, ApplicationResponseIterable] = None
+    body: typing.Union[None, ResponseType, ApplicationResponse] = None
 
 
 RouteHandler = typing.Callable[..., Response]
@@ -258,7 +258,7 @@ class JetforceApplication:
 
     def __call__(
         self, environ: EnvironDict, send_status: WriteStatusCallable
-    ) -> ApplicationResponseIterable:
+    ) -> ApplicationResponse:
         try:
             request = Request(environ)
         except Exception:

@@ -2,7 +2,7 @@ import typing
 
 from .base import (
     ApplicationCallable,
-    ApplicationResponseIterable,
+    ApplicationResponse,
     EnvironDict,
     Request,
     Status,
@@ -39,7 +39,7 @@ class CompositeApplication:
 
     def __call__(
         self, environ: EnvironDict, send_status: WriteStatusCallable
-    ) -> ApplicationResponseIterable:
+    ) -> ApplicationResponse:
         try:
             request = Request(environ)
         except Exception:
