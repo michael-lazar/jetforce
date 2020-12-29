@@ -141,8 +141,8 @@ class StaticDirectoryApplication(JetforceApplication):
                 return Response(Status.SUCCESS, mimetype, generator)
 
             mimetype = self.add_extra_parameters("text/gemini")
-            generator = self.list_directory(url_path, filesystem_path)
-            return Response(Status.SUCCESS, mimetype, generator)
+            body = self.list_directory(url_path, filesystem_path)
+            return Response(Status.SUCCESS, mimetype, body)
 
         else:
             return Response(Status.NOT_FOUND, "Not Found")
@@ -192,13 +192,13 @@ class StaticDirectoryApplication(JetforceApplication):
 
     def list_directory(
         self, url_path: pathlib.Path, filesystem_path: pathlib.Path
-    ) -> typing.Iterator[bytes]:
+    ) -> str:
         """
         Auto-generate a text/gemini document based on the contents of the file system.
         """
-        yield f"Directory: /{url_path}\r\n".encode()
+        lines = [f"Directory: /{url_path}]"]
         if url_path.parent != url_path:
-            yield f"=>/{url_path.parent}\t..\r\n".encode()
+            lines.append(f"=>/{url_path.parent}\t..")
 
         for file in sorted(filesystem_path.iterdir()):
             if file.name.startswith("."):
@@ -207,9 +207,11 @@ class StaticDirectoryApplication(JetforceApplication):
 
             encoded_path = urllib.parse.quote(str(url_path / file.name))
             if file.is_dir():
-                yield f"=>/{encoded_path}/\t{file.name}/\r\n".encode()
+                lines.append(f"=>/{encoded_path}/\t{file.name}/")
             else:
-                yield f"=>/{encoded_path}\t{file.name}\r\n".encode()
+                lines.append(f"=>/{encoded_path}\t{file.name}")
+
+        return "\r\n".join(lines)
 
     def guess_mimetype(self, filename: str) -> str:
         """
