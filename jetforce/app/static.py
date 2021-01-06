@@ -188,7 +188,7 @@ class StaticDirectoryApplication(JetforceApplication):
 
     def cgi_body_generator(
         self,
-        proc: subprocess.Popen[bytes],
+        proc: subprocess.Popen,
     ) -> typing.Iterator[typing.Union[bytes, Deferred]]:
         """
         Non-blocking read from the stdout of the CGI process and pipe it

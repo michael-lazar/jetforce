@@ -6,6 +6,12 @@
 
 - n/a
 
+### v0.8.1 (2021-01-06)
+
+### Changes
+
+- Remove new type hint syntax that was causing an error in python 3.7.
+
 ### v0.8.0 (2021-01-06)
 
 #### Changes
