@@ -6,8 +6,7 @@ import typing
 import urllib.parse
 
 from twisted.internet.address import IPv4Address, IPv6Address
-from twisted.internet.defer import Deferred, ensureDeferred
-from twisted.internet.error import ConnectionClosed
+from twisted.internet.defer import Deferred, ensureDeferred, CancelledError
 from twisted.internet.protocol import connectionDone
 from twisted.internet.task import deferLater
 from twisted.protocols.basic import LineOnlyReceiver
@@ -40,6 +39,7 @@ class GeminiProtocol(LineOnlyReceiver):
     """
 
     TIMESTAMP_FORMAT = "%d/%b/%Y:%H:%M:%S %z"
+    DEBUG = False
 
     client_addr: typing.Union[IPv4Address, IPv6Address]
     connected_timestamp: time.struct_time
@@ -69,8 +69,7 @@ class GeminiProtocol(LineOnlyReceiver):
         This is invoked by twisted after the connection has been closed.
         """
         if self._currently_deferred:
-            self._currently_deferred.errback(reason)
-            self._currently_deferred = None
+            self._currently_deferred.cancel()
 
     def lineReceived(self, line: bytes) -> Deferred:
         """
@@ -150,7 +149,8 @@ class GeminiProtocol(LineOnlyReceiver):
                 response_generator = await self.track_deferred(response_generator)
             else:
                 # Yield control of the event loop
-                await deferLater(self.server.reactor, 0)
+                deferred = deferLater(self.server.reactor, 0)
+                await self.track_deferred(deferred)
 
             for data in response_generator:
                 if isinstance(data, Deferred):
@@ -159,9 +159,9 @@ class GeminiProtocol(LineOnlyReceiver):
                 else:
                     self.write_body(data)
                     # Yield control of the event loop
-                    await deferLater(self.server.reactor, 0)
-
-        except ConnectionClosed:
+                    deferred = deferLater(self.server.reactor, 0)
+                    await self.track_deferred(deferred)
+        except CancelledError:
             pass
         except Exception:
             self.server.log_message(traceback.format_exc())
@@ -172,6 +172,10 @@ class GeminiProtocol(LineOnlyReceiver):
             self.finish_connection()
 
     async def track_deferred(self, deferred: Deferred) -> typing.Union[str, bytes]:
+        """
+        Keep track of the deferred that we're waiting on so we can send an
+        error back to it if the connection is abruptly killed.
+        """
         self._currently_deferred = deferred
         try:
             return await deferred
@@ -252,15 +256,20 @@ class GeminiProtocol(LineOnlyReceiver):
         self.meta = meta
         self.response_buffer = f"{status} {meta}\r\n"
 
-    def write_body(self, data: typing.Union[str, bytes]) -> None:
+    def write_body(self, data: typing.Union[str, bytes, None]) -> None:
         """
         Write bytes to the gemini response body.
         """
+        if data is None:
+            return
+
         if isinstance(data, str):
             data = data.encode()
 
         self.flush_status()
         self.response_size += len(data)
+        if self.DEBUG:
+            print(f"Writing body: {len(data)} bytes")
         self.transport.write(data)
 
     def flush_status(self) -> None:
@@ -270,6 +279,8 @@ class GeminiProtocol(LineOnlyReceiver):
         if self.response_buffer and not self.response_size:
             data = self.response_buffer.encode()
             self.response_size += len(data)
+            if self.DEBUG:
+                print(f"Writing status: {len(data)} bytes")
             self.transport.write(data)
         self.response_buffer = ""
 

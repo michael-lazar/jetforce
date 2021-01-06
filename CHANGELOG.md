@@ -2,20 +2,18 @@
 
 ### v0.8.0 (Unreleased)
 
-#### Spec Changes
-
 - Added support for international domain names using IDN encoding.
-
-#### New Features
-
-- Several fixes & improvements to python type hinting coverage.
+- Several improvements to internal python type hinting coverage.
 - Added a ``py.typed`` file to indicate project support for type hints.
-  
-#### Bug Fixes
-
+- Optimized TCP packets when streaming directory listings.
+- Optimized TCP packets when streaming large CGI responses.
+- Improved error handling to catch invalid responses from CGI scripts.
 - Fixed a bug where TLS_CLIENT_AUTHORISED would sometimes be set to
   ``True``/``False`` instead of ``1``/``0``.
-
+- Fixed error handling edge case when the client killed the connection
+  before all data has been sent. A `CancelledError` exception will now
+  be raised internally instead of a ``ConnectionClosed`` exception.
+  
 ### v0.7.0 (2020-12-06)
 
 #### Spec Changes

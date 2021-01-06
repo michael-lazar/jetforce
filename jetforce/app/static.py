@@ -1,10 +1,13 @@
-import codecs
 import mimetypes
 import os
 import pathlib
 import subprocess
 import typing
 import urllib.parse
+
+from twisted.internet import reactor
+from twisted.internet.task import deferLater
+from twisted.internet.defer import Deferred
 
 from .base import (
     EnvironDict,
@@ -33,6 +36,12 @@ class StaticDirectoryApplication(JetforceApplication):
 
     # Chunk size for streaming files, taken from the twisted FileSender class
     CHUNK_SIZE = 2 ** 14
+
+    # Length of time to defer while waiting for more data from a CGI script
+    CGI_POLLING_PERIOD = 0.05
+
+    # Maximum size in bytes of the first line of a server response
+    CGI_MAX_RESPONSE_HEADER_SIZE = 2048
 
     mimetypes: mimetypes.MimeTypes
 
@@ -141,8 +150,8 @@ class StaticDirectoryApplication(JetforceApplication):
                 return Response(Status.SUCCESS, mimetype, generator)
 
             mimetype = self.add_extra_parameters("text/gemini")
-            body = self.list_directory(url_path, filesystem_path)
-            return Response(Status.SUCCESS, mimetype, body)
+            generator = self.list_directory(url_path, filesystem_path)
+            return Response(Status.SUCCESS, mimetype, generator)
 
         else:
             return Response(Status.NOT_FOUND, "Not Found")
@@ -157,27 +166,54 @@ class StaticDirectoryApplication(JetforceApplication):
         cgi_env = {k: str(v) for k, v in environ.items() if k.isupper()}
         cgi_env["GATEWAY_INTERFACE"] = "CGI/1.1"
 
-        # Decode the stream as unicode so we can parse the status line
-        # Use surrogateescape to preserve any non-UTF8 byte sequences.
-        out = subprocess.Popen(
+        proc = subprocess.Popen(
             [str(filesystem_path)],
             stdout=subprocess.PIPE,
             env=cgi_env,
-            bufsize=1,
-            universal_newlines=True,
-            errors="surrogateescape",
+            bufsize=0,
         )
 
-        status_line = out.stdout.readline().strip()
-        status_parts = status_line.split(maxsplit=1)
+        status_line = proc.stdout.readline(self.CGI_MAX_RESPONSE_HEADER_SIZE)
+        if len(status_line) == self.CGI_MAX_RESPONSE_HEADER_SIZE:
+            # Too large response header line received from the CGI script.
+            return Response(Status.CGI_ERROR, "Unexpected Error")
+
+        status_parts = status_line.decode().strip().split(maxsplit=1)
         if len(status_parts) != 2 or not status_parts[0].isdecimal():
+            # Malformed header line received from the CGI script.
             return Response(Status.CGI_ERROR, "Unexpected Error")
 
         status, meta = status_parts
+        return Response(int(status), meta, self.cgi_body_generator(proc))
 
-        # Re-encode the rest of the body as bytes
-        body = codecs.iterencode(out.stdout, encoding="utf-8", errors="surrogateescape")
-        return Response(int(status), meta, body)
+    def cgi_body_generator(
+        self,
+        proc: subprocess.Popen[bytes],
+    ) -> typing.Iterator[typing.Union[bytes, Deferred]]:
+        """
+        Non-blocking read from the stdout of the CGI process and pipe it
+        to the socket transport.
+        """
+        while True:
+            proc.poll()
+
+            data = proc.stdout.read(self.CHUNK_SIZE)
+            if len(data) == self.CHUNK_SIZE:
+                # Send the chunk and yield control of the event loop
+                yield data
+            elif proc.returncode is None:
+                # We didn't get a full chunk's worth of data from the
+                # subprocess. Send what we have, but add a delay before
+                # attempting to read again to allow time for more bytes
+                # to buffer in stdout.
+                if data:
+                    yield data
+                yield deferLater(reactor, self.CGI_POLLING_PERIOD)
+            else:
+                # Subprocess has finished, send everything that's left.
+                if data:
+                    yield data
+                break
 
     def load_file(self, filesystem_path: pathlib.Path) -> typing.Iterator[bytes]:
         """
@@ -192,13 +228,13 @@ class StaticDirectoryApplication(JetforceApplication):
 
     def list_directory(
         self, url_path: pathlib.Path, filesystem_path: pathlib.Path
-    ) -> str:
+    ) -> typing.Iterator[bytes]:
         """
         Auto-generate a text/gemini document based on the contents of the file system.
         """
-        lines = [f"Directory: /{url_path}]"]
+        buffer = f"Directory: /{url_path}]\r\n".encode()
         if url_path.parent != url_path:
-            lines.append(f"=>/{url_path.parent}\t..")
+            buffer += f"=>/{url_path.parent}\t..\r\n".encode()
 
         for file in sorted(filesystem_path.iterdir()):
             if file.name.startswith("."):
@@ -207,11 +243,16 @@ class StaticDirectoryApplication(JetforceApplication):
 
             encoded_path = urllib.parse.quote(str(url_path / file.name))
             if file.is_dir():
-                lines.append(f"=>/{encoded_path}/\t{file.name}/")
+                buffer += f"=>/{encoded_path}/\t{file.name}/\r\n".encode()
             else:
-                lines.append(f"=>/{encoded_path}\t{file.name}")
+                buffer += f"=>/{encoded_path}\t{file.name}\r\n".encode()
 
-        return "\r\n".join(lines)
+            if len(buffer) >= self.CHUNK_SIZE:
+                data, buffer = buffer[: self.CHUNK_SIZE], buffer[self.CHUNK_SIZE :]
+                yield data
+
+        if buffer:
+            yield buffer
 
     def guess_mimetype(self, filename: str) -> str:
         """
