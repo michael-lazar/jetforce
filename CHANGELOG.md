@@ -1,6 +1,14 @@
 # Jetforce Changelog
 
-### v0.8.0 (Unreleased)
+### v0.9.0 (unreleased)
+
+#### Changes
+
+- n/a
+
+### v0.8.0 (2021-01-06)
+
+#### Changes
 
 - Added support for international domain names using IDN encoding.
 - Several improvements to internal python type hinting coverage.
