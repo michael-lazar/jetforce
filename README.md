@@ -5,6 +5,10 @@ Learn more about Gemini [here](https://portal.mozz.us/).
 
 ![Rocket Launch](logo.jpg)
 
+[![pypi](https://img.shields.io/pypi/v/jetforce.svg?label=version)](https://pypi.python.org/pypi/jetforce/)
+[![version](https://img.shields.io/badge/python-3.7+-blue.svg)](https://pypi.python.org/pypi/jetforce/)
+[![build](https://github.com/michael-lazar/jetforce/workflows/Jetforce/badge.svg)](https://github.com/michael-lazar/jetforce/actions?query=workflow%3AJetforce)
+
 ## Table of Contents
 
 * [Features](#features)
