@@ -21,8 +21,8 @@ Learn more about Gemini [here](https://portal.mozz.us/).
 ## Features
 
 - A built-in static file server with support for gemini directories and CGI scripts.
-- A full framework for writing python applications that loosely mimics [WSGI](https://en.wikipedia.org/wiki/Web_Server_Gateway_Interface).
-- A lean, modern python codebase with type hints and black formatting.
+- A full framework for writing expressive gemini applications like [astrobotany](https://github.com/michael-lazar/astrobotany).
+- A lean, modern codebase with type hints and black formatting.
 - A solid foundation built on top of the [twisted](https://twistedmatrix.com/trac/) asynchronous networking engine.
 
 ## Installation
