@@ -105,15 +105,10 @@ class GeminiServer(Factory):
         """
         return GeminiProtocol(self, self.app)
 
-    def run(self) -> None:
+    def initialize(self) -> None:
         """
-        This is the main server loop.
+        Install the server into the twisted reactor.
         """
-        self.log_message(ABOUT)
-        self.log_message(f"Server hostname is {self.hostname}")
-        self.log_message(f"TLS Certificate File: {self.certfile}")
-        self.log_message(f"TLS Private Key File: {self.keyfile}")
-
         certificate_options = GeminiCertificateOptions(
             certfile=self.certfile,
             keyfile=self.keyfile,
@@ -131,4 +126,13 @@ class GeminiServer(Factory):
             )
             endpoint.listen(self).addCallback(self.on_bind_interface)
 
+    def run(self) -> None:
+        """
+        This is the main server loop.
+        """
+        self.log_message(ABOUT)
+        self.log_message(f"Server hostname is {self.hostname}")
+        self.log_message(f"TLS Certificate File: {self.certfile}")
+        self.log_message(f"TLS Private Key File: {self.keyfile}")
+        self.initialize()
         self.reactor.run()

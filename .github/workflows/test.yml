@@ -1,0 +1,32 @@
+name: Jetforce
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [ "3.7", "3.8", "3.9", "3.10-dev" ]
+    steps:
+    - name: Check out repository
+      uses: actions/checkout@v2
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install packages
+      run: |
+        pip install .
+        pip install mypy pytest
+    - name: Check types
+      run: |
+        mypy --ignore-missing-imports jetforce/
+    - name: Run tests
+      run: |
+        pytest -v tests/

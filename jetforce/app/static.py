@@ -172,6 +172,7 @@ class StaticDirectoryApplication(JetforceApplication):
             env=cgi_env,
             bufsize=0,
         )
+        proc.stdout = typing.cast(typing.IO[bytes], proc.stdout)
 
         status_line = proc.stdout.readline(self.CGI_MAX_RESPONSE_HEADER_SIZE)
         if len(status_line) == self.CGI_MAX_RESPONSE_HEADER_SIZE:
@@ -194,6 +195,8 @@ class StaticDirectoryApplication(JetforceApplication):
         Non-blocking read from the stdout of the CGI process and pipe it
         to the socket transport.
         """
+        proc.stdout = typing.cast(typing.IO[bytes], proc.stdout)
+
         while True:
             proc.poll()
 
