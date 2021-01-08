@@ -21,7 +21,7 @@ Learn more about Gemini [here](https://portal.mozz.us/).
 ## Features
 
 - A built-in static file server with support for gemini directories and CGI scripts.
-- A full framework for writing expressive gemini applications like [astrobotany](https://github.com/michael-lazar/astrobotany).
+- A complete framework for writing robust gemini applications like [astrobotany](https://github.com/michael-lazar/astrobotany).
 - A lean, modern codebase with type hints and black formatting.
 - A solid foundation built on top of the [twisted](https://twistedmatrix.com/trac/) asynchronous networking engine.
 
