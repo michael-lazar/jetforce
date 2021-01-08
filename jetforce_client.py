@@ -39,10 +39,6 @@ def fetch(
                 sys.stdout.buffer.flush()
                 data = fp.read(1024)
 
-            # Send a close_notify alert
-            # ssock.setblocking(False)
-            # ssock.unwrap()
-
 
 def run_client() -> None:
     # fmt: off
@@ -66,7 +62,7 @@ def run_client() -> None:
 
     if args.tls_keylog:
         # This is a "private" variable that the stdlib exposes for debugging
-        context.keylog_filename = args.tls_keylog
+        context.keylog_filename = args.tls_keylog  # type: ignore
 
     fetch(args.url, args.host, args.port, args.tls_enable_sni)
 
