@@ -235,7 +235,7 @@ class StaticDirectoryApplication(JetforceApplication):
         """
         Auto-generate a text/gemini document based on the contents of the file system.
         """
-        buffer = f"Directory: /{url_path}]\r\n".encode()
+        buffer = f"Directory: /{url_path}\r\n".encode()
         if url_path.parent != url_path:
             buffer += f"=>/{url_path.parent}\t..\r\n".encode()
 
