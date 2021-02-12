@@ -19,7 +19,7 @@ def inspect_certificate(cert: x509.Certificate) -> typing.Dict[str, object]:
     """
     Extract useful fields from a x509 client certificate object.
     """
-    name_attrs = cert.subject.get_attributes_for_oid(COMMON_NAME)
+    name_attrs = list(cert.subject.get_attributes_for_oid(COMMON_NAME))
     common_name = name_attrs[0].value if name_attrs else ""
 
     fingerprint_bytes = cert.fingerprint(hashes.SHA256())
