@@ -191,9 +191,9 @@ additional modification by the server.
 
 #### CGI Environment Variables
 
-| Name | Example |
+| Name | Example Value |
 | --- | --- |
-| GATEWAY_INTERFACE | ``CGI/1.1`` |
+| GATEWAY_INTERFACE | ``CGI/1.1`` (for compatibility with RFC 3875) |
 | SERVER_PROTOCOL | ``GEMINI`` |
 | SERVER_SOFTWARE | ``jetforce/0.0.7`` |
 | GEMINI_URL | ``gemini://mozz.us/cgi-bin/example.cgi/extra?hello%20world`` |
@@ -212,51 +212,17 @@ additional modification by the server.
 
 Additional CGI variables will be included only when the client connection uses a TLS client certificate:
 
-<dl>
-  
-<dt>AUTH_TYPE</dt>
-<dd>
-  Authentication type (for compatibility with RFC 3785).<br>
-  <em>Example: "CERTIFICATE"</em>
-</dd>
+| Name | Example Value |
+| --- | --- |
+| AUTH_TYPE | ``CERTIFICATE`` |
+| REMOTE_USER | ``mozz123`` (the certificate's CommonName) |
+| TLS_CLIENT_HASH | ``SHA256:86341FB480BFE333C343530D75ABF99D1437F69338F36C684C8831B63C993A96`` |
+| TLS_CLIENT_NOT_BEFORE | ``2020-04-05T04:18:22Z`` |
+| TLS_CLIENT_NOT_AFTER | ``2021-04-05T04:18:22Z`` |
+| TLS_CLIENT_SERIAL_NUMBER | ``73629018972631`` |
+| TLS_CLIENT_AUTHORISED | ``0`` (not authorised) / ``1`` (authorised) † |
 
-<dt>REMOTE_USER</dt>
-<dd>
-  The certificate's subject CommonName attribute, if provided.<br>
-  <em>Example: "mozz123"</em>
-</dd>
-
-<dt>TLS_CLIENT_HASH</dt>
-<dd>
-  A SHA fingerprint that can be used to uniquely identify the certificate.<br>
-  <em>Example: "SHA256:86341FB480BFE333C343530D75ABF99D1437F69338F36C684C8831B63C993A96"</em>
-</dd>
-
-<dt>TLS_CLIENT_NOT_BEFORE</dt>
-<dd>
-  The certificate's activation date.<br>
-  <em>Example: "2020-04-05T04:18:22Z"</em>
-</dd>
-
-<dt>TLS_CLIENT_NOT_AFTER</dt>
-<dd>
-  The certificate's activation date.<br>
-  <em>Example: "2021-04-05T04:18:22Z"</em>
-</dd>
-
-<dt>TLS_CLIENT_SERIAL_NUMBER</dt>
-<dd>
-  The certificate's serial number.<br>
-  <em>Example: "73629018972631"</em>
-</dd>
-
-<dt>TLS_CLIENT_AUTHORISED</dt>
-<dd>
-  Was the certificate deemed trusted by the server's CA certificate store.<br>
-  <em>0 (not authorised) / 1 (authorised)</em>
-</dd>
-
-</dl>
+† Requires the server to be configured with a CA for validating client certificates.
 
 ## Deployment
 
