@@ -215,7 +215,7 @@ Additional CGI variables will be included only when the client connection uses a
 | Name | Example Value |
 | --- | --- |
 | AUTH_TYPE | ``CERTIFICATE`` |
-| REMOTE_USER | ``mozz123`` (the certificate's CommonName) |
+| REMOTE_USER | ``mozz123`` (the certificate subject CN attribute) |
 | TLS_CLIENT_HASH | ``SHA256:86341FB480BFE333C343530D75ABF99D1437F69338F36C684C8831B63C993A96`` |
 | TLS_CLIENT_NOT_BEFORE | ``2020-04-05T04:18:22Z`` |
 | TLS_CLIENT_NOT_AFTER | ``2021-04-05T04:18:22Z`` |
