@@ -191,80 +191,22 @@ additional modification by the server.
 
 #### CGI Environment Variables
 
-<dl>
-<dt>GATEWAY_INTERFACE</dt>
-<dd>
-  CGI version (for compatibility with RFC 3785).<br>
-  <em>Example: "CGI/1.1"</em>
-</dd>
-  
-<dt>SERVER_PROTOCOL</dt>
-<dd>
-  The server protocol.<br>
-  <em>Example: "GEMINI"</em>
-</dd>
+| Name | Example |
+| --- | --- |
+| GATEWAY_INTERFACE | ``CGI/1.1`` |
+| SERVER_PROTOCOL | ``GEMINI`` |
+| SERVER_SOFTWARE | ``jetforce/0.0.7`` |
+| GEMINI_URL | ``gemini://mozz.us/cgi-bin/example.cgi/extra?hello%20world`` |
+| SCRIPT_NAME | ``/cgi-bin/example.cgi`` |
+| PATH_INFO | ``/extra`` |
+| QUERY_STRING | ``hello%20world`` |
+| SERVER_NAME | ``mozz.us`` |
+| SERVER_PORT | ``1965`` |
+| REMOTE_HOST | ``10.10.0.2`` |
+| REMOTE_ADDR | ``10.10.0.2`` |
+| TLS_CIPHER | ``TLS_AES_256_GCM_SHA384`` |
+| TLS_VERSION | ``TLSv1.3`` |
 
-<dt>SERVER_SOFTWARE</dt>
-<dd>
-  The server name and version.<br>
-  <em>Example: "jetforce/0.0.7"</em>
-</dd>
-
-<dt>GEMINI_URL</dt>
-<dd>
-  The entire URL that was requested by the client.<br>
-  <em>Example: "gemini://mozz.us/cgi-bin/example.cgi/hello?world"</em>
-</dd>
-  
-<dt>SCRIPT_NAME</dt>
-<dd>
-  The part of the URL's path that corresponds to the CGI script location.<br>
-  <em>Example: "/cgi-bin/example.cgi"</em>
-</dd>
-
-<dt>PATH_INFO</dt>
-<dd>
-  The remainder of the URL's path after the SCRIPT_NAME.<br>
-  <em>Example: "/hello"</em>
-</dd>
-
-<dt>QUERY_STRING</dt>
-<dd>
-  The query string portion of the request URL.<br>
-  <em>Example: "world"</em>
-</dd>
-
-<dt>SERVER_NAME / HOSTNAME</dt>
-<dd>
-  The server hostname.<br>
-  <em>Example: "mozz.us"</em>
-</dd>
-
-<dt>SERVER_PORT</dt>
-<dd>
-  The server port number.<br>
-  <em>Example: "1965"</em>
-</dd>
-
-<dt>REMOTE_HOST / REMOTE_ADDR</dt>
-<dd>
-  The client's IP address.<br>
-  <em>Example: "10.10.0.2"</em>
-</dd>
-
-<dt>TLS_CIPHER</dt>
-<dd>
-  The negotiated TLS cipher<br>
-  <em>Example: "TLS_AES_256_GCM_SHA384"</em>
-</dd>
-
-<dt>TLS_VERSION</dt>
-<dd>
-  The negotiated TLS version.<br>
-  <em>Example: "TLSv1.3"</em>
-</dd>
-
-</dl>
 
 #### CGI Environment Variables - Authenticated
 
