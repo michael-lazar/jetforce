@@ -2,9 +2,13 @@
 
 ### v0.9.0 (unreleased)
 
-#### Changes
+N/A
 
-- n/a
+### v0.8.2 (2021-03-21)
+
+#### Fixes
+
+- Fix trailing ``]`` at the end of auto-generated directory names.
 
 ### v0.8.1 (2021-01-06)
 
