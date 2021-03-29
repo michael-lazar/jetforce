@@ -6,7 +6,7 @@ import typing
 import urllib.parse
 
 from twisted.internet.address import IPv4Address, IPv6Address
-from twisted.internet.defer import Deferred, ensureDeferred, CancelledError
+from twisted.internet.defer import CancelledError, Deferred, ensureDeferred
 from twisted.internet.protocol import connectionDone
 from twisted.internet.task import deferLater
 from twisted.protocols.basic import LineOnlyReceiver
