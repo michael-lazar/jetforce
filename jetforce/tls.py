@@ -179,7 +179,7 @@ class GeminiCertificateOptions(CertificateOptions):
         ctx.set_options(self._options)
         ctx.set_mode(self._mode)
 
-        ctx.use_certificate_file(self.certfile)
+        ctx.use_certificate_chain_file(self.certfile)
         ctx.use_privatekey_file(self.keyfile or self.certfile)
         for extraCert in self.extraCertChain:
             ctx.add_extra_chain_cert(extraCert)
