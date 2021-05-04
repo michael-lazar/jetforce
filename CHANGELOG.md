@@ -2,7 +2,10 @@
 
 ### v0.9.0 (unreleased)
 
-N/A
+#### Fixes
+
+- Fix not sending the complete certificate chain for TLS certificates
+  that include it.
 
 ### v0.8.2 (2021-03-21)
 
