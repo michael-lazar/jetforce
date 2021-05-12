@@ -9,6 +9,10 @@
   that include it.
 - Fix incorrect type signature for the EnvironDict type.
 
+#### Changes
+
+- Make the application ``Request`` class overridable.
+
 ### v0.8.2 (2021-03-21)
 
 #### Fixes

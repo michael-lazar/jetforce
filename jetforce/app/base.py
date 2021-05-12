@@ -252,6 +252,8 @@ class JetforceApplication:
     rate_limiter: typing.Optional[RateLimiter]
     routes: typing.List[typing.Tuple[RoutePattern, RouteHandler]]
 
+    request_class: typing.Type[Request] = Request
+
     def __init__(self, rate_limiter: typing.Optional[RateLimiter] = None):
         self.rate_limiter = rate_limiter
         self.routes = []
@@ -260,7 +262,7 @@ class JetforceApplication:
         self, environ: EnvironDict, send_status: WriteStatusCallable
     ) -> ApplicationResponse:
         try:
-            request = Request(environ)
+            request = self.request_class(environ)
         except Exception:
             send_status(Status.BAD_REQUEST, "Invalid URL")
             return
