@@ -144,21 +144,37 @@ class FunctionalTestCase(unittest.TestCase):
         self.assertEqual(resp, "51 Not Found\r\n")
 
     def test_directory_redirect(self):
-        resp = self.request("gemini://localhost/cgi-bin\r\n")
-        self.assertEqual(resp, "31 gemini://localhost/cgi-bin/\r\n")
+        resp = self.request("gemini://localhost/files\r\n")
+        self.assertEqual(resp, "31 gemini://localhost/files/\r\n")
 
     def test_directory(self):
-        resp = self.request("gemini://localhost/cgi-bin/\r\n")
+        resp = self.request("gemini://localhost/files/\r\n")
+        resp = resp.splitlines(keepends=True)[0]
+        self.assertEqual(resp, "20 text/gemini\r\n")
+
+    def test_directory_double_slash(self):
+        resp = self.request("gemini://localhost/files//\r\n")
         resp = resp.splitlines(keepends=True)[0]
         self.assertEqual(resp, "20 text/gemini\r\n")
 
     def test_directory_up(self):
-        resp = self.request("gemini://localhost/cgi-bin/..\r\n")
-        self.assertEqual(resp, "31 gemini://localhost/cgi-bin/../\r\n")
+        resp = self.request("gemini://localhost/files/..\r\n")
+        self.assertEqual(resp, "31 gemini://localhost/files/../\r\n")
 
     def test_directory_up_trailing_slash(self):
         resp = self.request("gemini://localhost/cgi-bin/../\r\n")
         self.assertEqual(resp, "20 text/gemini\r\nJetforce rules!\n")
+
+    def test_file_double_slash(self):
+        resp = self.request("gemini://localhost/files//test.txt\r\n")
+        self.assertEqual(resp, "20 text/plain\r\nthis is a file\n")
+
+    def test_file_trailing_slash(self):
+        """
+        Will return the file, I'm not sure if this is desired behavior or not.
+        """
+        resp = self.request("gemini://localhost/files/test.txt/\r\n")
+        self.assertEqual(resp, "20 text/plain\r\nthis is a file\n")
 
     def test_non_utf8(self):
         resp = self.request("gemini://localhost/%AE\r\n")
@@ -192,6 +208,13 @@ class FunctionalTestCase(unittest.TestCase):
 
     def test_cgi_path_info_trailing_slash(self):
         resp = self.request("gemini://localhost/cgi-bin/debug.py/extra/info/\r\n")
+        data = self.parse_cgi_resp(resp)
+        self.assertEqual(data["QUERY_STRING"], "")
+        self.assertEqual(data["SCRIPT_NAME"], "/cgi-bin/debug.py")
+        self.assertEqual(data["PATH_INFO"], "/extra/info/")
+
+    def test_cgi_path_info_double_slashes(self):
+        resp = self.request("gemini://localhost//cgi-bin//debug.py//extra//info//\r\n")
         data = self.parse_cgi_resp(resp)
         self.assertEqual(data["QUERY_STRING"], "")
         self.assertEqual(data["SCRIPT_NAME"], "/cgi-bin/debug.py")
