@@ -1,13 +1,15 @@
 # Jetforce Changelog
 
-### v0.9.0 (unreleased)
+### Unreleased
+
+### v0.9.0 (2021-05-12)
 
 #### Fixes
 
 - Fix not including trailing slashes in $PATH_INFO for CGI scripts.
 - Fix not sending the complete certificate chain for TLS certificates
-  that include it.
-- Fix incorrect type signature for the EnvironDict type.
+  that include a chain.
+- Fix incorrect type signature for the EnvironDict type class.
 
 #### Changes
 
