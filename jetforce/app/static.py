@@ -6,8 +6,8 @@ import typing
 import urllib.parse
 
 from twisted.internet import reactor
-from twisted.internet.task import deferLater
 from twisted.internet.defer import Deferred
+from twisted.internet.task import deferLater
 
 from .base import (
     EnvironDict,
@@ -113,6 +113,10 @@ class StaticDirectoryApplication(JetforceApplication):
                             request.environ["PATH_INFO"] = ""
                         else:
                             request.environ["PATH_INFO"] = f"/{path_info}"
+
+                        # Add back the trailing slash that was stripped off
+                        if request.path.endswith("/"):
+                            request.environ["PATH_INFO"] += "/"
 
                         return self.run_cgi_script(filesystem_path, request.environ)
 
