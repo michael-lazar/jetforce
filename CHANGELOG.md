@@ -4,6 +4,7 @@
 
 #### Fixes
 
+- Fix not including trailing slashes in $PATH_INFO for CGI scripts.
 - Fix not sending the complete certificate chain for TLS certificates
   that include it.
 
