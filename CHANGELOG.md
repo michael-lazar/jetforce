@@ -7,6 +7,7 @@
 - Fix not including trailing slashes in $PATH_INFO for CGI scripts.
 - Fix not sending the complete certificate chain for TLS certificates
   that include it.
+- Fix incorrect type signature for the EnvironDict type.
 
 ### v0.8.2 (2021-03-21)
 

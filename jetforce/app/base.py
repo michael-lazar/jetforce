@@ -9,7 +9,7 @@ from urllib.parse import unquote, urlparse
 
 from twisted.internet.defer import Deferred
 
-EnvironDict = typing.Dict[str, object]
+EnvironDict = typing.Dict[str, typing.Any]
 ResponseType = typing.Union[str, bytes, Deferred]
 ApplicationResponse = typing.Iterable[ResponseType]
 WriteStatusCallable = typing.Callable[[int, str], None]
