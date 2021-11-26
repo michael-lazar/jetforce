@@ -230,6 +230,13 @@ class FunctionalTestCase(unittest.TestCase):
             resp = self.request("gemini://café.localhost\r\n")
             self.assertEqual(resp, "20 text/gemini\r\nJetforce rules!\n")
 
+    def test_hostname_case_insensitive(self):
+        """
+        In the URI spec, the authority component is case-insensitive.
+        """
+        resp = self.request("gemini://LocalHost\r\n")
+        self.assertEqual(resp, "20 text/gemini\r\nJetforce rules!\n")
+
 
 if __name__ == "__main__":
     unittest.main()
