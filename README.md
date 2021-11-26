@@ -40,7 +40,7 @@ Or, install from source:
 ```bash
 $ git clone https://github.com/michael-lazar/jetforce
 $ cd jetforce
-$ python setup.py install
+$ pip install .
 ```
 
 Or, install into a python virtual environment:
