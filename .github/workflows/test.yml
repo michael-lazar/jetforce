@@ -24,10 +24,9 @@ jobs:
       run: |
         pip install .
         pip install mypy pytest
-        mypy --install-types --non-interactive
     - name: Check types
       run: |
-        mypy --ignore-missing-imports jetforce/
+        mypy --ignore-missing-imports --install-types --non-interactive jetforce/
     - name: Run tests
       run: |
         pytest -v tests/

@@ -4,7 +4,8 @@ import os
 import tempfile
 import typing
 
-import OpenSSL
+import OpenSSL.crypto
+import OpenSSL.SSL
 from cryptography import x509
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes, serialization
@@ -120,9 +121,9 @@ class GeminiCertificateOptions(CertificateOptions):
         mark the certificate as not trusted.
         """
         if not hasattr(conn, "authorised"):
-            conn.authorised = preverify_ok
+            conn.authorised = preverify_ok  # type: ignore
         else:
-            conn.authorised *= preverify_ok
+            conn.authorised *= preverify_ok  # type: ignore
 
         return True
 
