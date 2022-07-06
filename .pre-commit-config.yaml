@@ -3,10 +3,10 @@ default_language_version:
 default_stages: [commit, push]
 repos:
 - repo: https://github.com/ambv/black
-  rev: stable
+  rev: 22.6.0
   hooks:
   - id: black
 - repo: https://github.com/pre-commit/mirrors-isort
-  rev: v5.1.4
+  rev: v5.10.1
   hooks:
   - id: isort
