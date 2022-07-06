@@ -2,6 +2,11 @@
 
 ### Unreleased
 
+#### Changes
+
+- Fix ``strict_trailing_slash`` argument being applied as
+  `strict_port` when specified on a route decorator.
+
 ### v0.9.0 (2021-05-12)
 
 #### Fixes

@@ -296,6 +296,7 @@ class JetforceApplication:
         scheme: str = "gemini",
         hostname: typing.Optional[str] = None,
         strict_hostname: bool = True,
+        strict_port: bool = True,
         strict_trailing_slash: bool = False,
     ) -> typing.Callable[[RouteHandler], RouteHandler]:
         """
@@ -308,7 +309,12 @@ class JetforceApplication:
                 return Response(Status.SUCCESS, 'text/plain', 'Hello world!')
         """
         route_pattern = RoutePattern(
-            path, scheme, hostname, strict_hostname, strict_trailing_slash
+            path=path,
+            scheme=scheme,
+            hostname=hostname,
+            strict_hostname=strict_hostname,
+            strict_port=strict_port,
+            strict_trailing_slash=strict_trailing_slash,
         )
 
         def wrap(func: RouteHandler) -> RouteHandler:
