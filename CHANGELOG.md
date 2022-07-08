@@ -4,8 +4,6 @@
 
 ### v0.9.1 (2022-07-08)
 
-#### Changes
-
 - Fix ``strict_trailing_slash`` argument being applied as
   `strict_port` when specified on a route decorator.
 - Add support for python 3.10.
