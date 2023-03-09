@@ -23,7 +23,7 @@ else:
     RESET = ""
 
 
-ABOUT = fr"""
+ABOUT = rf"""
 {CYAN}You are now riding on...
 _________    _____________
 ______  /______  /___  __/_______________________
@@ -103,7 +103,7 @@ class GeminiServer(Factory):
         It builds the instance of the protocol class, which is what actually
         implements the Gemini protocol.
         """
-        return GeminiProtocol(self, self.app)
+        return self.protocol_class(self, self.app)
 
     def initialize(self) -> None:
         """
