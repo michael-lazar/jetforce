@@ -57,8 +57,9 @@ class GeminiServer(Factory):
         cafile: typing.Optional[str] = None,
         capath: typing.Optional[str] = None,
         proxy_protocol: bool = False,
+        use_tls: bool = True,
     ):
-        if certfile is None:
+        if certfile is None and use_tls:
             self.log_message("Generating ad-hoc certificate files...")
             certfile, keyfile = generate_ad_hoc_certificate(hostname)
 
@@ -72,6 +73,7 @@ class GeminiServer(Factory):
         self.cafile = cafile
         self.capath = capath
         self.proxy_protocol = proxy_protocol
+        self.use_tls = use_tls
 
     def log_access(self, message: str) -> None:
         """
@@ -110,17 +112,18 @@ class GeminiServer(Factory):
         """
         protocol_factory: Factory = self
 
-        context_factory = GeminiCertificateOptions(
-            certfile=self.certfile,
-            keyfile=self.keyfile,
-            cafile=self.cafile,
-            capath=self.capath,
-        )
-        protocol_factory = TLSMemoryBIOFactory(
-            context_factory,
-            False,
-            protocol_factory,  # noqa
-        )
+        if self.use_tls:
+            ssl_context_factory = GeminiCertificateOptions(
+                certfile=self.certfile,
+                keyfile=self.keyfile,
+                cafile=self.cafile,
+                capath=self.capath,
+            )
+            protocol_factory = TLSMemoryBIOFactory(
+                ssl_context_factory,
+                False,
+                protocol_factory,  # noqa
+            )
 
         endpoint = TCP4ServerEndpoint(self.reactor, self.port, interface=interface)
         if self.proxy_protocol:
@@ -142,7 +145,12 @@ class GeminiServer(Factory):
         """
         self.log_message(ABOUT)
         self.log_message(f"Server hostname is {self.hostname}")
-        self.log_message(f"TLS Certificate File: {self.certfile}")
-        self.log_message(f"TLS Private Key File: {self.keyfile}")
+        if self.proxy_protocol:
+            self.log_message("PROXY protocol is enabled")
+        if self.use_tls:
+            self.log_message(f"TLS Certificate File: {self.certfile}")
+            self.log_message(f"TLS Private Key File: {self.keyfile}")
+        else:
+            self.log_message("TLS is disabled")
         self.initialize()
         self.reactor.run()

@@ -10,10 +10,6 @@ from twisted.internet import reactor
 
 from jetforce import GeminiServer, StaticDirectoryApplication
 
-# Generic static app with a CGI script to echo back environment variables
-root_directory = os.path.join(os.path.dirname(__file__), "data")
-static_app = StaticDirectoryApplication(root_directory=root_directory)
-
 
 class GeminiTestServer(GeminiServer):
     real_port: int
@@ -32,9 +28,32 @@ class GeminiTestServer(GeminiServer):
         """Suppress logging"""
 
 
+# Generic static app with a CGI script to echo back environment variables
+root_directory = os.path.join(os.path.dirname(__file__), "data")
+app = StaticDirectoryApplication(root_directory=root_directory)
+
+
 SERVERS = {
-    "basic": GeminiTestServer(app=static_app, port=0),
-    "proxy": GeminiTestServer(app=static_app, port=0, proxy_protocol=True),
+    "basic": GeminiTestServer(
+        app=app,
+        port=0,
+    ),
+    "proxy": GeminiTestServer(
+        app=app,
+        port=0,
+        proxy_protocol=True,
+    ),
+    "plaintext": GeminiTestServer(
+        app=app,
+        port=0,
+        use_tls=False,
+    ),
+    "plaintext-proxy": GeminiTestServer(
+        app=app,
+        port=0,
+        proxy_protocol=True,
+        use_tls=False,
+    ),
 }
 
 
@@ -79,6 +98,13 @@ class BaseTestCase(TestCase):
     def get_conn_info(self):
         return self.server.host, self.server.real_port
 
+    def parse_cgi_resp(self, response):
+        return json.loads(response.splitlines()[1])
+
+
+class GeminiServerTestCase(BaseTestCase):
+    server = SERVERS["basic"]
+
     def request(self, data: str):
         context = self.create_context()
         conn = self.get_conn_info()
@@ -87,13 +113,6 @@ class BaseTestCase(TestCase):
                 ssock.sendall(data.encode(errors="surrogateescape"))
                 fp = ssock.makefile("rb")
                 return fp.read().decode(errors="surrogateescape")
-
-    def parse_cgi_resp(self, response):
-        return json.loads(response.splitlines()[1])
-
-
-class GeminiServerTestCase(BaseTestCase):
-    server = SERVERS["basic"]
 
     def test_index(self):
         resp = self.request("gemini://localhost\r\n")
@@ -287,3 +306,53 @@ class ProxyServerTestCase(BaseTestCase):
             with socket.create_connection(conn) as sock:
                 with context.wrap_socket(sock) as ssock:
                     ssock.sendall(b"gemini://localhost/cgi-bin/debug.py\r\n")
+
+
+class PlaintextServerTestCase(BaseTestCase):
+    server = SERVERS["plaintext"]
+
+    def test_plaintext(self):
+        """
+        The remote IP address should be derived from the proxy header.
+        """
+        conn = self.get_conn_info()
+        with socket.create_connection(conn) as sock:
+            sock.sendall(b"gemini://localhost/cgi-bin/debug.py\r\n")
+            fp = sock.makefile("rb")
+            resp = fp.read().decode(errors="surrogateescape")
+
+        data = self.parse_cgi_resp(resp)
+        assert "TLS_CIPHER" not in data
+        assert "TLS_VERSION" not in data
+
+
+class PlaintextProxyServerTestCase(BaseTestCase):
+    server = SERVERS["plaintext-proxy"]
+
+    def test_proxy_v1(self):
+        """
+        The remote IP address should be derived from the proxy header.
+        """
+        conn = self.get_conn_info()
+        with socket.create_connection(conn) as sock:
+            sock.sendall(
+                b"PROXY TCP4 192.168.0.1 192.168.0.11 56324 443\r\n"
+                b"gemini://localhost/cgi-bin/debug.py\r\n"
+            )
+            fp = sock.makefile("rb")
+            resp = fp.read().decode(errors="surrogateescape")
+
+        data = self.parse_cgi_resp(resp)
+        assert data["REMOTE_HOST"] == "192.168.0.1"
+
+    def test_proxy_invalid(self):
+        """
+        Requests missing the header should be closed.
+        """
+        conn = self.get_conn_info()
+        with socket.create_connection(conn) as sock:
+            sock.sendall(b"gemini://localhost/cgi-bin/debug.py\r\n")
+            fp = sock.makefile("rb")
+            resp = fp.read().decode(errors="surrogateescape")
+
+        assert resp == ""

@@ -44,12 +44,6 @@ group.add_argument(
     default="localhost",
 )
 group.add_argument(
-    "--proxy-protocol",
-    help="Use the PROXY protocol to retrieve client connection information",
-    action="store_true",
-    default=False,
-)
-group.add_argument(
     "--tls-certfile",
     dest="certfile",
     help="Server TLS certificate file",
@@ -72,6 +66,19 @@ group.add_argument(
     dest="capath",
     help="A directory containing CA files for validating clients",
     metavar="DIR",
+)
+group.add_argument(
+    "--no-tls",
+    help="Disable TLS and run the server over a plain TCP connection",
+    action="store_false",
+    dest="use_tls",
+    default=True,
+)
+group.add_argument(
+    "--proxy-protocol",
+    help="Use the PROXY protocol to retrieve client connection information",
+    action="store_true",
+    default=False,
 )
 group = parser.add_argument_group("fileserver configuration")
 group.add_argument(
@@ -130,6 +137,7 @@ def main() -> None:
         cafile=args.cafile,
         capath=args.capath,
         proxy_protocol=args.proxy_protocol,
+        use_tls=args.use_tls,
     )
     server.run()
 

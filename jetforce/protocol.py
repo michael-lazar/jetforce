@@ -204,7 +204,6 @@ class GeminiProtocol(LineOnlyReceiver):
         The TLS variable names borrow from the GLV-1.12556 server.
         """
         url_parts = urllib.parse.urlparse(self.url)
-        conn = self.transport.getHandle()
         environ = {
             "GEMINI_URL": self.url,
             "HOSTNAME": self.server.hostname,
@@ -215,10 +214,21 @@ class GeminiProtocol(LineOnlyReceiver):
             "SERVER_PORT": self.server.port,
             "SERVER_PROTOCOL": "GEMINI",
             "SERVER_SOFTWARE": f"jetforce/{__version__}",
-            "TLS_CIPHER": conn.get_cipher_name(),
-            "TLS_VERSION": conn.get_protocol_version_name(),
-            "client_certificate": None,
         }
+        if not self.transport.TLS:
+            return environ
+
+        conn = self.transport.getHandle()
+        environ.update(
+            {
+                "TLS_CIPHER": conn.get_cipher_name(),
+                "TLS_VERSION": conn.get_protocol_version_name(),
+                # Lowercase variables are not set in the environment for CGI
+                # scripts, but they can be accessed by python applications that
+                # utilize jetforce as a library.
+                "client_certificate": None,
+            }
+        )
 
         cert = self.transport.getPeerCertificate()
         if cert:
