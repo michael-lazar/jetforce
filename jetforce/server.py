@@ -6,9 +6,11 @@ import typing
 
 from twisted.internet import reactor as _reactor
 from twisted.internet.base import ReactorBase
-from twisted.internet.endpoints import SSL4ServerEndpoint
+from twisted.internet.endpoints import TCP4ServerEndpoint
 from twisted.internet.protocol import Factory
 from twisted.internet.tcp import Port
+from twisted.protocols.haproxy import proxyEndpoint
+from twisted.protocols.tls import TLSMemoryBIOFactory
 
 from .__version__ import __version__
 from .app.base import ApplicationCallable
@@ -44,10 +46,6 @@ class GeminiServer(Factory):
 
     protocol_class = GeminiProtocol
 
-    # The TLS twisted interface class is confusingly named SSL4, even though it
-    # will accept either IPv4 & IPv6 interfaces.
-    endpoint_class = SSL4ServerEndpoint
-
     def __init__(
         self,
         app: ApplicationCallable,
@@ -59,6 +57,7 @@ class GeminiServer(Factory):
         keyfile: typing.Optional[str] = None,
         cafile: typing.Optional[str] = None,
         capath: typing.Optional[str] = None,
+        proxy_protocol: bool = False,
     ):
         if certfile is None:
             self.log_message("Generating ad-hoc certificate files...")
@@ -73,6 +72,7 @@ class GeminiServer(Factory):
         self.keyfile = keyfile
         self.cafile = cafile
         self.capath = capath
+        self.proxy_protocol = proxy_protocol
 
     def log_access(self, message: str) -> None:
         """
@@ -105,26 +105,37 @@ class GeminiServer(Factory):
         """
         return self.protocol_class(self, self.app)
 
-    def initialize(self) -> None:
+    def bind_interface(self, interface: str) -> None:
         """
-        Install the server into the twisted reactor.
+        Binds the server to a twisted interface.
         """
-        certificate_options = GeminiCertificateOptions(
+        protocol_factory = self
+
+        context_factory = GeminiCertificateOptions(
             certfile=self.certfile,
             keyfile=self.keyfile,
             cafile=self.cafile,
             capath=self.capath,
         )
+        protocol_factory = TLSMemoryBIOFactory(
+            context_factory,
+            False,
+            protocol_factory,  # noqa
+        )
 
+        endpoint = TCP4ServerEndpoint(self.reactor, self.port, interface=interface)
+        if self.proxy_protocol:
+            endpoint = proxyEndpoint(endpoint)  # noqa
+
+        endpoint.listen(protocol_factory).addCallback(self.on_bind_interface)
+
+    def initialize(self) -> None:
+        """
+        Install the server into the twisted reactor.
+        """
         interfaces = [self.host] if self.host else ["0.0.0.0", "::"]
         for interface in interfaces:
-            endpoint = self.endpoint_class(
-                reactor=self.reactor,
-                port=self.port,
-                sslContextFactory=certificate_options,
-                interface=interface,
-            )
-            endpoint.listen(self).addCallback(self.on_bind_interface)
+            self.bind_interface(interface)
 
     def run(self) -> None:
         """

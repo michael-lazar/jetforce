@@ -13,8 +13,10 @@ from jetforce import GeminiServer, StaticDirectoryApplication
 ROOT_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), "data")
 
 
-class GeminiTestServer(GeminiServer):
+static_app = StaticDirectoryApplication(root_directory=ROOT_DIR)
 
+
+class GeminiTestServer(GeminiServer):
     real_port: int
 
     def on_bind_interface(self, port):
@@ -31,7 +33,11 @@ class GeminiTestServer(GeminiServer):
         """Suppress logging"""
 
 
-class FunctionalTestCase(unittest.TestCase):
+def parse_cgi_resp(response):
+    return json.loads(response.splitlines()[1])
+
+
+class JetforceServerTestCase(unittest.TestCase):
     """
     This class will spin up a complete test jetforce server and serve it
     on a local TCP port in a new thread. The tests will send real gemini
@@ -44,8 +50,7 @@ class FunctionalTestCase(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        app = StaticDirectoryApplication(root_directory=ROOT_DIR)
-        cls.server = GeminiTestServer(app=app, port=0)
+        cls.server = GeminiTestServer(app=static_app, port=0)
         cls.server.initialize()
 
         cls.thread = Thread(target=reactor.run, args=(False,))
@@ -65,15 +70,12 @@ class FunctionalTestCase(unittest.TestCase):
         context.check_hostname = False
         context.verify_mode = ssl.CERT_NONE
 
-        with socket.create_connection((cls.server.host, cls.server.real_port)) as sock:
+        conn = (cls.server.host, cls.server.real_port)
+        with socket.create_connection(conn) as sock:
             with context.wrap_socket(sock) as ssock:
                 ssock.sendall(data.encode(errors="surrogateescape"))
                 fp = ssock.makefile("rb")
                 return fp.read().decode(errors="surrogateescape")
-
-    @classmethod
-    def parse_cgi_resp(cls, response):
-        return json.loads(response.splitlines()[1])
 
     def test_index(self):
         resp = self.request("gemini://localhost\r\n")
@@ -187,35 +189,35 @@ class FunctionalTestCase(unittest.TestCase):
 
     def test_cgi_query(self):
         resp = self.request("gemini://localhost/cgi-bin/debug.py?hello%20world\r\n")
-        data = self.parse_cgi_resp(resp)
+        data = parse_cgi_resp(resp)
         self.assertEqual(data["QUERY_STRING"], "hello%20world")
         self.assertEqual(data["SCRIPT_NAME"], "/cgi-bin/debug.py")
         self.assertEqual(data["PATH_INFO"], "")
 
     def test_cgi_root_trailing_slash(self):
         resp = self.request("gemini://localhost/cgi-bin/debug.py/\r\n")
-        data = self.parse_cgi_resp(resp)
+        data = parse_cgi_resp(resp)
         self.assertEqual(data["QUERY_STRING"], "")
         self.assertEqual(data["SCRIPT_NAME"], "/cgi-bin/debug.py")
         self.assertEqual(data["PATH_INFO"], "/")
 
     def test_cgi_path_info(self):
         resp = self.request("gemini://localhost/cgi-bin/debug.py/extra/info\r\n")
-        data = self.parse_cgi_resp(resp)
+        data = parse_cgi_resp(resp)
         self.assertEqual(data["QUERY_STRING"], "")
         self.assertEqual(data["SCRIPT_NAME"], "/cgi-bin/debug.py")
         self.assertEqual(data["PATH_INFO"], "/extra/info")
 
     def test_cgi_path_info_trailing_slash(self):
         resp = self.request("gemini://localhost/cgi-bin/debug.py/extra/info/\r\n")
-        data = self.parse_cgi_resp(resp)
+        data = parse_cgi_resp(resp)
         self.assertEqual(data["QUERY_STRING"], "")
         self.assertEqual(data["SCRIPT_NAME"], "/cgi-bin/debug.py")
         self.assertEqual(data["PATH_INFO"], "/extra/info/")
 
     def test_cgi_path_info_double_slashes(self):
         resp = self.request("gemini://localhost//cgi-bin//debug.py//extra//info//\r\n")
-        data = self.parse_cgi_resp(resp)
+        data = parse_cgi_resp(resp)
         self.assertEqual(data["QUERY_STRING"], "")
         self.assertEqual(data["SCRIPT_NAME"], "/cgi-bin/debug.py")
         self.assertEqual(data["PATH_INFO"], "/extra/info/")
@@ -236,6 +238,45 @@ class FunctionalTestCase(unittest.TestCase):
         """
         resp = self.request("gemini://LocalHost\r\n")
         self.assertEqual(resp, "20 text/gemini\r\nJetforce rules!\n")
+
+
+class ProxiedServerTestCase(unittest.TestCase):
+    """
+    Tests that the server can receive and parse connection information from a
+    reverse proxy using the PROXY protocol.
+    """
+
+    server: GeminiTestServer
+    thread: Thread
+
+    @classmethod
+    def setUpClass(cls):
+        cls.server = GeminiTestServer(app=static_app, port=0, proxy_protocol=True)
+        cls.server.initialize()
+
+        cls.thread = Thread(target=reactor.run, args=(False,))
+        cls.thread.start()
+
+    @classmethod
+    def tearDownClass(cls):
+        reactor.callFromThread(reactor.stop)
+        cls.thread.join(timeout=5)
+
+    def test_proxy_v1(self):
+        context = ssl.create_default_context()
+        context.check_hostname = False
+        context.verify_mode = ssl.CERT_NONE
+
+        conn = (self.server.host, self.server.real_port)
+        with socket.create_connection(conn) as sock:
+            sock.send(b"PROXY TCP4 192.168.0.1 192.168.0.11 56324 443\r\n")
+            with context.wrap_socket(sock) as ssock:
+                ssock.sendall(b"gemini://localhost/cgi-bin/debug.py\r\n")
+                fp = ssock.makefile("rb")
+                resp = fp.read().decode(errors="surrogateescape")
+
+        data = parse_cgi_resp(resp)
+        assert data["REMOTE_HOST"] == "192.168.0.1"
 
 
 if __name__ == "__main__":

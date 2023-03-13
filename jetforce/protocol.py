@@ -41,7 +41,6 @@ class GeminiProtocol(LineOnlyReceiver):
     TIMESTAMP_FORMAT = "%d/%b/%Y:%H:%M:%S %z"
     DEBUG = False
 
-    client_addr: typing.Union[IPv4Address, IPv6Address]
     connected_timestamp: time.struct_time
     request: bytes
     url: str
@@ -62,7 +61,6 @@ class GeminiProtocol(LineOnlyReceiver):
         self.connected_timestamp = time.localtime()
         self.response_size = 0
         self.response_buffer = ""
-        self.client_addr = self.transport.getPeer()
 
     def connectionLost(self, reason: Failure = connectionDone) -> None:
         """
@@ -83,6 +81,17 @@ class GeminiProtocol(LineOnlyReceiver):
         Called when the maximum line length has been reached.
         """
         self.finish_connection()
+
+    @property
+    def client_addr(self) -> typing.Union[IPv4Address, IPv6Address]:
+        """
+        Return the client IP address.
+
+        This should be retrieved lazily (not cached when the connection is
+        first established) because the underlying value of getPeer() will
+        change depending on whether a PROXY header has been received or not.
+        """
+        return self.transport.getPeer()
 
     def finish_connection(self) -> None:
         """
@@ -109,7 +118,8 @@ class GeminiProtocol(LineOnlyReceiver):
         # Ensure that the underlying connection will always be closed. There is
         # no harm in calling this method twice if it was already invoked as
         # part of the above TLS shutdown.
-        self.transport.transport.loseConnection()
+        if hasattr(self.transport, "transport"):
+            self.transport.transport.loseConnection()
 
     async def _handle_request_noblock(self) -> None:
         """
