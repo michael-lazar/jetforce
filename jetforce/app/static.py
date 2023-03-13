@@ -35,7 +35,7 @@ class StaticDirectoryApplication(JetforceApplication):
     """
 
     # Chunk size for streaming files, taken from the twisted FileSender class
-    CHUNK_SIZE = 2 ** 14
+    CHUNK_SIZE = 2**14
 
     # Length of time to defer while waiting for more data from a CGI script
     CGI_POLLING_PERIOD = 0.05
@@ -215,7 +215,7 @@ class StaticDirectoryApplication(JetforceApplication):
                 # to buffer in stdout.
                 if data:
                     yield data
-                yield deferLater(reactor, self.CGI_POLLING_PERIOD)
+                yield deferLater(reactor, self.CGI_POLLING_PERIOD)  # type: ignore
             else:
                 # Subprocess has finished, send everything that's left.
                 if data:

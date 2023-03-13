@@ -5,7 +5,6 @@ import sys
 import typing
 
 from twisted.internet import reactor as _reactor
-from twisted.internet.base import ReactorBase
 from twisted.internet.endpoints import TCP4ServerEndpoint
 from twisted.internet.protocol import Factory
 from twisted.internet.tcp import Port
@@ -49,7 +48,7 @@ class GeminiServer(Factory):
     def __init__(
         self,
         app: ApplicationCallable,
-        reactor: ReactorBase = _reactor,
+        reactor: typing.Any = _reactor,
         host: str = "127.0.0.1",
         port: int = 1965,
         hostname: str = "localhost",
@@ -109,7 +108,7 @@ class GeminiServer(Factory):
         """
         Binds the server to a twisted interface.
         """
-        protocol_factory = self
+        protocol_factory: Factory = self
 
         context_factory = GeminiCertificateOptions(
             certfile=self.certfile,
@@ -125,7 +124,7 @@ class GeminiServer(Factory):
 
         endpoint = TCP4ServerEndpoint(self.reactor, self.port, interface=interface)
         if self.proxy_protocol:
-            endpoint = proxyEndpoint(endpoint)  # noqa
+            endpoint = proxyEndpoint(endpoint)  # type: ignore
 
         endpoint.listen(protocol_factory).addCallback(self.on_bind_interface)
 

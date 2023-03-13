@@ -16,7 +16,7 @@ from twisted.python.randbytes import secureRandom
 COMMON_NAME = x509.NameOID.COMMON_NAME
 
 
-def inspect_certificate(cert: x509.Certificate) -> typing.Dict[str, object]:
+def inspect_certificate(cert: x509.Certificate) -> typing.Dict[str, typing.Any]:
     """
     Extract useful fields from a x509 client certificate object.
     """
@@ -128,7 +128,9 @@ class GeminiCertificateOptions(CertificateOptions):
         return True
 
     def proto_select_callback(
-        self, conn: OpenSSL.SSL.Connection, protocols: typing.List[bytes]
+        self,
+        conn: OpenSSL.SSL.Connection,
+        protocols: typing.List[bytes],
     ) -> bytes:
         """
         Callback used by OpenSSL for ALPN support.
@@ -160,7 +162,6 @@ class GeminiCertificateOptions(CertificateOptions):
         cafile: typing.Optional[str] = None,
         capath: typing.Optional[str] = None,
     ) -> None:
-
         self.certfile = certfile
         self.keyfile = keyfile
         self.cafile = cafile
@@ -177,6 +178,7 @@ class GeminiCertificateOptions(CertificateOptions):
         Most of this code is copied directly from the parent class method.
         """
         ctx = self._contextFactory(self.method)
+
         ctx.set_options(self._options)
         ctx.set_mode(self._mode)
 

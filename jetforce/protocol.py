@@ -7,6 +7,7 @@ import urllib.parse
 
 from twisted.internet.address import IPv4Address, IPv6Address
 from twisted.internet.defer import CancelledError, Deferred, ensureDeferred
+from twisted.internet.interfaces import ITransport
 from twisted.internet.protocol import connectionDone
 from twisted.internet.task import deferLater
 from twisted.protocols.basic import LineOnlyReceiver
@@ -48,6 +49,9 @@ class GeminiProtocol(LineOnlyReceiver):
     meta: str
     response_buffer: str
     response_size: int
+
+    # The twisted base class has the wrong type hint for this
+    transport: typing.Type[ITransport]  # type: ignore[assignment]
 
     def __init__(self, server: GeminiServer, app: ApplicationCallable):
         self.server = server
@@ -159,13 +163,13 @@ class GeminiProtocol(LineOnlyReceiver):
                 response_generator = await self.track_deferred(response_generator)
             else:
                 # Yield control of the event loop
-                deferred = deferLater(self.server.reactor, 0)
+                deferred: Deferred[None] = deferLater(self.server.reactor, 0)
                 await self.track_deferred(deferred)
 
             for data in response_generator:
                 if isinstance(data, Deferred):
                     data = await self.track_deferred(data)
-                    self.write_body(data)
+                    self.write_body(data)  # type: ignore
                 else:
                     self.write_body(data)
                     # Yield control of the event loop
@@ -181,7 +185,7 @@ class GeminiProtocol(LineOnlyReceiver):
             self.log_request()
             self.finish_connection()
 
-    async def track_deferred(self, deferred: Deferred) -> typing.Union[str, bytes]:
+    async def track_deferred(self, deferred: Deferred) -> typing.Any:
         """
         Keep track of the deferred that we're waiting on so we can send an
         error back to it if the connection is abruptly killed.
