@@ -114,7 +114,7 @@ class GeminiServer(Factory):
 
         if self.use_tls:
             ssl_context_factory = GeminiCertificateOptions(
-                certfile=self.certfile,
+                certfile=self.certfile,  # type: ignore[arg-type]
                 keyfile=self.keyfile,
                 cafile=self.cafile,
                 capath=self.capath,
