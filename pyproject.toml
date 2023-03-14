@@ -1,0 +1,27 @@
+[tool.black]
+line-length = 88
+
+[tool.mypy]
+python_version = "3.10"
+
+[tool.ruff]
+select = [
+    "E",    # pycodestyle
+    "F",    # pyflakes
+    "I",    # isort
+    "PT",   # flake8-pytest-style
+    "C4",   # flake8-comprehensions
+    "ISC",  # flake8-implicit-str-concat
+    "TID",  # flake8-tidy-imports
+    "UP",   # pyupgrade
+]
+line-length = 88
+target-version = "py37"
+
+ignore = [
+    "E501",   # Line length is enforced by black
+    "PT012",  # Allow pytest.raises with context managers
+]
+
+[tool.ruff.flake8-tidy-imports]
+ban-relative-imports = "all"

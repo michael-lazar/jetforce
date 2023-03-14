@@ -11,10 +11,10 @@ from twisted.internet.tcp import Port
 from twisted.protocols.haproxy import proxyEndpoint
 from twisted.protocols.tls import TLSMemoryBIOFactory
 
-from .__version__ import __version__
-from .app.base import ApplicationCallable
-from .protocol import GeminiProtocol
-from .tls import GeminiCertificateOptions, generate_ad_hoc_certificate
+from jetforce.__version__ import __version__
+from jetforce.app.base import ApplicationCallable
+from jetforce.protocol import GeminiProtocol
+from jetforce.tls import GeminiCertificateOptions, generate_ad_hoc_certificate
 
 if sys.stderr.isatty():
     CYAN = "\033[36m\033[1m"
@@ -52,10 +52,10 @@ class GeminiServer(Factory):
         host: str = "127.0.0.1",
         port: int = 1965,
         hostname: str = "localhost",
-        certfile: typing.Optional[str] = None,
-        keyfile: typing.Optional[str] = None,
-        cafile: typing.Optional[str] = None,
-        capath: typing.Optional[str] = None,
+        certfile: str | None = None,
+        keyfile: str | None = None,
+        cafile: str | None = None,
+        capath: str | None = None,
         proxy_protocol: bool = False,
         use_tls: bool = True,
     ):

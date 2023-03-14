@@ -13,12 +13,12 @@ from twisted.internet.task import deferLater
 from twisted.protocols.basic import LineOnlyReceiver
 from twisted.python.failure import Failure
 
-from .__version__ import __version__
-from .app.base import ApplicationCallable, EnvironDict, Status
-from .tls import inspect_certificate
+from jetforce.__version__ import __version__
+from jetforce.app.base import ApplicationCallable, EnvironDict, Status
+from jetforce.tls import inspect_certificate
 
 if typing.TYPE_CHECKING:
-    from .server import GeminiServer
+    from jetforce.server import GeminiServer
 
 
 class GeminiProtocol(LineOnlyReceiver):
@@ -51,12 +51,12 @@ class GeminiProtocol(LineOnlyReceiver):
     response_size: int
 
     # The twisted base class has the wrong type hint for this
-    transport: typing.Type[ITransport]  # type: ignore[assignment]
+    transport: type[ITransport]  # type: ignore[assignment]
 
     def __init__(self, server: GeminiServer, app: ApplicationCallable):
         self.server = server
         self.app = app
-        self._currently_deferred: typing.Optional[Deferred] = None
+        self._currently_deferred: Deferred | None = None
 
     def connectionMade(self) -> None:
         """
@@ -87,7 +87,7 @@ class GeminiProtocol(LineOnlyReceiver):
         self.finish_connection()
 
     @property
-    def client_addr(self) -> typing.Union[IPv4Address, IPv6Address]:
+    def client_addr(self) -> IPv4Address | IPv6Address:
         """
         Return the client IP address.
 
@@ -280,7 +280,7 @@ class GeminiProtocol(LineOnlyReceiver):
         self.meta = meta
         self.response_buffer = f"{status} {meta}\r\n"
 
-    def write_body(self, data: typing.Union[str, bytes, None]) -> None:
+    def write_body(self, data: str | bytes | None) -> None:
         """
         Write bytes to the gemini response body.
         """

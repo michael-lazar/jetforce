@@ -1,6 +1,6 @@
 import typing
 
-from .base import (
+from jetforce.app.base import (
     ApplicationCallable,
     ApplicationResponse,
     EnvironDict,

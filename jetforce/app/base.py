@@ -57,7 +57,7 @@ class Request:
     url: str
     scheme: str
     hostname: str
-    port: typing.Optional[int]
+    port: int | None
     path: str
     params: str
     query: str
@@ -102,7 +102,7 @@ class Response:
 
     status: int
     meta: str
-    body: typing.Union[None, ResponseType, ApplicationResponse] = None
+    body: None | ResponseType | ApplicationResponse = None
 
 
 RouteHandler = typing.Callable[..., Response]
@@ -116,13 +116,13 @@ class RoutePattern:
 
     path: str = ".*"
     scheme: str = "gemini"
-    hostname: typing.Optional[str] = None
+    hostname: str | None = None
 
     strict_hostname: bool = True
     strict_port: bool = True
     strict_trailing_slash: bool = False
 
-    def match(self, request: Request) -> typing.Optional[re.Match[str]]:
+    def match(self, request: Request) -> re.Match[str] | None:
         """
         Check if the given request URL matches this route pattern.
         """
@@ -165,7 +165,7 @@ class RateLimiter:
     number: int
     period: int
     next_timestamp: float
-    rate_counter: typing.Dict[typing.Any, int]
+    rate_counter: dict[typing.Any, int]
 
     def __init__(self, rate: str) -> None:
         match = self.RE.fullmatch(rate)
@@ -195,7 +195,7 @@ class RateLimiter:
         """
         return request.environ["REMOTE_ADDR"]
 
-    def check(self, request: Request) -> typing.Optional[Response]:
+    def check(self, request: Request) -> Response | None:
         """
         Check if the given request should be rate limited.
 
@@ -249,12 +249,12 @@ class JetforceApplication:
     how to accomplish this.
     """
 
-    rate_limiter: typing.Optional[RateLimiter]
-    routes: typing.List[typing.Tuple[RoutePattern, RouteHandler]]
+    rate_limiter: RateLimiter | None
+    routes: list[tuple[RoutePattern, RouteHandler]]
 
-    request_class: typing.Type[Request] = Request
+    request_class: type[Request] = Request
 
-    def __init__(self, rate_limiter: typing.Optional[RateLimiter] = None):
+    def __init__(self, rate_limiter: RateLimiter | None = None):
         self.rate_limiter = rate_limiter
         self.routes = []
 
@@ -294,7 +294,7 @@ class JetforceApplication:
         self,
         path: str = ".*",
         scheme: str = "gemini",
-        hostname: typing.Optional[str] = None,
+        hostname: str | None = None,
         strict_hostname: bool = True,
         strict_port: bool = True,
         strict_trailing_slash: bool = False,

@@ -87,7 +87,7 @@ A live, unmoderated chat room over gemini://
                 ||----w |
                 ||     ||
 ```
-                
+
 You can set a username by connecting with a client certificate.
 Anonymous users will be identified by their IP address.
 

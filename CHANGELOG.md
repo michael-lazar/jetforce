@@ -14,6 +14,7 @@
 #### Changes
 
 - Updated required twisted version to >= 21.7.0.
+- Added support for python 3.11.
 
 ### v0.9.1 (2022-07-08)
 
@@ -63,7 +64,7 @@
 - Fixed error handling edge case when the client killed the connection
   before all data has been sent. A `CancelledError` exception will now
   be raised internally instead of a ``ConnectionClosed`` exception.
-  
+
 ### v0.7.0 (2020-12-06)
 
 #### Spec Changes
@@ -77,7 +78,7 @@
   fingerprint will still be available as TLS_CLIENT_HASH_B64 to help migrate
   existing CGI scripts, but it's recommended that you support the new hash
   format moving forward.
-  
+
 ### v0.6.0 (2020-07-30)
 
 #### Bugfixes
@@ -99,7 +100,7 @@
 - File chunking size has been optimized for streaming large static files.
 
 #### Examples
-  
+
 - Added an example that demonstrates how to use the new ``RateLimiter`` class
   (examples/rate_limit.py).
 
@@ -139,7 +140,7 @@
 - Added a new example that demonstrates extending the static file server with
   common patterns like redirects and authenticated directories
   (examples/redirect.py).
-  
+
 ### v0.4.0 (2020-06-09)
 
 #### Features
@@ -259,7 +260,7 @@ variable.
 ### v0.2.2 (2020-03-31)
 
 - Fix a regression in path matching for the static directory application.
-  
+
 ### v0.2.1 (2020-03-31)
 
 - A hostname can now be specified in the route pattern, to facilitate running
@@ -275,7 +276,7 @@ variable.
 
 #### Features
 
-- Added support for python 3.8. 
+- Added support for python 3.8.
 - Added a new server diagnostics tool, ``jetforce-diagnostics``.
 - Added ability to binding to IPv6 addresses (if supported by your OS):
   - For IPv4        : ``--host "0.0.0.0"``
@@ -290,11 +291,11 @@ variable.
   ``31 PERMANENT REDIRECT``.
 - Requests containing an invalid or unparsable URL format will now return a
   status of ``59 BAD REQUEST`` instead of ``50 PERMANENT FAILURE``.
-- Files starting with ``~`` will now be included in directory listings. 
+- Files starting with ``~`` will now be included in directory listings.
 - Requests containing an incorrect scheme, hostname, or port will now return a
   ``53 PROXY REFUSED`` instead of a ``50 PERMANENT FAILURE``.
 - The port number in the URL (if provided) is now validated against the
-  server's port number. 
+  server's port number.
 - OS errors when attempting to read a file will return a ``51 NOT FOUND``
   status instead of a ``42 CGI Error``. This is a precaution to prevent leaking
   sensitive information about the server's filesystem.
@@ -311,7 +312,7 @@ variable.
   if the URL does not match the server's scheme or hostname.
 - Timestamps in log messages are now displayed in the server's local timezone.
   As before, the UTC offset is included as "+HHMM" to avoid ambiguity.
-  
+
 ### v0.0.7 (2019-08-30)
 
 - Added support for a primitive version of CGI scripting.
