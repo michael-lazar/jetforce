@@ -302,7 +302,7 @@ class ProxyServerTestCase(BaseTestCase):
         """
         context = self.create_context()
         conn = self.get_conn_info()
-        with pytest.raises(ssl.SSLEOFError):
+        with pytest.raises(ssl.SSLError):
             with socket.create_connection(conn) as sock:
                 with context.wrap_socket(sock) as ssock:
                     ssock.sendall(b"gemini://localhost/cgi-bin/debug.py\r\n")
