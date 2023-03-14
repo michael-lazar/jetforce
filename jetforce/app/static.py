@@ -9,7 +9,7 @@ from twisted.internet import reactor
 from twisted.internet.defer import Deferred
 from twisted.internet.task import deferLater
 
-from .base import (
+from jetforce.app.base import (
     EnvironDict,
     JetforceApplication,
     RateLimiter,

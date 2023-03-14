@@ -12,6 +12,7 @@ select = [
     "PT",   # flake8-pytest-style
     "C4",   # flake8-comprehensions
     "ISC",  # flake8-implicit-str-concat
+    "TID",  # flake8-tidy-imports
     "UP",   # pyupgrade
 ]
 line-length = 88
@@ -21,3 +22,6 @@ ignore = [
     "E501",   # Line length is enforced by black
     "PT012",  # Allow pytest.raises with context managers
 ]
+
+[tool.ruff.flake8-tidy-imports]
+ban-relative-imports = "all"

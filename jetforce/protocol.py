@@ -13,12 +13,12 @@ from twisted.internet.task import deferLater
 from twisted.protocols.basic import LineOnlyReceiver
 from twisted.python.failure import Failure
 
-from .__version__ import __version__
-from .app.base import ApplicationCallable, EnvironDict, Status
-from .tls import inspect_certificate
+from jetforce.__version__ import __version__
+from jetforce.app.base import ApplicationCallable, EnvironDict, Status
+from jetforce.tls import inspect_certificate
 
 if typing.TYPE_CHECKING:
-    from .server import GeminiServer
+    from jetforce.server import GeminiServer
 
 
 class GeminiProtocol(LineOnlyReceiver):
