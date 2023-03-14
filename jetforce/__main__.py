@@ -76,7 +76,7 @@ group.add_argument(
 )
 group.add_argument(
     "--proxy-protocol",
-    help="Use the PROXY protocol to retrieve client connection information",
+    help="Use the HAProxy PROXY protocol to preserve the client IP address",
     action="store_true",
     default=False,
 )
