@@ -73,7 +73,7 @@ def _reactor():
     thread = Thread(target=reactor.run, args=(False,))
     thread.start()
     try:
-        yield reactor
+        yield
     finally:
         reactor.callFromThread(reactor.stop)
         thread.join(timeout=5)
@@ -116,165 +116,165 @@ class GeminiServerTestCase(BaseTestCase):
 
     def test_index(self):
         resp = self.request("gemini://localhost\r\n")
-        self.assertEqual(resp, "20 text/gemini\r\nJetforce rules!\n")
+        assert resp == "20 text/gemini\r\nJetforce rules!\n"
 
     def test_index_trailing_slash(self):
         resp = self.request("gemini://localhost/\r\n")
-        self.assertEqual(resp, "20 text/gemini\r\nJetforce rules!\n")
+        assert resp == "20 text/gemini\r\nJetforce rules!\n"
 
     def test_index_two_slashes(self):
         resp = self.request("gemini://localhost//\r\n")
-        self.assertEqual(resp, "20 text/gemini\r\nJetforce rules!\n")
+        assert resp == "20 text/gemini\r\nJetforce rules!\n"
 
     def test_index_slash_dot(self):
         resp = self.request("gemini://localhost/.\r\n")
-        self.assertEqual(resp, "31 gemini://localhost/./\r\n")
+        assert resp == "31 gemini://localhost/./\r\n"
 
     def test_index_slash_dot_slash(self):
         resp = self.request("gemini://localhost/./\r\n")
-        self.assertEqual(resp, "20 text/gemini\r\nJetforce rules!\n")
+        assert resp == "20 text/gemini\r\nJetforce rules!\n"
 
     def test_index_filename(self):
         resp = self.request("gemini://localhost/index.gmi\r\n")
-        self.assertEqual(resp, "20 text/gemini\r\nJetforce rules!\n")
+        assert resp == "20 text/gemini\r\nJetforce rules!\n"
 
     def test_index_filename_escaped(self):
         resp = self.request("gemini://localhost/inde%78.gmi\r\n")
-        self.assertEqual(resp, "20 text/gemini\r\nJetforce rules!\n")
+        assert resp == "20 text/gemini\r\nJetforce rules!\n"
 
     def test_invalid_path(self):
         resp = self.request("gemini://localhost/invalid\r\n")
-        self.assertEqual(resp, "51 Not Found\r\n")
+        assert resp == "51 Not Found\r\n"
 
     def test_invalid_hostname(self):
         resp = self.request("gemini://example.com\r\n")
-        self.assertEqual(resp, "53 This server does not allow proxy requests\r\n")
+        assert resp == "53 This server does not allow proxy requests\r\n"
 
     def test_invalid_port(self):
         resp = self.request("gemini://localhost:1111\r\n")
-        self.assertEqual(resp, "53 This server does not allow proxy requests\r\n")
+        assert resp == "53 This server does not allow proxy requests\r\n"
 
     def test_invalid_scheme(self):
         resp = self.request("data://localhost\r\n")
-        self.assertEqual(resp, "53 This server does not allow proxy requests\r\n")
+        assert resp == "53 This server does not allow proxy requests\r\n"
 
     def test_invalid_userinfo(self):
         resp = self.request("gemini://nancy@localhost\r\n")
-        self.assertEqual(resp, "59 Invalid URL\r\n")
+        assert resp == "59 Invalid URL\r\n"
 
     def test_missing_scheme(self):
         resp = self.request("//localhost\r\n")
-        self.assertEqual(resp, "59 Invalid URL\r\n")
+        assert resp == "59 Invalid URL\r\n"
 
     def test_escape_root(self):
         resp = self.request("gemini://localhost/..\r\n")
-        self.assertEqual(resp, "51 Not Found\r\n")
+        assert resp == "51 Not Found\r\n"
 
     def test_escape_root_directory(self):
         resp = self.request("gemini://localhost/../\r\n")
-        self.assertEqual(resp, "51 Not Found\r\n")
+        assert resp == "51 Not Found\r\n"
 
     def test_escape_root_directory2(self):
         resp = self.request("gemini://localhost/../.\r\n")
-        self.assertEqual(resp, "51 Not Found\r\n")
+        assert resp == "51 Not Found\r\n"
 
     def test_escape_root_filename(self):
         resp = self.request("gemini://localhost/../test_jetforce.py\r\n")
-        self.assertEqual(resp, "51 Not Found\r\n")
+        assert resp == "51 Not Found\r\n"
 
     def test_directory_redirect(self):
         resp = self.request("gemini://localhost/files\r\n")
-        self.assertEqual(resp, "31 gemini://localhost/files/\r\n")
+        assert resp == "31 gemini://localhost/files/\r\n"
 
     def test_directory(self):
         resp = self.request("gemini://localhost/files/\r\n")
         resp = resp.splitlines(keepends=True)[0]
-        self.assertEqual(resp, "20 text/gemini\r\n")
+        assert resp == "20 text/gemini\r\n"
 
     def test_directory_double_slash(self):
         resp = self.request("gemini://localhost/files//\r\n")
         resp = resp.splitlines(keepends=True)[0]
-        self.assertEqual(resp, "20 text/gemini\r\n")
+        assert resp == "20 text/gemini\r\n"
 
     def test_directory_up(self):
         resp = self.request("gemini://localhost/files/..\r\n")
-        self.assertEqual(resp, "31 gemini://localhost/files/../\r\n")
+        assert resp == "31 gemini://localhost/files/../\r\n"
 
     def test_directory_up_trailing_slash(self):
         resp = self.request("gemini://localhost/cgi-bin/../\r\n")
-        self.assertEqual(resp, "20 text/gemini\r\nJetforce rules!\n")
+        assert resp == "20 text/gemini\r\nJetforce rules!\n"
 
     def test_file_double_slash(self):
         resp = self.request("gemini://localhost/files//test.txt\r\n")
-        self.assertEqual(resp, "20 text/plain\r\nthis is a file\n")
+        assert resp == "20 text/plain\r\nthis is a file\n"
 
     def test_file_trailing_slash(self):
         """
         Will return the file, I'm not sure if this is desired behavior or not.
         """
         resp = self.request("gemini://localhost/files/test.txt/\r\n")
-        self.assertEqual(resp, "20 text/plain\r\nthis is a file\n")
+        assert resp == "20 text/plain\r\nthis is a file\n"
 
     def test_non_utf8(self):
         resp = self.request("gemini://localhost/%AE\r\n")
-        self.assertEqual(resp, "51 Not Found\r\n")
+        assert resp == "51 Not Found\r\n"
 
     def test_cgi(self):
         resp = self.request("gemini://localhost/cgi-bin/debug.py\r\n")
         resp = resp.splitlines(keepends=True)[0]
-        self.assertEqual(resp, "20 application/json\r\n")
+        assert resp == "20 application/json\r\n"
 
     def test_cgi_query(self):
         resp = self.request("gemini://localhost/cgi-bin/debug.py?hello%20world\r\n")
         data = self.parse_cgi_resp(resp)
-        self.assertEqual(data["QUERY_STRING"], "hello%20world")
-        self.assertEqual(data["SCRIPT_NAME"], "/cgi-bin/debug.py")
-        self.assertEqual(data["PATH_INFO"], "")
+        assert data["QUERY_STRING"] == "hello%20world"
+        assert data["SCRIPT_NAME"] == "/cgi-bin/debug.py"
+        assert data["PATH_INFO"] == ""
 
     def test_cgi_root_trailing_slash(self):
         resp = self.request("gemini://localhost/cgi-bin/debug.py/\r\n")
         data = self.parse_cgi_resp(resp)
-        self.assertEqual(data["QUERY_STRING"], "")
-        self.assertEqual(data["SCRIPT_NAME"], "/cgi-bin/debug.py")
-        self.assertEqual(data["PATH_INFO"], "/")
+        assert data["QUERY_STRING"] == ""
+        assert data["SCRIPT_NAME"] == "/cgi-bin/debug.py"
+        assert data["PATH_INFO"] == "/"
 
     def test_cgi_path_info(self):
         resp = self.request("gemini://localhost/cgi-bin/debug.py/extra/info\r\n")
         data = self.parse_cgi_resp(resp)
-        self.assertEqual(data["QUERY_STRING"], "")
-        self.assertEqual(data["SCRIPT_NAME"], "/cgi-bin/debug.py")
-        self.assertEqual(data["PATH_INFO"], "/extra/info")
+        assert data["QUERY_STRING"] == ""
+        assert data["SCRIPT_NAME"] == "/cgi-bin/debug.py"
+        assert data["PATH_INFO"] == "/extra/info"
 
     def test_cgi_path_info_trailing_slash(self):
         resp = self.request("gemini://localhost/cgi-bin/debug.py/extra/info/\r\n")
         data = self.parse_cgi_resp(resp)
-        self.assertEqual(data["QUERY_STRING"], "")
-        self.assertEqual(data["SCRIPT_NAME"], "/cgi-bin/debug.py")
-        self.assertEqual(data["PATH_INFO"], "/extra/info/")
+        assert data["QUERY_STRING"] == ""
+        assert data["SCRIPT_NAME"] == "/cgi-bin/debug.py"
+        assert data["PATH_INFO"] == "/extra/info/"
 
     def test_cgi_path_info_double_slashes(self):
         resp = self.request("gemini://localhost//cgi-bin//debug.py//extra//info//\r\n")
         data = self.parse_cgi_resp(resp)
-        self.assertEqual(data["QUERY_STRING"], "")
-        self.assertEqual(data["SCRIPT_NAME"], "/cgi-bin/debug.py")
-        self.assertEqual(data["PATH_INFO"], "/extra/info/")
+        assert data["QUERY_STRING"] == ""
+        assert data["SCRIPT_NAME"] == "/cgi-bin/debug.py"
+        assert data["PATH_INFO"] == "/extra/info/"
 
     def test_hostname_punycode(self):
         with mock.patch.object(self.server, "hostname", "xn--caf-dma.localhost"):
             resp = self.request("gemini://xn--caf-dma.localhost\r\n")
-            self.assertEqual(resp, "20 text/gemini\r\nJetforce rules!\n")
+            assert resp == "20 text/gemini\r\nJetforce rules!\n"
 
     def test_hostname_unicode(self):
         with mock.patch.object(self.server, "hostname", "xn--caf-dma.localhost"):
             resp = self.request("gemini://café.localhost\r\n")
-            self.assertEqual(resp, "20 text/gemini\r\nJetforce rules!\n")
+            assert resp == "20 text/gemini\r\nJetforce rules!\n"
 
     def test_hostname_case_insensitive(self):
         """
         In the URI spec, the authority component is case-insensitive.
         """
         resp = self.request("gemini://LocalHost\r\n")
-        self.assertEqual(resp, "20 text/gemini\r\nJetforce rules!\n")
+        assert resp == "20 text/gemini\r\nJetforce rules!\n"
 
 
 class ProxyServerTestCase(BaseTestCase):

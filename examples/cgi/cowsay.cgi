@@ -31,7 +31,7 @@ try:
         check=True,
         text=True,
     )
-except:
+except Exception:
     print("42 Unexpected Error")
 else:
     print("20 text/plain")

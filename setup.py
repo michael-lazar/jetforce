@@ -23,6 +23,13 @@ setuptools.setup(
         "idna",
         "pyopenssl",
     ],
+    extras_require={
+        "test": [
+            "pytest",
+            "mypy",
+            "types-pyOpenSSL",
+        ],
+    },
     long_description=long_description(),
     long_description_content_type="text/markdown",
     packages=["jetforce", "jetforce.app"],

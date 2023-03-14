@@ -9,7 +9,7 @@ app = StaticDirectoryApplication("/var/gemini")
 
 
 # Example of registering a custom file extension
-app.mimetypes.add_type("text/gemini", ".gemlog")
+app.mimetypes.add_type("text/gemini", ".gemlog")  # type: ignore
 
 
 @app.route("/old/(?P<route>.*)")
