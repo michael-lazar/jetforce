@@ -3,8 +3,6 @@ Main entry point for running ``jetforce`` from the command line.
 
 This will launch a gemini server running the StaticFileServer application.
 """
-# Black does not do a good job of formatting argparse code, IMHO.
-# fmt: off
 import argparse
 import sys
 
@@ -17,33 +15,33 @@ if sys.version_info < (3, 7):
     sys.exit("Fatal Error: jetforce requires Python 3.7+")
 
 
-# noinspection PyTypeChecker
 parser = argparse.ArgumentParser(
     prog="jetforce",
     description="An Experimental Gemini Protocol Server",
     formatter_class=argparse.ArgumentDefaultsHelpFormatter,
 )
 parser.add_argument(
-    "-V", "--version",
+    "-V",
+    "--version",
     action="version",
-    version="jetforce " + __version__
+    version="jetforce " + __version__,
 )
 group = parser.add_argument_group("server configuration")
 group.add_argument(
     "--host",
     help="Server address to bind to",
-    default="127.0.0.1"
+    default="127.0.0.1",
 )
 group.add_argument(
     "--port",
     help="Server port to bind to",
     type=int,
-    default=1965
+    default=1965,
 )
 group.add_argument(
     "--hostname",
     help="Server hostname",
-    default="localhost"
+    default="localhost",
 )
 group.add_argument(
     "--tls-certfile",
@@ -69,6 +67,19 @@ group.add_argument(
     help="A directory containing CA files for validating clients",
     metavar="DIR",
 )
+group.add_argument(
+    "--no-tls",
+    help="Disable TLS and run the server over a plain TCP connection",
+    action="store_false",
+    dest="use_tls",
+    default=True,
+)
+group.add_argument(
+    "--proxy-protocol",
+    help="Use the HAProxy PROXY protocol to preserve the client IP address",
+    action="store_true",
+    default=False,
+)
 group = parser.add_argument_group("fileserver configuration")
 group.add_argument(
     "--dir",
@@ -87,7 +98,7 @@ group.add_argument(
 group.add_argument(
     "--index-file",
     help="If a directory contains a file with this name, "
-         "that file will be served instead of auto-generating an index page",
+    "that file will be served instead of auto-generating an index page",
     default="index.gmi",
     metavar="FILE",
     dest="index_file",
@@ -125,6 +136,8 @@ def main() -> None:
         keyfile=args.keyfile,
         cafile=args.cafile,
         capath=args.capath,
+        proxy_protocol=args.proxy_protocol,
+        use_tls=args.use_tls,
     )
     server.run()
 

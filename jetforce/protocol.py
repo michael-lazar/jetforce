@@ -7,6 +7,7 @@ import urllib.parse
 
 from twisted.internet.address import IPv4Address, IPv6Address
 from twisted.internet.defer import CancelledError, Deferred, ensureDeferred
+from twisted.internet.interfaces import ITransport
 from twisted.internet.protocol import connectionDone
 from twisted.internet.task import deferLater
 from twisted.protocols.basic import LineOnlyReceiver
@@ -41,7 +42,6 @@ class GeminiProtocol(LineOnlyReceiver):
     TIMESTAMP_FORMAT = "%d/%b/%Y:%H:%M:%S %z"
     DEBUG = False
 
-    client_addr: typing.Union[IPv4Address, IPv6Address]
     connected_timestamp: time.struct_time
     request: bytes
     url: str
@@ -49,6 +49,9 @@ class GeminiProtocol(LineOnlyReceiver):
     meta: str
     response_buffer: str
     response_size: int
+
+    # The twisted base class has the wrong type hint for this
+    transport: typing.Type[ITransport]  # type: ignore[assignment]
 
     def __init__(self, server: GeminiServer, app: ApplicationCallable):
         self.server = server
@@ -62,7 +65,6 @@ class GeminiProtocol(LineOnlyReceiver):
         self.connected_timestamp = time.localtime()
         self.response_size = 0
         self.response_buffer = ""
-        self.client_addr = self.transport.getPeer()
 
     def connectionLost(self, reason: Failure = connectionDone) -> None:
         """
@@ -83,6 +85,17 @@ class GeminiProtocol(LineOnlyReceiver):
         Called when the maximum line length has been reached.
         """
         self.finish_connection()
+
+    @property
+    def client_addr(self) -> typing.Union[IPv4Address, IPv6Address]:
+        """
+        Return the client IP address.
+
+        This should be retrieved lazily (not cached when the connection is
+        first established) because the underlying value of getPeer() will
+        change depending on whether a PROXY header has been received or not.
+        """
+        return self.transport.getPeer()
 
     def finish_connection(self) -> None:
         """
@@ -109,7 +122,8 @@ class GeminiProtocol(LineOnlyReceiver):
         # Ensure that the underlying connection will always be closed. There is
         # no harm in calling this method twice if it was already invoked as
         # part of the above TLS shutdown.
-        self.transport.transport.loseConnection()
+        if hasattr(self.transport, "transport"):
+            self.transport.transport.loseConnection()
 
     async def _handle_request_noblock(self) -> None:
         """
@@ -149,13 +163,13 @@ class GeminiProtocol(LineOnlyReceiver):
                 response_generator = await self.track_deferred(response_generator)
             else:
                 # Yield control of the event loop
-                deferred = deferLater(self.server.reactor, 0)
+                deferred: Deferred[None] = deferLater(self.server.reactor, 0)
                 await self.track_deferred(deferred)
 
             for data in response_generator:
                 if isinstance(data, Deferred):
                     data = await self.track_deferred(data)
-                    self.write_body(data)
+                    self.write_body(data)  # type: ignore
                 else:
                     self.write_body(data)
                     # Yield control of the event loop
@@ -171,7 +185,7 @@ class GeminiProtocol(LineOnlyReceiver):
             self.log_request()
             self.finish_connection()
 
-    async def track_deferred(self, deferred: Deferred) -> typing.Union[str, bytes]:
+    async def track_deferred(self, deferred: Deferred) -> typing.Any:
         """
         Keep track of the deferred that we're waiting on so we can send an
         error back to it if the connection is abruptly killed.
@@ -190,7 +204,6 @@ class GeminiProtocol(LineOnlyReceiver):
         The TLS variable names borrow from the GLV-1.12556 server.
         """
         url_parts = urllib.parse.urlparse(self.url)
-        conn = self.transport.getHandle()
         environ = {
             "GEMINI_URL": self.url,
             "HOSTNAME": self.server.hostname,
@@ -201,10 +214,21 @@ class GeminiProtocol(LineOnlyReceiver):
             "SERVER_PORT": self.server.port,
             "SERVER_PROTOCOL": "GEMINI",
             "SERVER_SOFTWARE": f"jetforce/{__version__}",
-            "TLS_CIPHER": conn.get_cipher_name(),
-            "TLS_VERSION": conn.get_protocol_version_name(),
-            "client_certificate": None,
         }
+        if not self.transport.TLS:
+            return environ
+
+        conn = self.transport.getHandle()
+        environ.update(
+            {
+                "TLS_CIPHER": conn.get_cipher_name(),
+                "TLS_VERSION": conn.get_protocol_version_name(),
+                # Lowercase variables are not set in the environment for CGI
+                # scripts, but they can be accessed by python applications that
+                # utilize jetforce as a library.
+                "client_certificate": None,
+            }
+        )
 
         cert = self.transport.getPeerCertificate()
         if cert:

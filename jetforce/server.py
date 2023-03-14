@@ -5,10 +5,11 @@ import sys
 import typing
 
 from twisted.internet import reactor as _reactor
-from twisted.internet.base import ReactorBase
-from twisted.internet.endpoints import SSL4ServerEndpoint
+from twisted.internet.endpoints import TCP4ServerEndpoint
 from twisted.internet.protocol import Factory
 from twisted.internet.tcp import Port
+from twisted.protocols.haproxy import proxyEndpoint
+from twisted.protocols.tls import TLSMemoryBIOFactory
 
 from .__version__ import __version__
 from .app.base import ApplicationCallable
@@ -23,7 +24,7 @@ else:
     RESET = ""
 
 
-ABOUT = fr"""
+ABOUT = rf"""
 {CYAN}You are now riding on...
 _________    _____________
 ______  /______  /___  __/_______________________
@@ -44,14 +45,10 @@ class GeminiServer(Factory):
 
     protocol_class = GeminiProtocol
 
-    # The TLS twisted interface class is confusingly named SSL4, even though it
-    # will accept either IPv4 & IPv6 interfaces.
-    endpoint_class = SSL4ServerEndpoint
-
     def __init__(
         self,
         app: ApplicationCallable,
-        reactor: ReactorBase = _reactor,
+        reactor: typing.Any = _reactor,
         host: str = "127.0.0.1",
         port: int = 1965,
         hostname: str = "localhost",
@@ -59,8 +56,10 @@ class GeminiServer(Factory):
         keyfile: typing.Optional[str] = None,
         cafile: typing.Optional[str] = None,
         capath: typing.Optional[str] = None,
+        proxy_protocol: bool = False,
+        use_tls: bool = True,
     ):
-        if certfile is None:
+        if certfile is None and use_tls:
             self.log_message("Generating ad-hoc certificate files...")
             certfile, keyfile = generate_ad_hoc_certificate(hostname)
 
@@ -73,6 +72,8 @@ class GeminiServer(Factory):
         self.keyfile = keyfile
         self.cafile = cafile
         self.capath = capath
+        self.proxy_protocol = proxy_protocol
+        self.use_tls = use_tls
 
     def log_access(self, message: str) -> None:
         """
@@ -103,28 +104,40 @@ class GeminiServer(Factory):
         It builds the instance of the protocol class, which is what actually
         implements the Gemini protocol.
         """
-        return GeminiProtocol(self, self.app)
+        return self.protocol_class(self, self.app)
+
+    def bind_interface(self, interface: str) -> None:
+        """
+        Binds the server to a twisted interface.
+        """
+        protocol_factory: Factory = self
+
+        if self.use_tls:
+            ssl_context_factory = GeminiCertificateOptions(
+                certfile=self.certfile,  # type: ignore[arg-type]
+                keyfile=self.keyfile,
+                cafile=self.cafile,
+                capath=self.capath,
+            )
+            protocol_factory = TLSMemoryBIOFactory(
+                ssl_context_factory,
+                False,
+                protocol_factory,  # noqa
+            )
+
+        endpoint = TCP4ServerEndpoint(self.reactor, self.port, interface=interface)
+        if self.proxy_protocol:
+            endpoint = proxyEndpoint(endpoint)  # type: ignore
+
+        endpoint.listen(protocol_factory).addCallback(self.on_bind_interface)
 
     def initialize(self) -> None:
         """
         Install the server into the twisted reactor.
         """
-        certificate_options = GeminiCertificateOptions(
-            certfile=self.certfile,
-            keyfile=self.keyfile,
-            cafile=self.cafile,
-            capath=self.capath,
-        )
-
         interfaces = [self.host] if self.host else ["0.0.0.0", "::"]
         for interface in interfaces:
-            endpoint = self.endpoint_class(
-                reactor=self.reactor,
-                port=self.port,
-                sslContextFactory=certificate_options,
-                interface=interface,
-            )
-            endpoint.listen(self).addCallback(self.on_bind_interface)
+            self.bind_interface(interface)
 
     def run(self) -> None:
         """
@@ -132,7 +145,12 @@ class GeminiServer(Factory):
         """
         self.log_message(ABOUT)
         self.log_message(f"Server hostname is {self.hostname}")
-        self.log_message(f"TLS Certificate File: {self.certfile}")
-        self.log_message(f"TLS Private Key File: {self.keyfile}")
+        if self.proxy_protocol:
+            self.log_message("PROXY protocol is enabled")
+        if self.use_tls:
+            self.log_message(f"TLS Certificate File: {self.certfile}")
+            self.log_message(f"TLS Private Key File: {self.keyfile}")
+        else:
+            self.log_message("TLS is disabled")
         self.initialize()
         self.reactor.run()

@@ -17,8 +17,7 @@ setuptools.setup(
     author_email="lazar.michael22@gmail.com",
     description="An Experimental Gemini Server",
     install_requires=[
-        # 21.2.0 introduces a bunch of broken type hints
-        "twisted>=20.3.0,<21.2.0",
+        "twisted>=21.7.0",
         # Requirements below are used by twisted[security]
         "service_identity",
         "idna",

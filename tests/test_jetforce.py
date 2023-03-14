@@ -2,19 +2,16 @@ import json
 import os
 import socket
 import ssl
-import unittest
 from threading import Thread
-from unittest import mock
+from unittest import TestCase, mock
 
+import pytest
 from twisted.internet import reactor
 
 from jetforce import GeminiServer, StaticDirectoryApplication
 
-ROOT_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), "data")
-
 
 class GeminiTestServer(GeminiServer):
-
     real_port: int
 
     def on_bind_interface(self, port):
@@ -31,7 +28,58 @@ class GeminiTestServer(GeminiServer):
         """Suppress logging"""
 
 
-class FunctionalTestCase(unittest.TestCase):
+# Generic static app with a CGI script to echo back environment variables
+root_directory = os.path.join(os.path.dirname(__file__), "data")
+app = StaticDirectoryApplication(root_directory=root_directory)
+
+
+SERVERS = {
+    "basic": GeminiTestServer(
+        app=app,
+        port=0,
+    ),
+    "proxy": GeminiTestServer(
+        app=app,
+        port=0,
+        proxy_protocol=True,
+    ),
+    "plaintext": GeminiTestServer(
+        app=app,
+        port=0,
+        use_tls=False,
+    ),
+    "plaintext-proxy": GeminiTestServer(
+        app=app,
+        port=0,
+        proxy_protocol=True,
+        use_tls=False,
+    ),
+}
+
+
+@pytest.fixture(scope="session", autouse=True)
+def _reactor():
+    """
+    Setup a twisted reactor thread that will run in the background for
+    the entire test suite. The reactor is pretty finicky with regards to
+    unit tests because it can only be started once per-interpreter, so
+    doing it in a session fixture is a workaround. The servers need to be
+    initialized before calling reactor.run, which is why I have them declared
+    as global state up here instead of class-level variables.
+    """
+    for server in SERVERS.values():
+        server.initialize()
+
+    thread = Thread(target=reactor.run, args=(False,))
+    thread.start()
+    try:
+        yield reactor
+    finally:
+        reactor.callFromThread(reactor.stop)
+        thread.join(timeout=5)
+
+
+class BaseTestCase(TestCase):
     """
     This class will spin up a complete test jetforce server and serve it
     on a local TCP port in a new thread. The tests will send real gemini
@@ -40,40 +88,31 @@ class FunctionalTestCase(unittest.TestCase):
     """
 
     server: GeminiTestServer
-    thread: Thread
 
-    @classmethod
-    def setUpClass(cls):
-        app = StaticDirectoryApplication(root_directory=ROOT_DIR)
-        cls.server = GeminiTestServer(app=app, port=0)
-        cls.server.initialize()
-
-        cls.thread = Thread(target=reactor.run, args=(False,))
-        cls.thread.start()
-
-    @classmethod
-    def tearDownClass(cls):
-        reactor.callFromThread(reactor.stop)
-        cls.thread.join(timeout=5)
-
-    @classmethod
-    def request(cls, data: str):
-        """
-        Send bytes to the server using a TCP/IP socket.
-        """
+    def create_context(self):
         context = ssl.create_default_context()
         context.check_hostname = False
         context.verify_mode = ssl.CERT_NONE
+        return context
 
-        with socket.create_connection((cls.server.host, cls.server.real_port)) as sock:
+    def get_conn_info(self):
+        return self.server.host, self.server.real_port
+
+    def parse_cgi_resp(self, response):
+        return json.loads(response.splitlines()[1])
+
+
+class GeminiServerTestCase(BaseTestCase):
+    server = SERVERS["basic"]
+
+    def request(self, data: str):
+        context = self.create_context()
+        conn = self.get_conn_info()
+        with socket.create_connection(conn) as sock:
             with context.wrap_socket(sock) as ssock:
                 ssock.sendall(data.encode(errors="surrogateescape"))
                 fp = ssock.makefile("rb")
                 return fp.read().decode(errors="surrogateescape")
-
-    @classmethod
-    def parse_cgi_resp(cls, response):
-        return json.loads(response.splitlines()[1])
 
     def test_index(self):
         resp = self.request("gemini://localhost\r\n")
@@ -238,5 +277,82 @@ class FunctionalTestCase(unittest.TestCase):
         self.assertEqual(resp, "20 text/gemini\r\nJetforce rules!\n")
 
 
-if __name__ == "__main__":
-    unittest.main()
+class ProxyServerTestCase(BaseTestCase):
+    server = SERVERS["proxy"]
+
+    def test_proxy_v1(self):
+        """
+        The remote IP address should be derived from the proxy header.
+        """
+        context = self.create_context()
+        conn = self.get_conn_info()
+        with socket.create_connection(conn) as sock:
+            sock.send(b"PROXY TCP4 192.168.0.1 192.168.0.11 56324 443\r\n")
+            with context.wrap_socket(sock) as ssock:
+                ssock.sendall(b"gemini://localhost/cgi-bin/debug.py\r\n")
+                fp = ssock.makefile("rb")
+                resp = fp.read().decode(errors="surrogateescape")
+
+        data = self.parse_cgi_resp(resp)
+        assert data["REMOTE_HOST"] == "192.168.0.1"
+
+    def test_proxy_invalid(self):
+        """
+        Requests missing the header should be closed before the TLS handshake.
+        """
+        context = self.create_context()
+        conn = self.get_conn_info()
+        with pytest.raises(ssl.SSLError):
+            with socket.create_connection(conn) as sock:
+                with context.wrap_socket(sock) as ssock:
+                    ssock.sendall(b"gemini://localhost/cgi-bin/debug.py\r\n")
+
+
+class PlaintextServerTestCase(BaseTestCase):
+    server = SERVERS["plaintext"]
+
+    def test_plaintext(self):
+        """
+        The remote IP address should be derived from the proxy header.
+        """
+        conn = self.get_conn_info()
+        with socket.create_connection(conn) as sock:
+            sock.sendall(b"gemini://localhost/cgi-bin/debug.py\r\n")
+            fp = sock.makefile("rb")
+            resp = fp.read().decode(errors="surrogateescape")
+
+        data = self.parse_cgi_resp(resp)
+        assert "TLS_CIPHER" not in data
+        assert "TLS_VERSION" not in data
+
+
+class PlaintextProxyServerTestCase(BaseTestCase):
+    server = SERVERS["plaintext-proxy"]
+
+    def test_proxy_v1(self):
+        """
+        The remote IP address should be derived from the proxy header.
+        """
+        conn = self.get_conn_info()
+        with socket.create_connection(conn) as sock:
+            sock.sendall(
+                b"PROXY TCP4 192.168.0.1 192.168.0.11 56324 443\r\n"
+                b"gemini://localhost/cgi-bin/debug.py\r\n"
+            )
+            fp = sock.makefile("rb")
+            resp = fp.read().decode(errors="surrogateescape")
+
+        data = self.parse_cgi_resp(resp)
+        assert data["REMOTE_HOST"] == "192.168.0.1"
+
+    def test_proxy_invalid(self):
+        """
+        Requests missing the header should be closed.
+        """
+        conn = self.get_conn_info()
+        with socket.create_connection(conn) as sock:
+            sock.sendall(b"gemini://localhost/cgi-bin/debug.py\r\n")
+            fp = sock.makefile("rb")
+            resp = fp.read().decode(errors="surrogateescape")
+
+        assert resp == ""

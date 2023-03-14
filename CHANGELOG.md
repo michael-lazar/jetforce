@@ -2,9 +2,22 @@
 
 ### Unreleased
 
+#### Features
+
+- Added support for the HAProxy "PROXY" protocol via the
+  `--proxy-protocol` flag. This allows the server to determine the
+  real client IP address when operating behind a reverse proxy such
+  as nginx or stunnel.
+- Added support for running a server without TLS via the `--no-tls`
+  flag.
+
+#### Changes
+
+- Updated required twisted version to >= 21.7.0.
+
 ### v0.9.1 (2022-07-08)
 
-### Fixes
+#### Fixes
 
 - Fix ``strict_trailing_slash`` argument being applied as
   `strict_port` when specified on a route decorator.
@@ -31,7 +44,7 @@
 
 ### v0.8.1 (2021-01-06)
 
-### Changes
+#### Changes
 
 - Remove new type hint syntax that was causing an error in python 3.7.
 
