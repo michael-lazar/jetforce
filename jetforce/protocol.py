@@ -215,7 +215,12 @@ class GeminiProtocol(LineOnlyReceiver):
             "SERVER_PROTOCOL": "GEMINI",
             "SERVER_SOFTWARE": f"jetforce/{__version__}",
         }
-        if not self.transport.TLS:
+
+        try:
+            cert = self.transport.getPeerCertificate()
+        except AttributeError:
+            # We're not using a TLS-enabled transport, we can skip
+            # all of the TLS environment initialization below.
             return environ
 
         conn = self.transport.getHandle()
@@ -230,7 +235,6 @@ class GeminiProtocol(LineOnlyReceiver):
             }
         )
 
-        cert = self.transport.getPeerCertificate()
         if cert:
             x509_cert = cert.to_cryptography()
             cert_data = inspect_certificate(x509_cert)
