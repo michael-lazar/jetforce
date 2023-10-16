@@ -11,6 +11,11 @@
 - Added support for running a server without TLS via the `--no-tls`
   flag.
 
+#### Fixes
+
+- Fixed incorrect mimetype/charset in responses for compressed files
+  ending in ``.gz`` and ``.bz2``.
+
 #### Changes
 
 - Updated required twisted version to >= 21.7.0.

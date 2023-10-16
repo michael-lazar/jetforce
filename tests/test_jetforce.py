@@ -215,6 +215,10 @@ class GeminiServerTestCase(BaseTestCase):
         resp = self.request("gemini://localhost/files/test.txt/\r\n")
         assert resp == "20 text/plain\r\nthis is a file\n"
 
+    def test_file_gzip_mimetype(self):
+        resp = self.request("gemini://localhost/files/test.txt.gz\r\n")
+        assert resp.startswith("20 text/plain\r\nthis is a file\n")
+
     def test_non_utf8(self):
         resp = self.request("gemini://localhost/%AE\r\n")
         assert resp == "51 Not Found\r\n"
