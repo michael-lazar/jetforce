@@ -69,7 +69,18 @@ class StaticDirectoryApplication(JetforceApplication):
             if os.path.isfile(fn):
                 self.mimetypes.read(fn)
 
-        # This is a valid method but the type stubs are incorrect
+        # The mimetype library will try to split out the compression algorithm
+        # from the underlying filetype, e.g. "./file.mbox.gz" will be parsed as
+        # mimetype="application/mbox",encoding="gzip". This is useful for
+        # HTTP because you can then set the encoding using the Content-Encoding
+        # header. However, for gemini there is no way to specify the encoding
+        # of a response, so we need to disable this behavior and stick to
+        # straight mimetypes for compressed files.
+        self.mimetypes.encodings_map = {}
+        self.mimetypes.add_type("application/gzip", ".gz")  # type: ignore
+        self.mimetypes.add_type("application/x-bzip2", ".bz2")  # type: ignore
+
+        # Add some non-standard mimetypes
         self.mimetypes.add_type("text/gemini", ".gmi")  # type: ignore
         self.mimetypes.add_type("text/gemini", ".gemini")  # type: ignore
 

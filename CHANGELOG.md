@@ -2,6 +2,8 @@
 
 ### Unreleased
 
+### v0.10.0 (2023-10-15)
+
 #### Features
 
 - Added support for the HAProxy "PROXY" protocol via the
@@ -10,6 +12,15 @@
   as nginx or stunnel.
 - Added support for running a server without TLS via the `--no-tls`
   flag.
+
+#### Fixes
+
+- Fixed incorrect mimetype/charset in responses for compressed files
+  ending in ``.gz`` and ``.bz2``.
+- The "meta" component in jetforce's request logs is now surrounded
+  by double quotation marks, to allow for unambiguous log parsing.
+  Any quotation marks inside of the meta string itself will be escaped
+  with a single backslash, (e.g. ``\"``).
 
 #### Changes
 
