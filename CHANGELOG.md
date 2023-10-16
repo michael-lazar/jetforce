@@ -15,6 +15,10 @@
 
 - Fixed incorrect mimetype/charset in responses for compressed files
   ending in ``.gz`` and ``.bz2``.
+- The "meta" component in jetforce's request logs is now surrounded
+  by double quotation marks, to allow for unambiguous log parsing.
+  Any quotation marks inside of the meta string itself will be escaped
+  with a single backslash, (e.g. ``\"``).
 
 #### Changes
 

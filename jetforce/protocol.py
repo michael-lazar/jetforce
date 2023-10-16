@@ -313,12 +313,12 @@ class GeminiProtocol(LineOnlyReceiver):
         Log a gemini request using a format derived from the Common Log Format.
         """
         try:
-            message = '{} [{}] "{}" {} {} {}'.format(
+            message = '{} [{}] "{}" {} "{}" {}'.format(
                 self.client_addr.host,
                 time.strftime(self.TIMESTAMP_FORMAT, self.connected_timestamp),
                 self.url,
                 self.status,
-                self.meta,
+                self.meta.replace('"', '\\"'),
                 self.response_size,
             )
         except AttributeError:
