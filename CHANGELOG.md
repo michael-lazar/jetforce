@@ -2,6 +2,13 @@
 
 ### Unreleased
 
+### v0.10.1 (2023-10-16)
+
+#### Fixes
+
+- Fixed regression that prevented TLS client certificates and other
+  TLS environment variables from being initialized.
+
 ### v0.10.0 (2023-10-15)
 
 #### Features
