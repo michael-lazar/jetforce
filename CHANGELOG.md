@@ -2,6 +2,8 @@
 
 ### Unreleased
 
+### v0.10.0 (2023-10-15)
+
 #### Features
 
 - Added support for the HAProxy "PROXY" protocol via the

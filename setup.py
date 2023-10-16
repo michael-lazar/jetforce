@@ -10,7 +10,7 @@ def long_description() -> str:
 
 setuptools.setup(
     name="Jetforce",
-    version="0.9.1",
+    version="0.10.0",
     url="https://github.com/michael-lazar/jetforce",
     license="Other/Proprietary License",
     author="Michael Lazar",
