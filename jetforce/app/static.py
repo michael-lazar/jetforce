@@ -276,11 +276,8 @@ class StaticDirectoryApplication(JetforceApplication):
         """
         Guess the mimetype of a file based on the file extension.
         """
-        mime, encoding = self.mimetypes.guess_type(filename)
-        if encoding:
-            return f"{mime}; charset={encoding}"
-        else:
-            return mime or "application/octet-stream"
+        mimetype, _ = self.mimetypes.guess_type(filename)
+        return mimetype or "application/octet-stream"
 
     def add_extra_parameters(self, meta: str) -> str:
         """
