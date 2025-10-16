@@ -2,6 +2,10 @@
 
 ### Unreleased
 
+#### Changes
+
+- Dropped support for python 3.7. Added support for python 3.12, 3.13, and 3.14.
+
 #### Fixes
 
 - Added a 10 second timeout on incoming connections to receive the
