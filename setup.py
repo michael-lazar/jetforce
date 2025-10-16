@@ -41,7 +41,7 @@ setuptools.setup(
             "jetforce-client=jetforce_client:run_client",
         ]
     },
-    python_requires=">=3.7",
+    python_requires=">=3.8",
     keywords="gemini server tcp gopher asyncio",
     classifiers=[
         "Environment :: Web Environment",

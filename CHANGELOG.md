@@ -2,6 +2,16 @@
 
 ### Unreleased
 
+#### Changes
+
+- Dropped support for python 3.7. Added support for python 3.12, 3.13, and 3.14.
+
+#### Fixes
+
+- Added a 10 second timeout on incoming connections to receive the
+  gemini request line. This fixes an issue with broken clients
+  leaving connections hanging open and using up file descriptors.
+
 ### v0.10.1 (2023-10-16)
 
 #### Fixes
@@ -129,12 +139,12 @@
 - URLs with a userinfo component will now be rejected with a status of 59.
 - The status code definitions have been updated to match the recent changes
   to the gemini spec:
-  - 21 ``SUCCESS_END_OF_SESSION`` -> (removed)
-  - 61 ``TRANSIENT_CERTIFICATE_REQUESTED`` -> ``CERTIFICATE_NOT_AUTHORISED``
-  - 62 ``AUTHORISED_CERTIFICATE_REQUIRED`` -> ``CERTIFICATE_NOT_VALID``
-  - 63 ``CERTIFICATE_NOT_ACCEPTED`` -> (removed)
-  - 64 ``FUTURE_CERTIFICATE_REJECTED`` -> (removed)
-  - 65 ``EXPIRED_CERTIFICATE_REJECTED`` -> (removed)
+    - 21 ``SUCCESS_END_OF_SESSION`` -> (removed)
+    - 61 ``TRANSIENT_CERTIFICATE_REQUESTED`` -> ``CERTIFICATE_NOT_AUTHORISED``
+    - 62 ``AUTHORISED_CERTIFICATE_REQUIRED`` -> ``CERTIFICATE_NOT_VALID``
+    - 63 ``CERTIFICATE_NOT_ACCEPTED`` -> (removed)
+    - 64 ``FUTURE_CERTIFICATE_REJECTED`` -> (removed)
+    - 65 ``EXPIRED_CERTIFICATE_REJECTED`` -> (removed)
 
 #### Bugfixes
 
@@ -179,16 +189,17 @@
   characters in filenames.
 - The ``Request`` class will now apply URL decoding to the following components
   of the request, in addition to the query params:
-  - ``request.path``
-  - ``request.params``
-  - ``request.fragment``
+    - ``request.path``
+    - ``request.params``
+    - ``request.fragment``
 
 ### v0.3.1 (2020-06-01)
 
 #### Bugfixes
 
 - The client certificate fingerprint hash is now encoded using a URL-safe
-  version of the base64 algorithm [urlsafe_b64encode()](https://docs.python.org/3/library/base64.html#base64.urlsafe_b64encode).
+  version of the base64
+  algorithm [urlsafe_b64encode()](https://docs.python.org/3/library/base64.html#base64.urlsafe_b64encode).
   This is intended to make it simpler for applications and CGI scripts to
   use the certificate fingerprint in URL paths.
 
@@ -297,9 +308,9 @@ variable.
 - Added support for python 3.8.
 - Added a new server diagnostics tool, ``jetforce-diagnostics``.
 - Added ability to binding to IPv6 addresses (if supported by your OS):
-  - For IPv4        : ``--host "0.0.0.0"``
-  - For IPv6        : ``--host "::"``
-  - For IPv4 + IPv6 : ``--host ""``
+    - For IPv4        : ``--host "0.0.0.0"``
+    - For IPv6        : ``--host "::"``
+    - For IPv4 + IPv6 : ``--host ""``
 - Various improvements have been made to the project documentation.
 
 #### Bugfixes
@@ -346,9 +357,9 @@ variable.
 - Added support for accepting input using query strings.
 - Files with the ".gmi" extension are now recognized as *text/gemini*.
 - Added a new examples/ directory with the following applications
-  - A bare bones echo server
-  - A guestbook application
-  - An HTTP/HTTPS proxy server
+    - A bare bones echo server
+    - A guestbook application
+    - An HTTP/HTTPS proxy server
 
 ### v0.0.5 (2019-08-12)
 

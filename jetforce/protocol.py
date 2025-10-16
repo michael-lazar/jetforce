@@ -11,6 +11,7 @@ from twisted.internet.interfaces import ITransport
 from twisted.internet.protocol import connectionDone
 from twisted.internet.task import deferLater
 from twisted.protocols.basic import LineOnlyReceiver
+from twisted.protocols.policies import TimeoutMixin
 from twisted.python.failure import Failure
 
 from jetforce.__version__ import __version__
@@ -21,7 +22,7 @@ if typing.TYPE_CHECKING:
     from jetforce.server import GeminiServer
 
 
-class GeminiProtocol(LineOnlyReceiver):
+class GeminiProtocol(LineOnlyReceiver, TimeoutMixin):
     """
     Handle a single Gemini Protocol TCP request.
 
@@ -39,6 +40,7 @@ class GeminiProtocol(LineOnlyReceiver):
     removed.
     """
 
+    REQUEST_TIMEOUT = 10  # seconds
     TIMESTAMP_FORMAT = "%d/%b/%Y:%H:%M:%S %z"
     DEBUG = False
 
@@ -66,10 +68,15 @@ class GeminiProtocol(LineOnlyReceiver):
         self.response_size = 0
         self.response_buffer = ""
 
+        # Set a timeout for receiving the request line from the client
+        self.setTimeout(self.REQUEST_TIMEOUT)
+
     def connectionLost(self, reason: Failure = connectionDone) -> None:
         """
         This is invoked by twisted after the connection has been closed.
         """
+        self.setTimeout(None)
+
         if self._currently_deferred:
             self._currently_deferred.cancel()
 
@@ -77,6 +84,8 @@ class GeminiProtocol(LineOnlyReceiver):
         """
         This method is invoked by LineOnlyReceiver for every incoming line.
         """
+        self.setTimeout(None)
+
         self.request = line
         return ensureDeferred(self._handle_request_noblock())
 
@@ -84,6 +93,8 @@ class GeminiProtocol(LineOnlyReceiver):
         """
         Called when the maximum line length has been reached.
         """
+        self.setTimeout(None)
+
         self.finish_connection()
 
     @property
@@ -96,6 +107,12 @@ class GeminiProtocol(LineOnlyReceiver):
         change depending on whether a PROXY header has been received or not.
         """
         return self.transport.getPeer()
+
+    def timeoutConnection(self):
+        """
+        Called when the connection times out.
+        """
+        self.finish_connection()
 
     def finish_connection(self) -> None:
         """
