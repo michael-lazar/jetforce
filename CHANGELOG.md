@@ -4,14 +4,11 @@
 
 #### Changes
 
-- Changed the default ``--path`` argument from `/var/gemini/` to the
-  current directory.
-
-#### Fixes
-
 - Added a 10 second timeout on incoming connections to receive the
   gemini request line. This fixes an issue with broken clients
   leaving connections hanging open and using up file descriptors.
+- Changed the default ``--path`` argument from `/var/gemini/` to the
+  current directory.
 
 #### Maintenance
 
