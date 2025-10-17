@@ -45,8 +45,11 @@ $ cd jetforce
 # Run the server
 $ ./tools/jetforce
 
+# Run a server demo (see examples/ directory)
+$ ./tools/run-demo chatroom
+
 # Run the test client
-$ ./tools/jetforce-client
+$ ./tools/jetforce-client gemini://mozz.us
 
 # Run tests/linters
 $ ./tools/pytest

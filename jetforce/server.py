@@ -144,7 +144,9 @@ class GeminiServer(Factory):
         This is the main server loop.
         """
         self.log_message(ABOUT)
-        self.log_message(f"Server hostname is {self.hostname}")
+        self.log_message(
+            f"Server hostname is {self.hostname} (gemini://{self.hostname})"
+        )
         if hasattr(self.app, "root"):
             self.log_message(f"Root directory: {self.app.root}")
         if self.proxy_protocol:

@@ -7,7 +7,7 @@ name = "Jetforce"
 version = "0.10.1"
 description = "An Experimental Gemini Server"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 license = { text = "Other/Proprietary License" }
 keywords = ["gemini", "server", "tcp", "gopher", "asyncio"]
 authors = [
@@ -63,7 +63,7 @@ addopts = "-v"
 
 [tool.ruff]
 line-length = 88
-target-version = "py38"
+target-version = "py39"
 
 [tool.ruff.lint]
 select = [
