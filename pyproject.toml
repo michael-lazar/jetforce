@@ -62,6 +62,10 @@ testpaths = ["tests"]
 addopts = "-v"
 
 [tool.ruff]
+line-length = 88
+target-version = "py38"
+
+[tool.ruff.lint]
 select = [
     "E", # pycodestyle
     "F", # pyflakes
@@ -72,12 +76,9 @@ select = [
     "TID", # flake8-tidy-imports
     "UP", # pyupgrade
 ]
-line-length = 88
-target-version = "py38"
-
 ignore = [
     "PT012", # Allow pytest.raises with context managers
 ]
 
-[tool.ruff.flake8-tidy-imports]
+[tool.ruff.lint.flake8-tidy-imports]
 ban-relative-imports = "all"
