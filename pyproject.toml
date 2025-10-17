@@ -29,13 +29,6 @@ dependencies = [
     "pyopenssl",
 ]
 
-[project.optional-dependencies]
-test = [
-    "pytest",
-    "mypy",
-    "types-pyOpenSSL",
-]
-
 [project.urls]
 Homepage = "https://github.com/michael-lazar/jetforce"
 
@@ -53,11 +46,22 @@ jetforce = ["py.typed"]
 py-modules = ["jetforce_client"]
 zip-safe = false
 
+[dependency-groups]
+dev = [
+    "pytest",
+    "mypy",
+    "types-pyOpenSSL",
+]
+
 [tool.black]
 line-length = 88
 
 [tool.mypy]
-python_version = "3.10"
+files = ["jetforce", "examples"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v"
 
 [tool.ruff]
 select = [
@@ -71,7 +75,7 @@ select = [
     "UP", # pyupgrade
 ]
 line-length = 88
-target-version = "py37"
+target-version = "py38"
 
 ignore = [
     "E501", # Line length is enforced by black
