@@ -21,13 +21,14 @@ Learn more about Gemini [here](https://portal.mozz.us/).
 ## Features
 
 - A built-in static file server with support for gemini directories and CGI scripts.
-- A complete framework for writing robust gemini applications like [astrobotany](https://github.com/michael-lazar/astrobotany).
+- A complete framework for writing robust gemini applications
+  like [astrobotany](https://github.com/michael-lazar/astrobotany).
 - A lean, modern codebase with type hints and black formatting.
 - A solid foundation built on top of the [twisted](https://twistedmatrix.com/trac/) asynchronous networking engine.
 
 ## Installation
 
-Requires Python 3.7 or newer.
+Requires Python 3.9 or newer.
 
 The latest stable release can be installed from [PyPI](https://pypi.org/project/Jetforce/):
 
@@ -191,36 +192,35 @@ additional modification by the server.
 
 #### CGI Environment Variables
 
-| Name | Example Value |
-| --- | --- |
-| GATEWAY_INTERFACE | ``CGI/1.1`` (for compatibility with RFC 3875) |
-| SERVER_PROTOCOL | ``GEMINI`` |
-| SERVER_SOFTWARE | ``jetforce/0.0.7`` |
-| GEMINI_URL | ``gemini://mozz.us/cgi-bin/example.cgi/extra?hello%20world`` |
-| SCRIPT_NAME | ``/cgi-bin/example.cgi`` |
-| PATH_INFO | ``/extra`` |
-| QUERY_STRING | ``hello%20world`` |
-| SERVER_NAME | ``mozz.us`` |
-| SERVER_PORT | ``1965`` |
-| REMOTE_HOST | ``10.10.0.2`` |
-| REMOTE_ADDR | ``10.10.0.2`` |
-| TLS_CIPHER | ``TLS_AES_256_GCM_SHA384`` |
-| TLS_VERSION | ``TLSv1.3`` |
-
+| Name              | Example Value                                                |
+|-------------------|--------------------------------------------------------------|
+| GATEWAY_INTERFACE | ``CGI/1.1`` (for compatibility with RFC 3875)                |
+| SERVER_PROTOCOL   | ``GEMINI``                                                   |
+| SERVER_SOFTWARE   | ``jetforce/0.0.7``                                           |
+| GEMINI_URL        | ``gemini://mozz.us/cgi-bin/example.cgi/extra?hello%20world`` |
+| SCRIPT_NAME       | ``/cgi-bin/example.cgi``                                     |
+| PATH_INFO         | ``/extra``                                                   |
+| QUERY_STRING      | ``hello%20world``                                            |
+| SERVER_NAME       | ``mozz.us``                                                  |
+| SERVER_PORT       | ``1965``                                                     |
+| REMOTE_HOST       | ``10.10.0.2``                                                |
+| REMOTE_ADDR       | ``10.10.0.2``                                                |
+| TLS_CIPHER        | ``TLS_AES_256_GCM_SHA384``                                   |
+| TLS_VERSION       | ``TLSv1.3``                                                  |
 
 #### CGI Environment Variables - Authenticated
 
 Additional CGI variables will be included only when the client connection uses a TLS client certificate:
 
-| Name | Example Value |
-| --- | --- |
-| AUTH_TYPE | ``CERTIFICATE`` |
-| REMOTE_USER | ``mozz123`` (the certificate subject CN attribute) |
-| TLS_CLIENT_HASH | ``SHA256:86341FB480BFE333C343530D75ABF99D1437F69338F36C684C8831B63C993A96`` |
-| TLS_CLIENT_NOT_BEFORE | ``2020-04-05T04:18:22Z`` |
-| TLS_CLIENT_NOT_AFTER | ``2021-04-05T04:18:22Z`` |
-| TLS_CLIENT_SERIAL_NUMBER | ``73629018972631`` |
-| TLS_CLIENT_AUTHORISED | ``0`` (not authorised) / ``1`` (authorised) † |
+| Name                     | Example Value                                                               |
+|--------------------------|-----------------------------------------------------------------------------|
+| AUTH_TYPE                | ``CERTIFICATE``                                                             |
+| REMOTE_USER              | ``mozz123`` (the certificate subject CN attribute)                          |
+| TLS_CLIENT_HASH          | ``SHA256:86341FB480BFE333C343530D75ABF99D1437F69338F36C684C8831B63C993A96`` |
+| TLS_CLIENT_NOT_BEFORE    | ``2020-04-05T04:18:22Z``                                                    |
+| TLS_CLIENT_NOT_AFTER     | ``2021-04-05T04:18:22Z``                                                    |
+| TLS_CLIENT_SERIAL_NUMBER | ``73629018972631``                                                          |
+| TLS_CLIENT_AUTHORISED    | ``0`` (not authorised) / ``1`` (authorised) †                               |
 
 † Requires the server to be configured with a CA for validating client certificates.
 
@@ -291,7 +291,8 @@ To view the project's release history, see the [CHANGELOG](CHANGELOG.md) file.
 
 ## License
 
-This project is licensed under the [Floodgap Free Software License](https://www.floodgap.com/software/ffsl/license.html).
+This project is licensed under
+the [Floodgap Free Software License](https://www.floodgap.com/software/ffsl/license.html).
 
 > The Floodgap Free Software License (FFSL) has one overriding mandate: that software
 > using it, or derivative works based on software that uses it, must be free. By free
