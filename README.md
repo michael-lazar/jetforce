@@ -28,35 +28,29 @@ Learn more about Gemini [here](https://portal.mozz.us/).
 
 ## Installation
 
-Requires Python 3.9 or newer.
+Requires Python 3.9 or newer and [uv](https://docs.astral.sh/uv/).
 
-The latest stable release can be installed from [PyPI](https://pypi.org/project/Jetforce/):
+Run directly using uvx:
 
 ```bash
-$ pip install jetforce
+$ uvx jetforce
 ```
 
-Or, install from source:
+Or, clone the repo and run from source:
 
 ```bash
 $ git clone https://github.com/michael-lazar/jetforce
 $ cd jetforce
-$ pip install .
-```
 
-Or, install into a python virtual environment:
+# Run the server
+$ ./tools/jetforce
 
-```bash
-# Create a project directory somewhere
-$ mkdir /opt/jetforce
+# Run the client
+$ ./tools/jetforce-client
 
-# Activate a virtual environment and install jetforce
-$ python3 -m virtualenv /opt/jetforce/venv
-$ source /opt/jetforce/venv/bin/activate
-$ pip install jetforce
-
-# The launch script will be installed here
-$ /opt/jetforce/venv/bin/jetforce
+# Run tests/linters
+$ ./tools/pytest
+$ ./tools/mypy
 ```
 
 ## Usage

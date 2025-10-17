@@ -51,10 +51,8 @@ dev = [
     "pytest",
     "mypy",
     "types-pyOpenSSL",
+    "ruff",
 ]
-
-[tool.black]
-line-length = 88
 
 [tool.mypy]
 files = ["jetforce", "examples"]
@@ -78,7 +76,6 @@ line-length = 88
 target-version = "py38"
 
 ignore = [
-    "E501", # Line length is enforced by black
     "PT012", # Allow pytest.raises with context managers
 ]
 
