@@ -176,12 +176,10 @@ class GeminiProtocol(LineOnlyReceiver, TimeoutMixin):
         try:
             environ = self.build_environ()
             response_generator = self.app(environ, self.write_status)
-            if isinstance(response_generator, Deferred):
-                response_generator = await self.track_deferred(response_generator)
-            else:
-                # Yield control of the event loop
-                deferred: Deferred[None] = deferLater(self.server.reactor, 0)
-                await self.track_deferred(deferred)
+
+            # Yield control of the event loop
+            deferred = deferLater(self.server.reactor, 0)
+            await self.track_deferred(deferred)
 
             for data in response_generator:
                 if isinstance(data, Deferred):
