@@ -1,4 +1,4 @@
-#!/usr/local/bin/python3.7
+#!/usr/bin/env python3
 r"""
 CGI script that requests user supplied text using the INPUT status, and
 pipes it into the `cowsay` program.
@@ -12,6 +12,7 @@ pipes it into the `cowsay` program.
                 ||----w |
                 ||     ||
 """
+
 import os
 import subprocess
 import sys
