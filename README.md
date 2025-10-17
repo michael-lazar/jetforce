@@ -45,7 +45,7 @@ $ cd jetforce
 # Run the server
 $ ./tools/jetforce
 
-# Run a server demo (see examples/ directory)
+# Run a demo application (see examples/ directory)
 $ ./tools/run-demo chatroom
 
 # Run the test client
