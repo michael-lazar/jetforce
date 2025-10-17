@@ -3,6 +3,7 @@
 This example shows how you can extend the jetforce static directory server to
 support advanced behavior like custom redirects and directory authentication.
 """
+
 from jetforce import GeminiServer, Response, StaticDirectoryApplication, Status
 
 app = StaticDirectoryApplication("/var/gemini")

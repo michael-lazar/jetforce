@@ -7,11 +7,24 @@ on:
     branches: [ master ]
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
+<<<<<<< HEAD
+        python-version: [ "3.9", "3.10", "3.11", "3.12", "3.13", "3.14" ]
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install the latest version of uv and set the python version
+        uses: astral-sh/setup-uv@v7
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Run mypy with python ${{ matrix.python-version }}
+        run: uv run --frozen mypy
+      - name: Run pytest with python ${{ matrix.python-version }}
+        run: uv run --frozen pytest
+=======
         python-version: [ "3.8", "3.9", "3.10", "3.11", "3.12", "3.13", "3.14" ]
     steps:
       - name: Check out repository
@@ -30,3 +43,4 @@ jobs:
       - name: Run pytest
         run: |
           pytest -v tests/
+>>>>>>> master

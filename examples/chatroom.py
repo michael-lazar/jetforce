@@ -14,6 +14,7 @@ waiting for the whole request to complete first. The jetforce-client tool can
 do this, but most other gemini clients probably won't be able to handle
 streaming.
 """
+
 from collections import deque
 from datetime import datetime
 

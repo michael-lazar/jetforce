@@ -4,13 +4,17 @@
 
 #### Changes
 
-- Dropped support for python 3.7. Added support for python 3.12, 3.13, and 3.14.
-
-#### Fixes
-
 - Added a 10 second timeout on incoming connections to receive the
   gemini request line. This fixes an issue with broken clients
   leaving connections hanging open and using up file descriptors.
+- Changed the default ``--path`` argument from `/var/gemini/` to the
+  current directory.
+
+#### Maintenance
+
+- Dropped support for python 3.7 and 3.8.
+- Added support for python 3.12, 3.13, and 3.14.
+- Updated the repo to use `uv` and other modern tooling.
 
 ### v0.10.1 (2023-10-16)
 

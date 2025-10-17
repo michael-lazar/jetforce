@@ -19,6 +19,7 @@ app = jetforce.CompositeApplication(
 )
 ```
 """
+
 from jetforce import GeminiServer, StaticDirectoryApplication
 from jetforce.app.composite import CompositeApplication
 

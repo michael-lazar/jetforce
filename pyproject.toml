@@ -1,27 +1,84 @@
-[tool.black]
-line-length = 88
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "Jetforce"
+version = "0.10.1"
+description = "An Experimental Gemini Server"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "Other/Proprietary License" }
+keywords = ["gemini", "server", "tcp", "gopher", "asyncio"]
+authors = [
+    { name = "Michael Lazar", email = "lazar.michael22@gmail.com" }
+]
+classifiers = [
+    "Environment :: Web Environment",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dependencies = [
+    "twisted>=21.7.0",
+    "service_identity",
+    "idna",
+    "pyopenssl",
+]
+
+[project.urls]
+Homepage = "https://github.com/michael-lazar/jetforce"
+
+[project.scripts]
+jetforce = "jetforce.__main__:main"
+jetforce-client = "jetforce_client:run_client"
+
+[tool.setuptools.packages.find]
+include = ["jetforce*"]
+
+[tool.setuptools.package-data]
+jetforce = ["py.typed"]
+
+[tool.setuptools]
+py-modules = ["jetforce_client"]
+zip-safe = false
+
+[dependency-groups]
+dev = [
+    "pytest",
+    "mypy",
+    "types-pyOpenSSL",
+    "ruff",
+]
 
 [tool.mypy]
-python_version = "3.10"
+files = ["jetforce", "examples"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v"
 
 [tool.ruff]
-select = [
-    "E",    # pycodestyle
-    "F",    # pyflakes
-    "I",    # isort
-    "PT",   # flake8-pytest-style
-    "C4",   # flake8-comprehensions
-    "ISC",  # flake8-implicit-str-concat
-    "TID",  # flake8-tidy-imports
-    "UP",   # pyupgrade
-]
 line-length = 88
-target-version = "py37"
+target-version = "py39"
 
+[tool.ruff.lint]
+select = [
+    "E", # pycodestyle
+    "F", # pyflakes
+    "I", # isort
+    "PT", # flake8-pytest-style
+    "C4", # flake8-comprehensions
+    "ISC", # flake8-implicit-str-concat
+    "TID", # flake8-tidy-imports
+    "UP", # pyupgrade
+]
 ignore = [
-    "E501",   # Line length is enforced by black
-    "PT012",  # Allow pytest.raises with context managers
+    "PT012", # Allow pytest.raises with context managers
 ]
 
-[tool.ruff.flake8-tidy-imports]
+[tool.ruff.lint.flake8-tidy-imports]
 ban-relative-imports = "all"
