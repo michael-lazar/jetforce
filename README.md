@@ -36,6 +36,12 @@ Run directly using uvx:
 $ uvx jetforce
 ```
 
+Install from PyPI:
+
+```bash
+$ uv tool install jetforce
+```
+
 Or, clone the repo and run from source:
 
 ```bash
@@ -297,3 +303,4 @@ the [Floodgap Free Software License](https://www.floodgap.com/software/ffsl/lice
 > we mean simply "free as in beer" -- you may put your work into open or closed source
 > packages as you see fit, whether or not you choose to release your changes or updates
 > publicly, but you must not ask any fee for it.
+
