@@ -6,6 +6,7 @@
 
 - Dropped support for python 3.7 and 3.9.
 - Added support for python 3.12, 3.13, and 3.14.
+- Changed the default ``--path`` argument from `/var/gemini/` to `./`
 
 #### Fixes
 

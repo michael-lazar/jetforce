@@ -81,7 +81,7 @@ server configuration:
                         None)
 
 fileserver configuration:
-  --dir DIR             Root directory on the filesystem to serve (default: /var/gemini)
+  --dir DIR             Root directory on the filesystem to serve (default: ./)
   --cgi-dir DIR         CGI script directory, relative to the server's root directory
                         (default: cgi-bin)
   --index-file FILE     If a directory contains a file with this name, that file will be

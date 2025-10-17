@@ -80,7 +80,7 @@ group = parser.add_argument_group("fileserver configuration")
 group.add_argument(
     "--dir",
     help="Root directory on the filesystem to serve",
-    default="/var/gemini",
+    default="./",
     metavar="DIR",
     dest="root_directory",
 )
@@ -115,6 +115,7 @@ group.add_argument(
 
 def main() -> None:
     args = parser.parse_args()
+
     rate_limiter = RateLimiter(args.rate_limit) if args.rate_limit else None
     app = StaticDirectoryApplication(
         root_directory=args.root_directory,
