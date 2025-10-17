@@ -2,6 +2,7 @@
 """
 A very basic gemini client to use for testing server configurations.
 """
+
 import argparse
 import socket
 import ssl
@@ -41,17 +42,31 @@ def fetch(
 
 
 def run_client() -> None:
-    # fmt: off
     parser = argparse.ArgumentParser(description="A simple gemini client")
     parser.add_argument("url")
     parser.add_argument("--host", help="Server host")
     parser.add_argument("--port", help="Server port")
-    parser.add_argument("--tls-certfile", help="Client certificate")
-    parser.add_argument("--tls-keyfile", help="Client private key")
-    parser.add_argument("--tls-alpn-protocol", help="Protocol for ALPN negotiation")
-    parser.add_argument("--tls-enable-sni", action="store_true", help="Specify the hostname using SNI")
-    parser.add_argument("--tls-keylog", help="Keylog file for TLS debugging (requires python 3.8+)")
-    # fmt: on
+    parser.add_argument(
+        "--tls-certfile",
+        help="Client certificate",
+    )
+    parser.add_argument(
+        "--tls-keyfile",
+        help="Client private key",
+    )
+    parser.add_argument(
+        "--tls-alpn-protocol",
+        help="Protocol for ALPN negotiation",
+    )
+    parser.add_argument(
+        "--tls-enable-sni",
+        action="store_true",
+        help="Specify the hostname using SNI",
+    )
+    parser.add_argument(
+        "--tls-keylog",
+        help="Keylog file for TLS debugging (requires python 3.8+)",
+    )
 
     args = parser.parse_args()
     if args.tls_certfile:

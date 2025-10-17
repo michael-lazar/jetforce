@@ -11,6 +11,7 @@ number or results returned per-page be controllable?
 
 > jetforce-client https://localhost/docs/ssl/p/1
 """
+
 import math
 import ssl
 
@@ -52,7 +53,7 @@ def docs(request, module, page=1):
     lines.extend(items)
     lines.append("")
     if page < page_count:
-        lines.append(f"=>/docs/{module}/p/{page+1} Next {paginate_by} lines")
+        lines.append(f"=>/docs/{module}/p/{page + 1} Next {paginate_by} lines")
     if page > 1:
         lines.append(f"=>/docs/{module} Back to the beginning")
 

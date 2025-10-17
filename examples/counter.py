@@ -7,6 +7,7 @@ generator and write the data to the socket in-between each iteration. This can
 be useful if you want to serve a large response, like a binary file, without
 loading the entire response into memory at once.
 """
+
 import time
 
 from twisted.internet import reactor

@@ -6,6 +6,7 @@ retrieve their response by parsing the URL query string.
 
 This example stores the guestbook inside of a persistent sqlite database.
 """
+
 import sqlite3
 from datetime import datetime
 

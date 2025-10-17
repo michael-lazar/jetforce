@@ -12,6 +12,7 @@ using jetforce-client like this:
 
 > jetforce-client https://mozz.us --host localhost
 """
+
 import subprocess
 
 from jetforce import GeminiServer, JetforceApplication, Response, Status

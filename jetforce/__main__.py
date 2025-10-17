@@ -3,17 +3,13 @@ Main entry point for running ``jetforce`` from the command line.
 
 This will launch a gemini server running the StaticFileServer application.
 """
+
 import argparse
-import sys
 
 from jetforce.__version__ import __version__
 from jetforce.app.base import RateLimiter
 from jetforce.app.static import StaticDirectoryApplication
 from jetforce.server import GeminiServer
-
-if sys.version_info < (3, 7):
-    sys.exit("Fatal Error: jetforce requires Python 3.7+")
-
 
 parser = argparse.ArgumentParser(
     prog="jetforce",

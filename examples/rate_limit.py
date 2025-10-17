@@ -2,6 +2,7 @@
 """
 This example shows how you can implement rate limiting on a per-endpoint basis.
 """
+
 from jetforce import GeminiServer, JetforceApplication, RateLimiter, Response, Status
 
 # Setup a global rate limiter that will be applied to all requests
