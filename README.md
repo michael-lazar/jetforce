@@ -45,12 +45,13 @@ $ cd jetforce
 # Run the server
 $ ./tools/jetforce
 
-# Run the client
+# Run the test client
 $ ./tools/jetforce-client
 
 # Run tests/linters
 $ ./tools/pytest
 $ ./tools/mypy
+$ ./tools/ruff
 ```
 
 ## Usage
