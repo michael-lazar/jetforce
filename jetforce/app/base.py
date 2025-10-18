@@ -105,7 +105,21 @@ class Response:
     body: None | ResponseType | ApplicationResponse = None
 
 
-RouteHandler = typing.Callable[..., Response]
+@dataclasses.dataclass
+class DeferredResponse:
+    """
+    Object that encapsulates information about a single gemini response.
+
+    The status & meta are deferred to prevent blocking the event loop in
+    cases where they will be delayed (for example waiting for a CGI script
+    to process and return the header line).
+    """
+
+    send_status: Deferred[tuple[int, str]]
+    body: ResponseType | ApplicationResponse
+
+
+RouteHandler = typing.Callable[..., typing.Union[Response, DeferredResponse]]
 
 
 @dataclasses.dataclass
@@ -228,7 +242,9 @@ class RateLimiter:
                 return Response(Status.SUCCESS, "text/gemini", "hello world!")
         """
 
-        def wrapper(request: Request, **kwargs: typing.Any) -> Response:
+        def wrapper(
+            request: Request, **kwargs: typing.Any
+        ) -> Response | DeferredResponse:
             response = self.check(request)
             if response:
                 return response
@@ -259,7 +275,9 @@ class JetforceApplication:
         self.routes = []
 
     def __call__(
-        self, environ: EnvironDict, send_status: WriteStatusCallable
+        self,
+        environ: EnvironDict,
+        send_status: WriteStatusCallable,
     ) -> ApplicationResponse:
         try:
             request = self.request_class(environ)
@@ -268,9 +286,9 @@ class JetforceApplication:
             return
 
         if self.rate_limiter:
-            response = self.rate_limiter.check(request)
-            if response:
-                send_status(response.status, response.meta)
+            rate_response = self.rate_limiter.check(request)
+            if rate_response:
+                send_status(rate_response.status, rate_response.meta)
                 return
 
         for route_pattern, callback in self.routes[::-1]:
@@ -283,7 +301,12 @@ class JetforceApplication:
             callback_kwargs = {}
 
         response = callback(request, **callback_kwargs)
-        send_status(response.status, response.meta)
+        if isinstance(response, Response):
+            send_status(response.status, response.meta)
+        elif isinstance(response, DeferredResponse):
+            response.send_status.addCallback(lambda res: send_status(res[0], res[1]))
+        else:
+            raise TypeError(f"Invalid response type {type(response)}")
 
         if isinstance(response.body, (bytes, str, Deferred)):
             yield response.body

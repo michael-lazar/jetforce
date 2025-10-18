@@ -178,7 +178,7 @@ class GeminiProtocol(LineOnlyReceiver, TimeoutMixin):
             response_generator = self.app(environ, self.write_status)
 
             # Yield control of the event loop
-            deferred = deferLater(self.server.reactor, 0)
+            deferred: Deferred[None] = deferLater(self.server.reactor, 0)
             await self.track_deferred(deferred)
 
             for data in response_generator:

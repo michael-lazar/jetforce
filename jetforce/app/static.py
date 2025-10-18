@@ -10,6 +10,7 @@ from twisted.internet.defer import Deferred
 from twisted.internet.task import deferLater
 
 from jetforce.app.base import (
+    DeferredResponse,
     EnvironDict,
     JetforceApplication,
     RateLimiter,
@@ -84,7 +85,10 @@ class StaticDirectoryApplication(JetforceApplication):
         self.mimetypes.add_type("text/gemini", ".gmi")  # type: ignore
         self.mimetypes.add_type("text/gemini", ".gemini")  # type: ignore
 
-    def serve_static_file(self, request: Request) -> Response:
+    def serve_static_file(
+        self,
+        request: Request,
+    ) -> typing.Union[Response, DeferredResponse]:
         """
         Convert a URL into a filesystem path, and attempt to serve the file
         or directory that is represented at that path.
@@ -172,8 +176,10 @@ class StaticDirectoryApplication(JetforceApplication):
             return Response(Status.NOT_FOUND, "Not Found")
 
     def run_cgi_script(
-        self, filesystem_path: typing.Union[str, pathlib.Path], environ: EnvironDict
-    ) -> Response:
+        self,
+        filesystem_path: typing.Union[str, pathlib.Path],
+        environ: EnvironDict,
+    ) -> DeferredResponse:
         """
         Execute the given file as a CGI script and return the script's stdout
         stream to the client.
@@ -189,22 +195,15 @@ class StaticDirectoryApplication(JetforceApplication):
         )
         proc.stdout = typing.cast(typing.IO[bytes], proc.stdout)
 
-        status_line = proc.stdout.readline(self.CGI_MAX_RESPONSE_HEADER_SIZE)
-        if len(status_line) == self.CGI_MAX_RESPONSE_HEADER_SIZE:
-            # Too large response header line received from the CGI script.
-            return Response(Status.CGI_ERROR, "Unexpected Error")
-
-        status_parts = status_line.decode().strip().split(maxsplit=1)
-        if len(status_parts) != 2 or not status_parts[0].isdecimal():
-            # Malformed header line received from the CGI script.
-            return Response(Status.CGI_ERROR, "Unexpected Error")
-
-        status, meta = status_parts
-        return Response(int(status), meta, self.cgi_body_generator(proc))
+        send_status: Deferred[tuple[int, str]] = Deferred()
+        body = self.cgi_body_generator(proc, send_status)
+        response = DeferredResponse(send_status, body)
+        return response
 
     def cgi_body_generator(
         self,
         proc: subprocess.Popen,
+        send_status: Deferred,
     ) -> typing.Iterator[typing.Union[bytes, Deferred]]:
         """
         Non-blocking read from the stdout of the CGI process and pipe it
@@ -212,10 +211,37 @@ class StaticDirectoryApplication(JetforceApplication):
         """
         proc.stdout = typing.cast(typing.IO[bytes], proc.stdout)
 
+        status_line_sent = False
+        status_line = b""
+
         while True:
             proc.poll()
-
             data = proc.stdout.read(self.CHUNK_SIZE)
+
+            if not status_line_sent:
+                if b"\n" in data:
+                    buffer, data = data.split(b"\n", 1)
+                    status_line += data
+
+                    status_parts = status_line.decode().strip().split(maxsplit=1)
+                    if len(status_parts) != 2 or not status_parts[0].isdecimal():
+                        # Malformed header line received from the CGI script.
+                        send_status.callback((Status.CGI_ERROR, "Unexpected Error"))
+                        return
+
+                    status, meta = status_parts
+                    send_status.callback((int(status), meta))
+                    status_line_sent = True
+
+                else:
+                    status_line += data
+                    data = b""
+
+                    if len(status_line) >= self.CGI_MAX_RESPONSE_HEADER_SIZE:
+                        # Too large response header line received from the CGI script.
+                        send_status.callback((Status.CGI_ERROR, "Unexpected Error"))
+                        return
+
             if len(data) == self.CHUNK_SIZE:
                 # Send the chunk and yield control of the event loop
                 yield data
