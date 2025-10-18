@@ -9,8 +9,10 @@ import time
 
 query = os.environ["QUERY_STRING"] or "0"
 
-if query:
-    time.sleep(int(query))
+print("20 text/html", flush=True)
 
-print("20 text/html")
-print(f"Slept for {query} seconds.")
+for i in range(int(query)):
+    print(i, flush=True)
+    time.sleep(1)
+
+print("Done")

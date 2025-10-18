@@ -190,6 +190,7 @@ class GeminiProtocol(LineOnlyReceiver, TimeoutMixin):
                     # Yield control of the event loop
                     deferred = deferLater(self.server.reactor, 0)
                     await self.track_deferred(deferred)
+
         except CancelledError:
             pass
         except Exception:

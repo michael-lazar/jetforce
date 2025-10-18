@@ -1,13 +1,11 @@
 import mimetypes
 import os
 import pathlib
-import subprocess
 import typing
 import urllib.parse
 
-from twisted.internet import reactor
+from twisted.internet import protocol, reactor
 from twisted.internet.defer import Deferred
-from twisted.internet.task import deferLater
 
 from jetforce.app.base import (
     DeferredResponse,
@@ -19,6 +17,106 @@ from jetforce.app.base import (
     RoutePattern,
     Status,
 )
+
+
+class CGISubprocessProtocol(protocol.ProcessProtocol):
+    """
+    Twisted ProcessProtocol for handling CGI script execution asynchronously.
+
+    This protocol manages the lifecycle of a CGI subprocess, capturing its
+    stdout output and parsing the CGI response header (status line) before
+    streaming the body data back through deferred objects.
+    """
+
+    # Maximum size in bytes of the first line of a server response
+    CGI_MAX_RESPONSE_HEADER_SIZE = 2048
+
+    def __init__(self):
+        self.send_status: Deferred[tuple[int, str]] = Deferred()
+        self.status_line_sent = False
+        self.status_line_buffer = b""
+        self.pending_deferred: Deferred[bytes] = Deferred()
+        self.process_ended = False
+        self.error_occurred = False
+
+    def outReceived(self, data: bytes) -> None:
+        """
+        Called when data is received from the subprocess stdout.
+        """
+        print(data)
+        if self.error_occurred:
+            return
+
+        if self.status_line_sent:
+            # Status line already sent, send the data immediately
+            self._resolve_pending(data)
+            return
+
+        # Still parsing the status line
+        self.status_line_buffer += data
+
+        if b"\n" in self.status_line_buffer:
+            # Found the end of the status line
+            status_line, remaining_data = self.status_line_buffer.split(b"\n", 1)
+
+            if len(status_line) >= self.CGI_MAX_RESPONSE_HEADER_SIZE:
+                # Status line is too large
+                self.error_occurred = True
+                self._resolve_status(Status.CGI_ERROR, "Unexpected Error")
+                return
+
+            status_parts = status_line.decode().strip().split(maxsplit=1)
+            if len(status_parts) != 2 or not status_parts[0].isdecimal():
+                # Malformed header line
+                self.error_occurred = True
+                self._resolve_status(Status.CGI_ERROR, "Unexpected Error")
+                return
+
+            status, meta = status_parts
+            self._resolve_status(int(status), meta)
+            self.status_line_sent = True
+
+            # If there's remaining data after the status line, send it
+            if remaining_data:
+                self._resolve_pending(remaining_data)
+
+    def processEnded(self, reason) -> None:
+        """
+        Called when the subprocess has ended.
+        """
+        self.process_ended = True
+
+        # If we never sent the status line, send an error
+        if not self.status_line_sent and not self.error_occurred:
+            self.error_occurred = True
+            self._resolve_status(Status.CGI_ERROR, "Unexpected Error")
+
+        # Resolve the last deferred to signal the end
+        self._resolve_pending(b"")
+
+    def _resolve_pending(self, data: bytes) -> None:
+        """
+        Helper method to resolve the pending deferred with the given data.
+        """
+        if not self.pending_deferred.called:
+            self.pending_deferred.callback(data)
+
+    def _resolve_status(self, status: int, meta: str) -> None:
+        """
+        Helper method to resolve the status deferred with status and meta.
+        """
+        if not self.send_status.called:
+            self.send_status.callback((status, meta))
+
+    def body_generator(self) -> typing.Iterator[Deferred[bytes]]:
+        """
+        Generator that yields deferred objects which resolve when the CGI
+        process has data available.
+        """
+        while not self.process_ended:
+            # Create a new deferred that will resolve when data is available
+            self.pending_deferred = Deferred()
+            yield self.pending_deferred
 
 
 class StaticDirectoryApplication(JetforceApplication):
@@ -37,12 +135,6 @@ class StaticDirectoryApplication(JetforceApplication):
 
     # Chunk size for streaming files, taken from the twisted FileSender class
     CHUNK_SIZE = 2**14
-
-    # Length of time to defer while waiting for more data from a CGI script
-    CGI_POLLING_PERIOD = 0.05
-
-    # Maximum size in bytes of the first line of a server response
-    CGI_MAX_RESPONSE_HEADER_SIZE = 2048
 
     mimetypes: mimetypes.MimeTypes
 
@@ -182,87 +274,31 @@ class StaticDirectoryApplication(JetforceApplication):
     ) -> DeferredResponse:
         """
         Execute the given file as a CGI script and return the script's stdout
-        stream to the client.
+        stream to the client using Twisted's ProcessProtocol.
         """
         cgi_env = {k: str(v) for k, v in environ.items() if k.isupper()}
         cgi_env["GATEWAY_INTERFACE"] = "CGI/1.1"
 
-        proc = subprocess.Popen(
+        cgi_protocol = CGISubprocessProtocol()
+
+        # Spawn the CGI process using Twisted's reactor
+        reactor.spawnProcess(  # type: ignore
+            cgi_protocol,
+            str(filesystem_path),
             [str(filesystem_path)],
-            stdout=subprocess.PIPE,
             env=cgi_env,
-            bufsize=0,
         )
-        proc.stdout = typing.cast(typing.IO[bytes], proc.stdout)
 
-        send_status: Deferred[tuple[int, str]] = Deferred()
-        body = self.cgi_body_generator(proc, send_status)
-        response = DeferredResponse(send_status, body)
-        return response
-
-    def cgi_body_generator(
-        self,
-        proc: subprocess.Popen,
-        send_status: Deferred,
-    ) -> typing.Iterator[typing.Union[bytes, Deferred]]:
-        """
-        Non-blocking read from the stdout of the CGI process and pipe it
-        to the socket transport.
-        """
-        proc.stdout = typing.cast(typing.IO[bytes], proc.stdout)
-
-        status_line_sent = False
-        status_line = b""
-
-        while True:
-            proc.poll()
-            data = proc.stdout.read(self.CHUNK_SIZE)
-
-            if not status_line_sent:
-                if b"\n" in data:
-                    buffer, data = data.split(b"\n", 1)
-                    status_line += buffer
-
-                    status_parts = status_line.decode().strip().split(maxsplit=1)
-                    if len(status_parts) != 2 or not status_parts[0].isdecimal():
-                        # Malformed header line received from the CGI script.
-                        send_status.callback((Status.CGI_ERROR, "Unexpected Error"))
-                        return
-
-                    status, meta = status_parts
-                    send_status.callback((int(status), meta))
-                    status_line_sent = True
-
-                else:
-                    status_line += data
-                    data = b""
-
-                    if len(status_line) >= self.CGI_MAX_RESPONSE_HEADER_SIZE:
-                        # Too large response header line received from the CGI script.
-                        send_status.callback((Status.CGI_ERROR, "Unexpected Error"))
-                        return
-
-            if len(data) == self.CHUNK_SIZE:
-                # Send the chunk and yield control of the event loop
-                yield data
-            elif proc.returncode is None:
-                # We didn't get a full chunk's worth of data from the
-                # subprocess. Send what we have, but add a delay before
-                # attempting to read again to allow time for more bytes
-                # to buffer in stdout.
-                if data:
-                    yield data
-                yield deferLater(reactor, self.CGI_POLLING_PERIOD)  # type: ignore
-            else:
-                # Subprocess has finished, send everything that's left.
-                if data:
-                    yield data
-                break
+        return DeferredResponse(
+            cgi_protocol.send_status,
+            cgi_protocol.body_generator(),
+        )
 
     def load_file(self, filesystem_path: pathlib.Path) -> typing.Iterator[bytes]:
         """
         Load a file in chunks to allow streaming to the TCP socket.
         """
+        # TODO: can this use the twisted library to avoid polling?
         with filesystem_path.open("rb") as fp:
             while True:
                 data = fp.read(self.CHUNK_SIZE)
