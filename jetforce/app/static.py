@@ -221,7 +221,7 @@ class StaticDirectoryApplication(JetforceApplication):
             if not status_line_sent:
                 if b"\n" in data:
                     buffer, data = data.split(b"\n", 1)
-                    status_line += data
+                    status_line += buffer
 
                     status_parts = status_line.decode().strip().split(maxsplit=1)
                     if len(status_parts) != 2 or not status_parts[0].isdecimal():
