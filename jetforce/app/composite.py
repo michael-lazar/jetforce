@@ -9,7 +9,7 @@ from jetforce.app.base import (
     WriteStatusCallable,
 )
 
-ApplicationMap = typing.Dict[typing.Optional[str], ApplicationCallable]
+ApplicationMap = dict[typing.Optional[str], ApplicationCallable]
 
 
 class CompositeApplication:

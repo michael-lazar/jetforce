@@ -176,7 +176,11 @@ class GeminiProtocol(LineOnlyReceiver, TimeoutMixin):
         try:
             environ = self.build_environ()
             response_generator = self.app(environ, self.write_status)
+
             if isinstance(response_generator, Deferred):
+                # I'm pretty sure this can never happen based on the type
+                # annotations, but I don't want to remove it and risk breaking
+                # backwards compatibility.
                 response_generator = await self.track_deferred(response_generator)
             else:
                 # Yield control of the event loop
@@ -192,6 +196,7 @@ class GeminiProtocol(LineOnlyReceiver, TimeoutMixin):
                     # Yield control of the event loop
                     deferred = deferLater(self.server.reactor, 0)
                     await self.track_deferred(deferred)
+
         except CancelledError:
             pass
         except Exception:

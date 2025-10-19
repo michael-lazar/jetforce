@@ -12,7 +12,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-<<<<<<< HEAD
         python-version: [ "3.9", "3.10", "3.11", "3.12", "3.13", "3.14" ]
     steps:
       - uses: actions/checkout@v5
@@ -24,23 +23,3 @@ jobs:
         run: uv run --frozen mypy
       - name: Run pytest with python ${{ matrix.python-version }}
         run: uv run --frozen pytest
-=======
-        python-version: [ "3.8", "3.9", "3.10", "3.11", "3.12", "3.13", "3.14" ]
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
-          cache: 'pip'
-      - name: Install packages
-        run: |
-          pip install .[test]
-      - name: Run mypy
-        run: |
-          mypy jetforce/ examples/
-      - name: Run pytest
-        run: |
-          pytest -v tests/
->>>>>>> master

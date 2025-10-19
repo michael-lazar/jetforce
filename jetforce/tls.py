@@ -16,7 +16,7 @@ from twisted.python.randbytes import secureRandom
 COMMON_NAME = x509.NameOID.COMMON_NAME
 
 
-def inspect_certificate(cert: x509.Certificate) -> typing.Dict[str, typing.Any]:
+def inspect_certificate(cert: x509.Certificate) -> dict[str, typing.Any]:
     """
     Extract useful fields from a x509 client certificate object.
     """
@@ -43,7 +43,7 @@ def inspect_certificate(cert: x509.Certificate) -> typing.Dict[str, typing.Any]:
     return data
 
 
-def generate_ad_hoc_certificate(hostname: str) -> typing.Tuple[str, str]:
+def generate_ad_hoc_certificate(hostname: str) -> tuple[str, str]:
     """
     Utility function to generate an ad-hoc self-signed SSL certificate.
     """
@@ -97,7 +97,7 @@ class GeminiCertificateOptions(CertificateOptions):
         https://github.com/twisted/twisted/blob/trunk/src/twisted/internet/_sslverify.py
     """
 
-    _acceptableProtocols: typing.List[bytes]
+    _acceptableProtocols: list[bytes]
 
     def verify_callback(
         self,
@@ -130,7 +130,7 @@ class GeminiCertificateOptions(CertificateOptions):
     def proto_select_callback(
         self,
         conn: OpenSSL.SSL.Connection,
-        protocols: typing.List[bytes],
+        protocols: list[bytes],
     ) -> bytes:
         """
         Callback used by OpenSSL for ALPN support.
