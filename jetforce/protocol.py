@@ -177,9 +177,15 @@ class GeminiProtocol(LineOnlyReceiver, TimeoutMixin):
             environ = self.build_environ()
             response_generator = self.app(environ, self.write_status)
 
-            # Yield control of the event loop
-            deferred: Deferred[None] = deferLater(self.server.reactor, 0)
-            await self.track_deferred(deferred)
+            if isinstance(response_generator, Deferred):
+                # I'm pretty sure this can never happen based on the type
+                # annotations, but I don't want to remove it and risk breaking
+                # backwards compatibility.
+                response_generator = await self.track_deferred(response_generator)
+            else:
+                # Yield control of the event loop
+                deferred: Deferred[None] = deferLater(self.server.reactor, 0)
+                await self.track_deferred(deferred)
 
             for data in response_generator:
                 if isinstance(data, Deferred):
