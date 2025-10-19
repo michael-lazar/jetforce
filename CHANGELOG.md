@@ -5,10 +5,12 @@
 #### Changes
 
 - Added a 10 second timeout on incoming connections to receive the
-  gemini request line. This fixes an issue with broken clients
-  leaving connections hanging open and using up file descriptors.
+  gemini request line. This fixes an issue with clients leaving
+  connections hanging open and using up file descriptors.
 - Changed the default ``--path`` argument from `/var/gemini/` to the
-  current directory.
+  current working directory.
+- Improved performance for CGI script handling, the server no longer
+  blocks waiting for the status line to be returned from the script.
 
 #### Maintenance
 
