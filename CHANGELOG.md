@@ -1,5 +1,7 @@
 # Jetforce Changelog
 
+### Unreleased
+
 ### v1.0.0 (2025-10-18)
 
 #### Breaking changes
