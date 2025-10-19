@@ -298,7 +298,6 @@ class StaticDirectoryApplication(JetforceApplication):
         """
         Load a file in chunks to allow streaming to the TCP socket.
         """
-        # TODO: can this use the twisted library to avoid polling?
         with filesystem_path.open("rb") as fp:
             while True:
                 data = fp.read(self.CHUNK_SIZE)
