@@ -7,7 +7,7 @@
 #### Breaking changes
 
 - Dropped support for python 3.7 and 3.8.
-- Changed the default ``--path`` argument from `/var/gemini/` to the
+- Changed the default ``--dir`` argument from `/var/gemini/` to the
   current working directory.
 
 #### Changes
