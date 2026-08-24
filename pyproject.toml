@@ -27,6 +27,7 @@ dependencies = [
     "service_identity",
     "idna",
     "pyopenssl",
+    "cryptography>=42",
 ]
 
 [project.urls]

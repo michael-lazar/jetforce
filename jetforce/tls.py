@@ -27,8 +27,8 @@ def inspect_certificate(cert: x509.Certificate) -> dict[str, typing.Any]:
     fingerprint = f"SHA256:{fingerprint_bytes.hex().zfill(64).upper()}"
     fingerprint_b64 = base64.urlsafe_b64encode(fingerprint_bytes).decode()
 
-    not_before = cert.not_valid_before.strftime("%Y-%m-%dT%H:%M:%SZ")
-    not_after = cert.not_valid_after.strftime("%Y-%m-%dT%H:%M:%SZ")
+    not_before = cert.not_valid_before_utc.strftime("%Y-%m-%dT%H:%M:%SZ")
+    not_after = cert.not_valid_after_utc.strftime("%Y-%m-%dT%H:%M:%SZ")
 
     serial_number = cert.serial_number
 
@@ -65,7 +65,7 @@ def generate_ad_hoc_certificate(hostname: str) -> tuple[str, str]:
 
         common_name = x509.NameAttribute(COMMON_NAME, hostname)
         subject_name = x509.Name([common_name])
-        not_valid_before = datetime.datetime.utcnow()
+        not_valid_before = datetime.datetime.now(datetime.timezone.utc)
         not_valid_after = not_valid_before + datetime.timedelta(days=365)
         cert_builder = x509.CertificateBuilder(
             subject_name=subject_name,

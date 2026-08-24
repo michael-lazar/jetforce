@@ -2,6 +2,10 @@
 
 ### Unreleased
 
+#### Fixes
+
+- Fix cryptography deprecation warnings for UTC timestamps.
+
 ### v1.0.0 (2025-10-18)
 
 #### Breaking changes

@@ -257,9 +257,10 @@ wheels = [
 
 [[package]]
 name = "jetforce"
-version = "0.10.1"
+version = "1.0.0"
 source = { editable = "." }
 dependencies = [
+    { name = "cryptography" },
     { name = "idna" },
     { name = "pyopenssl" },
     { name = "service-identity" },
@@ -276,6 +277,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "cryptography", specifier = ">=42" },
     { name = "idna" },
     { name = "pyopenssl" },
     { name = "service-identity" },
